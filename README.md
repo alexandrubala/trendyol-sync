@@ -62,6 +62,14 @@ trendyol-sync/
 - [x] Criptare `api_key` și `api_secret` (AES-256-CBC + `wp_salt('auth')`)
 - [x] Mascare secrete în UI (câmpuri password; păstrare valoare la salvare goală)
 
+### Sprint 2 (v1.0.1)
+
+- [x] Auto-update nativ din GitHub Releases (hook-uri `site_transient_update_plugins` + `plugins_api`)
+- [x] Suport token opțional pentru repository privat (`TRENDYOL_SYNC_GITHUB_TOKEN`)
+- [x] Endpoint stub comenzi `get_shipment_packages($args)` pentru Faza 2
+- [x] `uninstall.php` cu cleanup complet: opțiune, transient-uri `trendyol_*`, tabele custom
+- [x] Bază i18n (`/languages/trendyol-sync.pot`) și încărcare textdomain pe `init`
+
 ### Roadmap (în dezvoltare)
 
 - [ ] Client API + test conexiune (*Check API Status*)
@@ -69,7 +77,7 @@ trendyol-sync/
 - [ ] Mapare produse WooCommerce → Trendyol
 - [ ] Coadă Action Scheduler + `createProducts` v2 + polling `getBatchRequestResult`
 - [ ] Logger și dashboard sync
-- [ ] Comenzi (`getShipmentPackages`)
+- [ ] Implementare completă comenzi (`getShipmentPackages`) + procesare shipment flow
 
 ## Securitate
 
