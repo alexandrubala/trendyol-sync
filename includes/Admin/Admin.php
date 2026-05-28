@@ -72,6 +72,7 @@ class Admin {
 		$this->connection_checker->register_hooks();
 		$this->sync_ajax->register_hooks();
 		$this->product_data_tab->register_hooks();
+		( new Updater() )->register_hooks();
 	}
 
 	/**
