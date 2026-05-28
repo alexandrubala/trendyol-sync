@@ -1,0 +1,9 @@
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
+vendor/
+node_modules/
+composer.lock
+*.zip
