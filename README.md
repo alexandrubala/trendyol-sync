@@ -62,7 +62,7 @@ trendyol-sync/
 - [x] Criptare `api_key` și `api_secret` (AES-256-CBC + `wp_salt('auth')`)
 - [x] Mascare secrete în UI (câmpuri password; păstrare valoare la salvare goală)
 
-### Sprint 2 (v1.0.1)
+### Sprint 2 (v1.0.2)
 
 - [x] Auto-update nativ din GitHub Releases (hook-uri `site_transient_update_plugins` + `plugins_api`)
 - [x] Suport token opțional pentru repository privat (`TRENDYOL_SYNC_GITHUB_TOKEN`)
