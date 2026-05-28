@@ -6,13 +6,13 @@
  *
  * @wordpress-plugin
  * Plugin Name:       Trendyol Sync
- * Plugin URI:        https://github.com/example/trendyol-sync
+ * Plugin URI:        https://github.com/alexandrubala/trendyol-sync
  * Description:       Sincronizare controlată a produselor WooCommerce cu marketplace-ul Trendyol.
  * Version:           1.0.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
- * Author:            Your Name
- * Author URI:        https://example.com
+ * Author:            alexandrubala
+ * Author URI:        https://github.com/alexandrubala
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       trendyol-sync
