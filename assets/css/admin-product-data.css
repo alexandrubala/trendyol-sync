@@ -1,0 +1,14 @@
+#trendyol_sync_product_data .trendyol-sync-select {
+	min-width: 50%;
+}
+
+#trendyol_sync_product_data .trendyol-sync-cache-notice {
+	padding: 0 12px 8px;
+	color: #856404;
+}
+
+#trendyol_sync_product_data .trendyol-sync-readonly label {
+	display: block;
+	font-weight: 600;
+	margin-bottom: 4px;
+}

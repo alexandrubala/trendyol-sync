@@ -36,12 +36,20 @@ class Admin {
 	private $connection_checker;
 
 	/**
+	 * Tab Product Data WooCommerce.
+	 *
+	 * @var Product_Data_Tab
+	 */
+	private $product_data_tab;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
 		$this->settings           = trendyol_sync()->settings();
 		$this->settings_page      = new Settings_Page( $this->settings );
 		$this->connection_checker = new Connection_Checker( $this->settings );
+		$this->product_data_tab   = new Product_Data_Tab();
 	}
 
 	/**
@@ -54,6 +62,7 @@ class Admin {
 		add_action( 'admin_init', array( $this->settings, 'register' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		$this->connection_checker->register_hooks();
+		$this->product_data_tab->register_hooks();
 	}
 
 	/**

@@ -14,6 +14,8 @@ use TrendyolSync\API\Auth;
 use TrendyolSync\API\Client;
 use TrendyolSync\API\Environment;
 use TrendyolSync\Cache\Transient_Cache;
+use TrendyolSync\Sync\Payload_Validator;
+use TrendyolSync\Sync\Product_Mapper;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -56,6 +58,20 @@ final class Plugin {
 	 * @var Transient_Cache|null
 	 */
 	private $cache = null;
+
+	/**
+	 * Mapper produs → payload Trendyol (lazy).
+	 *
+	 * @var Product_Mapper|null
+	 */
+	private $product_mapper = null;
+
+	/**
+	 * Validator pre-flight (lazy).
+	 *
+	 * @var Payload_Validator|null
+	 */
+	private $payload_validator = null;
 
 	/**
 	 * @return Plugin
@@ -182,6 +198,32 @@ final class Plugin {
 		}
 
 		return $this->cache;
+	}
+
+	/**
+	 * Mapper WooCommerce → JSON Product Create v2.
+	 *
+	 * @return Product_Mapper
+	 */
+	public function product_mapper(): Product_Mapper {
+		if ( null === $this->product_mapper ) {
+			$this->product_mapper = new Product_Mapper();
+		}
+
+		return $this->product_mapper;
+	}
+
+	/**
+	 * Validator pre-flight înainte de coada Action Scheduler.
+	 *
+	 * @return Payload_Validator
+	 */
+	public function payload_validator(): Payload_Validator {
+		if ( null === $this->payload_validator ) {
+			$this->payload_validator = new Payload_Validator();
+		}
+
+		return $this->payload_validator;
 	}
 
 	/**
