@@ -92,17 +92,6 @@ class Product_Data_Tab {
 		wp_nonce_field( 'trendyol_sync_product_meta', 'trendyol_sync_product_nonce' );
 		?>
 		<div id="trendyol_sync_product_data" class="panel woocommerce_options_panel hidden">
-			<?php if ( empty( $brands ) || empty( $categories ) ) : ?>
-				<p class="form-field trendyol-sync-cache-notice">
-					<?php
-					esc_html_e(
-						'Listele de branduri și categorii nu sunt în cache. Rulează o sincronizare din setările Trendyol Sync (Sprint 2) înainte de a mapa produsele.',
-						'trendyol-sync'
-					);
-					?>
-				</p>
-			<?php endif; ?>
-
 			<?php
 			woocommerce_wp_text_input(
 				array(
