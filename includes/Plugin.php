@@ -14,8 +14,10 @@ use TrendyolSync\API\Auth;
 use TrendyolSync\API\Client;
 use TrendyolSync\API\Environment;
 use TrendyolSync\Cache\Transient_Cache;
+use TrendyolSync\Sync\Batch_Poller;
 use TrendyolSync\Sync\Payload_Validator;
 use TrendyolSync\Sync\Product_Mapper;
+use TrendyolSync\Sync\Sync_Runner;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -111,6 +113,9 @@ final class Plugin {
 			add_action( 'admin_notices', array( $this, 'woocommerce_missing_notice' ) );
 			return;
 		}
+
+		Sync_Runner::register_hooks();
+		Batch_Poller::register_hooks();
 
 		if ( is_admin() ) {
 			$this->admin = new Admin();
