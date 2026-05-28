@@ -9,6 +9,11 @@ namespace TrendyolSync;
 
 use TrendyolSync\Activator;
 use TrendyolSync\Admin\Admin;
+use TrendyolSync\Admin\Settings;
+use TrendyolSync\API\Auth;
+use TrendyolSync\API\Client;
+use TrendyolSync\API\Environment;
+use TrendyolSync\Cache\Transient_Cache;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -30,6 +35,27 @@ final class Plugin {
 	 * @var Admin|null
 	 */
 	private $admin = null;
+
+	/**
+	 * Setări plugin (lazy).
+	 *
+	 * @var Settings|null
+	 */
+	private $settings = null;
+
+	/**
+	 * Client API Trendyol (lazy).
+	 *
+	 * @var Client|null
+	 */
+	private $api_client = null;
+
+	/**
+	 * Cache transient API (lazy).
+	 *
+	 * @var Transient_Cache|null
+	 */
+	private $cache = null;
 
 	/**
 	 * @return Plugin
@@ -113,6 +139,49 @@ final class Plugin {
 	 */
 	public function admin(): ?Admin {
 		return $this->admin;
+	}
+
+	/**
+	 * Handler Settings API (partajat între admin și client API).
+	 *
+	 * @return Settings
+	 */
+	public function settings(): Settings {
+		if ( null === $this->settings ) {
+			$this->settings = new Settings();
+		}
+
+		return $this->settings;
+	}
+
+	/**
+	 * Client HTTP Trendyol configurat cu credențialele salvate.
+	 *
+	 * @return Client
+	 */
+	public function api_client(): Client {
+		if ( null === $this->api_client ) {
+			$settings = $this->settings();
+			$this->api_client = new Client(
+				new Environment( $settings ),
+				new Auth( $settings )
+			);
+		}
+
+		return $this->api_client;
+	}
+
+	/**
+	 * Strat cache transient pentru date API statice.
+	 *
+	 * @return Transient_Cache
+	 */
+	public function cache(): Transient_Cache {
+		if ( null === $this->cache ) {
+			$this->cache = new Transient_Cache();
+		}
+
+		return $this->cache;
 	}
 
 	/**

@@ -2,6 +2,29 @@
 	margin-bottom: 1.5em;
 }
 
+.trendyol-sync-settings-divider {
+	margin: 2em 0 1.5em;
+}
+
+.trendyol-connection-status {
+	margin-left: 0.75em;
+	vertical-align: middle;
+}
+
+.trendyol-connection-status.is-loading {
+	color: #646970;
+}
+
+.trendyol-connection-status.is-success {
+	color: #00a32a;
+	font-weight: 600;
+}
+
+.trendyol-connection-status.is-error {
+	color: #d63638;
+	font-weight: 600;
+}
+
 .trendyol-sync-settings-form .form-table th {
 	width: 220px;
 }

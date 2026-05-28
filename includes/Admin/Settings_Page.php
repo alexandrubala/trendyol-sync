@@ -51,6 +51,25 @@ class Settings_Page {
 				do_settings_sections( $page_slug );
 				submit_button( __( 'Salvează setările', 'trendyol-sync' ) );
 				?>
+
+				<?php if ( Settings::TAB_CREDENTIALS === $active_tab ) : ?>
+					<hr class="trendyol-sync-settings-divider" />
+					<h2><?php esc_html_e( 'Test conexiune API', 'trendyol-sync' ); ?></h2>
+					<p class="description">
+						<?php esc_html_e( 'Verifică dacă credențialele și mediul selectat permit accesul la API Trendyol.', 'trendyol-sync' ); ?>
+					</p>
+					<p>
+						<button
+							type="button"
+							id="trendyol-check-connection"
+							class="button button-secondary"
+							<?php echo $this->settings->has_credentials() ? '' : ' disabled'; ?>
+						>
+							<?php esc_html_e( 'Check API Status', 'trendyol-sync' ); ?>
+						</button>
+						<span id="trendyol-connection-status" class="trendyol-connection-status" role="status" aria-live="polite"></span>
+					</p>
+				<?php endif; ?>
 			</form>
 		</div>
 		<?php
