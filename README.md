@@ -70,6 +70,11 @@ trendyol-sync/
 - [x] `uninstall.php` cu cleanup complet: opțiune, transient-uri `trendyol_*`, tabele custom
 - [x] Bază i18n (`/languages/trendyol-sync.pot`) și încărcare textdomain pe `init`
 
+### v1.0.3
+
+- [x] Buton **Sincronizează catalog** în setări (branduri + categorii Trendyol în cache)
+- [x] Avertisment pe tab-ul produs când cache-ul catalog lipsește
+
 ### Roadmap (în dezvoltare)
 
 - [ ] Client API + test conexiune (*Check API Status*)
