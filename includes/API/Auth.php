@@ -8,6 +8,7 @@
 namespace TrendyolSync\API;
 
 use TrendyolSync\Admin\Settings;
+use TrendyolSync\API\Market_Context;
 use TrendyolSync\Security\Encryption;
 
 defined( 'ABSPATH' ) || exit;
@@ -50,12 +51,21 @@ class Auth {
 		$supplier_id = (string) ( $stored['supplier_id'] ?? '' );
 		$integrator  = (string) ( $stored['integrator_name'] ?? 'SelfIntegration' );
 
-		return array(
+		$headers = array(
 			'Authorization' => $this->build_authorization_header( $api_key, $api_secret ),
 			'User-Agent'    => $this->build_user_agent( $supplier_id, $integrator ),
 			'Content-Type'  => 'application/json',
 			'Accept'        => 'application/json',
 		);
+
+		$market = Market_Context::for_site();
+
+		if ( $market->is_supported() ) {
+			$headers['storeFrontCode']   = $market->get_storefront_code();
+			$headers['Accept-Language']  = $market->get_accept_language();
+		}
+
+		return $headers;
 	}
 
 	/**

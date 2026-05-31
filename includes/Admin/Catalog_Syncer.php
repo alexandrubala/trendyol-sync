@@ -10,6 +10,7 @@ namespace TrendyolSync\Admin;
 use TrendyolSync\API\Auth;
 use TrendyolSync\API\Endpoints\Brands;
 use TrendyolSync\API\Endpoints\Categories;
+use TrendyolSync\API\Market_Context;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -106,8 +107,24 @@ class Catalog_Syncer {
 	 * @return array<string, mixed>
 	 */
 	public function sync(): array {
+		$market = Market_Context::for_site();
+
+		if ( ! $market->is_supported() ) {
+			return array(
+				'success' => false,
+				'message' => __(
+					'Piața Trendyol nu a putut fi detectată din setările site-ului. Setează țara magazinului WooCommerce (ex. România) sau limba site-ului (ex. română) înainte de sincronizare.',
+					'trendyol-sync'
+				),
+			);
+		}
+
 		$plugin = trendyol_sync();
 		$cache  = $plugin->cache();
+
+		$cache->delete_all_brands();
+		$cache->delete_category_tree();
+
 		$brands = new Brands( $plugin->api_client(), $cache );
 
 		$brand_pages = 0;
@@ -149,20 +166,23 @@ class Catalog_Syncer {
 			);
 		}
 
-		$brand_count    = count( $this->catalog->get_brand_options() );
-		$category_count = count( $this->catalog->get_category_options() );
+		$counts = $this->catalog->rebuild_option_caches();
 
 		return array(
 			'success'        => true,
 			'message'        => sprintf(
-				/* translators: 1: brand count, 2: category count */
-				__( 'Catalog sincronizat: %1$d branduri, %2$d categorii.', 'trendyol-sync' ),
-				$brand_count,
-				$category_count
+				/* translators: 1: market label, 2: brand count, 3: category count */
+				__( 'Catalog sincronizat pentru %1$s: %2$d branduri, %3$d categorii.', 'trendyol-sync' ),
+				$market->get_label(),
+				$counts['brand_count'],
+				$counts['category_count']
 			),
-			'brand_count'    => $brand_count,
-			'category_count' => $category_count,
+			'brand_count'    => $counts['brand_count'],
+			'category_count' => $counts['category_count'],
 			'brand_pages'    => $brand_pages,
+			'market'         => $market->get_label(),
+			'storefront'     => $market->get_storefront_code(),
+			'language'       => $market->get_accept_language(),
 		);
 	}
 

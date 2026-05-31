@@ -16,6 +16,8 @@ defined( 'ABSPATH' ) || exit;
  */
 class Catalog_Options {
 
+	private const SEARCH_LIMIT = 30;
+
 	/**
 	 * @var Transient_Cache
 	 */
@@ -34,6 +36,106 @@ class Catalog_Options {
 	 * @return array<int, string>
 	 */
 	public function get_brand_options(): array {
+		$cached = $this->cache->get_brand_options();
+
+		if ( is_array( $cached ) && ! empty( $cached ) ) {
+			return $cached;
+		}
+
+		return $this->build_brand_options_from_pages();
+	}
+
+	/**
+	 * Categorii leaf pentru &lt;select&gt;: [ id => "Părinte > Copil" ].
+	 *
+	 * @return array<int, string>
+	 */
+	public function get_category_options(): array {
+		$cached = $this->cache->get_category_options();
+
+		if ( is_array( $cached ) && ! empty( $cached ) ) {
+			return $cached;
+		}
+
+		return $this->build_category_options_from_tree();
+	}
+
+	/**
+	 * Reconstruiește și salvează opțiunile flatten în cache.
+	 *
+	 * @return array{brand_count: int, category_count: int}
+	 */
+	public function rebuild_option_caches(): array {
+		$brands     = $this->build_brand_options_from_pages();
+		$categories = $this->build_category_options_from_tree();
+
+		$this->cache->set_brand_options( $brands );
+		$this->cache->set_category_options( $categories );
+
+		return array(
+			'brand_count'    => count( $brands ),
+			'category_count' => count( $categories ),
+		);
+	}
+
+	/**
+	 * Căutare branduri pentru Select2 AJAX.
+	 *
+	 * @param string $term  Termen căutare.
+	 * @param int    $limit Număr maxim rezultate.
+	 * @return array<int, array{id: int, text: string}>
+	 */
+	public function search_brands( string $term, int $limit = self::SEARCH_LIMIT ): array {
+		return $this->search_options( $this->get_brand_options(), $term, $limit );
+	}
+
+	/**
+	 * Căutare categorii pentru Select2 AJAX.
+	 *
+	 * @param string $term  Termen căutare.
+	 * @param int    $limit Număr maxim rezultate.
+	 * @return array<int, array{id: int, text: string}>
+	 */
+	public function search_categories( string $term, int $limit = self::SEARCH_LIMIT ): array {
+		return $this->search_options( $this->get_category_options(), $term, $limit );
+	}
+
+	/**
+	 * Etichetă brand după ID (pentru valoarea selectată).
+	 *
+	 * @param int $brand_id ID brand.
+	 * @return string
+	 */
+	public function get_brand_label( int $brand_id ): string {
+		if ( $brand_id <= 0 ) {
+			return '';
+		}
+
+		$options = $this->get_brand_options();
+
+		return (string) ( $options[ $brand_id ] ?? '' );
+	}
+
+	/**
+	 * Etichetă categorie după ID.
+	 *
+	 * @param int $category_id ID categorie.
+	 * @return string
+	 */
+	public function get_category_label( int $category_id ): string {
+		if ( $category_id <= 0 ) {
+			return '';
+		}
+
+		$options = $this->get_category_options();
+
+		return (string) ( $options[ $category_id ] ?? '' );
+	}
+
+	/**
+	 * @return array<int, string>
+	 */
+	private function build_brand_options_from_pages(): array {
 		$options = array();
 		$page    = 0;
 		$size    = 1000;
@@ -77,11 +179,9 @@ class Catalog_Options {
 	}
 
 	/**
-	 * Categorii leaf pentru &lt;select&gt;: [ id => "Părinte > Copil" ].
-	 *
 	 * @return array<int, string>
 	 */
-	public function get_category_options(): array {
+	private function build_category_options_from_tree(): array {
 		$tree = $this->cache->get_category_tree();
 
 		if ( null === $tree ) {
@@ -94,6 +194,48 @@ class Catalog_Options {
 		$this->flatten_categories( $nodes, array(), $flat );
 
 		return $flat;
+	}
+
+	/**
+	 * @param array<int, string> $options Opțiuni id => label.
+	 * @param string           $term    Termen.
+	 * @param int              $limit   Limită.
+	 * @return array<int, array{id: int, text: string}>
+	 */
+	private function search_options( array $options, string $term, int $limit ): array {
+		$term    = trim( $this->to_lower( $term ) );
+		$results = array();
+		$limit   = max( 1, min( 100, $limit ) );
+
+		if ( '' === $term ) {
+			$slice = array_slice( $options, 0, $limit, true );
+
+			foreach ( $slice as $id => $label ) {
+				$results[] = array(
+					'id'   => (int) $id,
+					'text' => (string) $label,
+				);
+			}
+
+			return $results;
+		}
+
+		foreach ( $options as $id => $label ) {
+			if ( false === $this->contains_insensitive( (string) $label, $term ) ) {
+				continue;
+			}
+
+			$results[] = array(
+				'id'   => (int) $id,
+				'text' => (string) $label,
+			);
+
+			if ( count( $results ) >= $limit ) {
+				break;
+			}
+		}
+
+		return $results;
 	}
 
 	/**
@@ -119,6 +261,10 @@ class Catalog_Options {
 	private function extract_category_nodes( array $data ): array {
 		if ( isset( $data['categories'] ) && is_array( $data['categories'] ) ) {
 			return $data['categories'];
+		}
+
+		if ( isset( $data['id'], $data['name'] ) ) {
+			return array( $data );
 		}
 
 		if ( $this->is_list( $data ) ) {
@@ -179,5 +325,30 @@ class Catalog_Options {
 		}
 
 		return array_keys( $data ) === range( 0, count( $data ) - 1 );
+	}
+
+	/**
+	 * @param string $value Text.
+	 * @return string
+	 */
+	private function to_lower( string $value ): string {
+		if ( function_exists( 'mb_strtolower' ) ) {
+			return mb_strtolower( $value );
+		}
+
+		return strtolower( $value );
+	}
+
+	/**
+	 * @param string $haystack Text.
+	 * @param string $needle   Termen.
+	 * @return bool
+	 */
+	private function contains_insensitive( string $haystack, string $needle ): bool {
+		if ( function_exists( 'mb_stripos' ) ) {
+			return false !== mb_stripos( $haystack, $needle );
+		}
+
+		return false !== stripos( $haystack, $needle );
 	}
 }

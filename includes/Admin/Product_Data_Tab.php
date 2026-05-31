@@ -7,6 +7,7 @@
 
 namespace TrendyolSync\Admin;
 
+use TrendyolSync\API\Market_Context;
 use TrendyolSync\Sync\Variant_Grouper;
 use TrendyolSync\WooCommerce\Meta_Keys;
 
@@ -18,6 +19,9 @@ defined( 'ABSPATH' ) || exit;
 class Product_Data_Tab {
 
 	public const TAB_ID = 'trendyol_sync';
+
+	public const AJAX_SEARCH_ACTION  = 'trendyol_sync_search_catalog';
+	public const SEARCH_NONCE_ACTION = 'trendyol_sync_search_catalog';
 
 	/**
 	 * @var Catalog_Options
@@ -48,6 +52,7 @@ class Product_Data_Tab {
 		add_action( 'woocommerce_product_data_panels', array( $this, 'render_product_panel' ) );
 		add_action( 'save_post_product', array( $this, 'save_product_meta' ), 10, 2 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+		add_action( 'wp_ajax_' . self::AJAX_SEARCH_ACTION, array( $this, 'handle_search_catalog' ) );
 	}
 
 	/**
@@ -80,20 +85,25 @@ class Product_Data_Tab {
 		}
 
 		$product_id = (int) $post->ID;
-		$brands     = $this->catalog->get_brand_options();
-		$categories = $this->catalog->get_category_options();
-		$cache_empty = empty( $brands ) || empty( $categories );
+		$market     = Market_Context::for_site();
+		$cache_empty = ! $market->is_supported() || ! $this->has_catalog_cache();
 
-		$barcode     = Meta_Keys::get_string( $product_id, Meta_Keys::BARCODE );
-		$brand_id    = (int) Meta_Keys::get_string( $product_id, Meta_Keys::BRAND_ID );
-		$category_id = (int) Meta_Keys::get_string( $product_id, Meta_Keys::CATEGORY_ID );
-		$sync_enabled = Meta_Keys::is_sync_enabled( $product_id );
-		$main_id     = Meta_Keys::get_string( $product_id, Meta_Keys::PRODUCT_MAIN_ID );
+		$barcode        = Meta_Keys::get_string( $product_id, Meta_Keys::BARCODE );
+		$brand_id       = (int) Meta_Keys::get_string( $product_id, Meta_Keys::BRAND_ID );
+		$category_id    = (int) Meta_Keys::get_string( $product_id, Meta_Keys::CATEGORY_ID );
+		$brand_label    = $this->catalog->get_brand_label( $brand_id );
+		$category_label = $this->catalog->get_category_label( $category_id );
+		$sync_enabled   = Meta_Keys::is_sync_enabled( $product_id );
+		$main_id        = Meta_Keys::get_string( $product_id, Meta_Keys::PRODUCT_MAIN_ID );
 
 		wp_nonce_field( 'trendyol_sync_product_meta', 'trendyol_sync_product_nonce' );
 		?>
 		<div id="trendyol_sync_product_data" class="panel woocommerce_options_panel hidden">
-			<?php if ( $cache_empty ) : ?>
+			<?php if ( ! $market->is_supported() ) : ?>
+				<p class="trendyol-sync-cache-notice">
+					<?php esc_html_e( 'Piața Trendyol nu corespunde setărilor site-ului. Setează țara magazinului WooCommerce (ex. România) sau limba site-ului la română.', 'trendyol-sync' ); ?>
+				</p>
+			<?php elseif ( $cache_empty ) : ?>
 				<p class="trendyol-sync-cache-notice">
 					<?php
 					echo wp_kses(
@@ -133,15 +143,16 @@ class Product_Data_Tab {
 				<select
 					id="<?php echo esc_attr( Meta_Keys::BRAND_ID ); ?>"
 					name="<?php echo esc_attr( Meta_Keys::BRAND_ID ); ?>"
-					class="wc-enhanced-select trendyol-sync-select"
-					data-placeholder="<?php esc_attr_e( 'Selectează brandul…', 'trendyol-sync' ); ?>"
+					class="trendyol-sync-select"
+					data-placeholder="<?php esc_attr_e( 'Caută brandul…', 'trendyol-sync' ); ?>"
+					<?php echo $cache_empty ? ' disabled' : ''; ?>
 				>
 					<option value=""><?php esc_html_e( '— Selectează —', 'trendyol-sync' ); ?></option>
-					<?php foreach ( $brands as $id => $name ) : ?>
-						<option value="<?php echo esc_attr( (string) $id ); ?>" <?php selected( $brand_id, $id ); ?>>
-							<?php echo esc_html( $name ); ?>
+					<?php if ( $brand_id > 0 && '' !== $brand_label ) : ?>
+						<option value="<?php echo esc_attr( (string) $brand_id ); ?>" selected="selected">
+							<?php echo esc_html( $brand_label ); ?>
 						</option>
-					<?php endforeach; ?>
+					<?php endif; ?>
 				</select>
 			</p>
 
@@ -152,15 +163,16 @@ class Product_Data_Tab {
 				<select
 					id="<?php echo esc_attr( Meta_Keys::CATEGORY_ID ); ?>"
 					name="<?php echo esc_attr( Meta_Keys::CATEGORY_ID ); ?>"
-					class="wc-enhanced-select trendyol-sync-select"
-					data-placeholder="<?php esc_attr_e( 'Selectează categoria…', 'trendyol-sync' ); ?>"
+					class="trendyol-sync-select"
+					data-placeholder="<?php esc_attr_e( 'Caută categoria…', 'trendyol-sync' ); ?>"
+					<?php echo $cache_empty ? ' disabled' : ''; ?>
 				>
 					<option value=""><?php esc_html_e( '— Selectează —', 'trendyol-sync' ); ?></option>
-					<?php foreach ( $categories as $id => $label ) : ?>
-						<option value="<?php echo esc_attr( (string) $id ); ?>" <?php selected( $category_id, $id ); ?>>
-							<?php echo esc_html( $label ); ?>
+					<?php if ( $category_id > 0 && '' !== $category_label ) : ?>
+						<option value="<?php echo esc_attr( (string) $category_id ); ?>" selected="selected">
+							<?php echo esc_html( $category_label ); ?>
 						</option>
-					<?php endforeach; ?>
+					<?php endif; ?>
 				</select>
 			</p>
 
@@ -277,5 +289,87 @@ class Product_Data_Tab {
 			array(),
 			TRENDYOL_SYNC_VERSION
 		);
+
+		wp_enqueue_script( 'selectWoo' );
+		wp_enqueue_style( 'select2' );
+
+		wp_enqueue_script(
+			'trendyol-sync-product-data',
+			TRENDYOL_SYNC_URL . 'assets/js/admin-product-data.js',
+			array( 'jquery', 'selectWoo' ),
+			TRENDYOL_SYNC_VERSION,
+			true
+		);
+
+		wp_localize_script(
+			'trendyol-sync-product-data',
+			'trendyolSyncProductData',
+			array(
+				'ajaxUrl'      => admin_url( 'admin-ajax.php' ),
+				'searchAction' => self::AJAX_SEARCH_ACTION,
+				'nonce'        => wp_create_nonce( self::SEARCH_NONCE_ACTION ),
+			)
+		);
+	}
+
+	/**
+	 * Căutare AJAX brand / categorie pentru Select2.
+	 *
+	 * @return void
+	 */
+	public function handle_search_catalog(): void {
+		check_ajax_referer( self::SEARCH_NONCE_ACTION, 'nonce' );
+
+		if ( ! current_user_can( 'edit_products' ) ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Nu ai permisiunea de a căuta în catalog.', 'trendyol-sync' ),
+				),
+				403
+			);
+		}
+
+		$market = Market_Context::for_site();
+
+		if ( ! $market->is_supported() || ! $this->has_catalog_cache() ) {
+			wp_send_json_success(
+				array(
+					'results' => array(),
+				)
+			);
+		}
+
+		$type = isset( $_GET['type'] ) ? sanitize_key( wp_unslash( (string) $_GET['type'] ) ) : '';
+		$term = isset( $_GET['term'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['term'] ) ) : '';
+
+		if ( 'brand' === $type ) {
+			$results = $this->catalog->search_brands( $term );
+		} elseif ( 'category' === $type ) {
+			$results = $this->catalog->search_categories( $term );
+		} else {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Tip de căutare invalid.', 'trendyol-sync' ),
+				),
+				400
+			);
+		}
+
+		wp_send_json_success(
+			array(
+				'results' => $results,
+			)
+		);
+	}
+
+	/**
+	 * Verifică dacă există cache catalog pentru piața detectată.
+	 *
+	 * @return bool
+	 */
+	private function has_catalog_cache(): bool {
+		$cache = trendyol_sync()->cache();
+
+		return null !== $cache->get_brand_options() && null !== $cache->get_category_options();
 	}
 }

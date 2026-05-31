@@ -72,6 +72,26 @@ class Settings_Page {
 
 					<hr class="trendyol-sync-settings-divider" />
 					<h2><?php esc_html_e( 'Catalog Trendyol', 'trendyol-sync' ); ?></h2>
+					<?php
+					$market = \TrendyolSync\API\Market_Context::for_site();
+					if ( $market->is_supported() ) :
+						?>
+						<p class="description">
+							<?php
+							printf(
+								/* translators: 1: market label, 2: storefront code, 3: language code */
+								esc_html__( 'Piață detectată: %1$s (%2$s, limba %3$s). Categoriile se descarcă în limba site-ului tău.', 'trendyol-sync' ),
+								esc_html( $market->get_label() ),
+								esc_html( $market->get_storefront_code() ),
+								esc_html( $market->get_accept_language() )
+							);
+							?>
+						</p>
+					<?php else : ?>
+						<p class="description trendyol-sync-market-warning">
+							<?php esc_html_e( 'Piața Trendyol nu a putut fi detectată. Setează țara magazinului WooCommerce (ex. România) sau limba site-ului la română înainte de sincronizare.', 'trendyol-sync' ); ?>
+						</p>
+					<?php endif; ?>
 					<p class="description">
 						<?php esc_html_e( 'Descarcă listele de branduri și categorii în cache local. Necesar pentru dropdown-urile de pe pagina de produs.', 'trendyol-sync' ); ?>
 					</p>

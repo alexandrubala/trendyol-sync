@@ -7,6 +7,8 @@
 
 namespace TrendyolSync\Cache;
 
+use TrendyolSync\API\Market_Context;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -14,10 +16,40 @@ defined( 'ABSPATH' ) || exit;
  */
 class Transient_Cache {
 
-	private const KEY_CATEGORY_TREE = 'trendyol_sync_cache_categories';
+	private const KEY_CATEGORY_TREE   = 'trendyol_sync_cache_categories';
+	private const KEY_BRAND_OPTIONS   = 'trendyol_sync_cache_brand_options';
+	private const KEY_CATEGORY_OPTIONS = 'trendyol_sync_cache_category_options';
 
 	private const TTL_CATEGORY_TREE = 7 * DAY_IN_SECONDS;
 	private const TTL_BRANDS        = DAY_IN_SECONDS;
+	private const TTL_OPTIONS       = 7 * DAY_IN_SECONDS;
+
+	/**
+	 * @var Market_Context
+	 */
+	private $market;
+
+	/**
+	 * @var string
+	 */
+	private $suffix;
+
+	/**
+	 * @param Market_Context|null $market Context piață (implicit: detectat din site).
+	 */
+	public function __construct( ?Market_Context $market = null ) {
+		$this->market = $market ?? Market_Context::for_site();
+		$this->suffix = $this->market->is_supported()
+			? $this->market->get_cache_suffix()
+			: 'unsupported';
+	}
+
+	/**
+	 * @return Market_Context
+	 */
+	public function market(): Market_Context {
+		return $this->market;
+	}
 
 	/**
 	 * Citește arborele de categorii din cache.
@@ -25,7 +57,7 @@ class Transient_Cache {
 	 * @return array<string, mixed>|null Null dacă lipsește sau a expirat.
 	 */
 	public function get_category_tree(): ?array {
-		$cached = get_transient( self::KEY_CATEGORY_TREE );
+		$cached = get_transient( $this->scoped_key( self::KEY_CATEGORY_TREE ) );
 
 		return is_array( $cached ) ? $cached : null;
 	}
@@ -37,7 +69,7 @@ class Transient_Cache {
 	 * @return void
 	 */
 	public function set_category_tree( array $data ): void {
-		set_transient( self::KEY_CATEGORY_TREE, $data, self::TTL_CATEGORY_TREE );
+		set_transient( $this->scoped_key( self::KEY_CATEGORY_TREE ), $data, self::TTL_CATEGORY_TREE );
 	}
 
 	/**
@@ -66,12 +98,64 @@ class Transient_Cache {
 	}
 
 	/**
-	 * Șterge cache-ul de categorii.
+	 * Opțiuni brand pre-procesate [ id => name ].
+	 *
+	 * @return array<int, string>|null
+	 */
+	public function get_brand_options(): ?array {
+		$cached = get_transient( $this->scoped_key( self::KEY_BRAND_OPTIONS ) );
+
+		return is_array( $cached ) ? $cached : null;
+	}
+
+	/**
+	 * @param array<int, string> $options Opțiuni brand.
+	 * @return void
+	 */
+	public function set_brand_options( array $options ): void {
+		set_transient( $this->scoped_key( self::KEY_BRAND_OPTIONS ), $options, self::TTL_OPTIONS );
+	}
+
+	/**
+	 * Opțiuni categorie pre-procesate [ id => label ].
+	 *
+	 * @return array<int, string>|null
+	 */
+	public function get_category_options(): ?array {
+		$cached = get_transient( $this->scoped_key( self::KEY_CATEGORY_OPTIONS ) );
+
+		return is_array( $cached ) ? $cached : null;
+	}
+
+	/**
+	 * @param array<int, string> $options Opțiuni categorie.
+	 * @return void
+	 */
+	public function set_category_options( array $options ): void {
+		set_transient( $this->scoped_key( self::KEY_CATEGORY_OPTIONS ), $options, self::TTL_OPTIONS );
+	}
+
+	/**
+	 * Șterge cache-ul de categorii și opțiunile flatten pentru piața curentă.
 	 *
 	 * @return void
 	 */
 	public function delete_category_tree(): void {
-		delete_transient( self::KEY_CATEGORY_TREE );
+		delete_transient( $this->scoped_key( self::KEY_CATEGORY_TREE ) );
+		delete_transient( $this->scoped_key( self::KEY_CATEGORY_OPTIONS ) );
+	}
+
+	/**
+	 * Șterge cache-ul branduri (toate paginile cunoscute) și opțiunile flatten.
+	 *
+	 * @return void
+	 */
+	public function delete_all_brands(): void {
+		delete_transient( $this->scoped_key( self::KEY_BRAND_OPTIONS ) );
+
+		for ( $page = 0; $page < 50; ++$page ) {
+			delete_transient( $this->get_brands_key( $page, 1000 ) );
+		}
 	}
 
 	/**
@@ -91,6 +175,14 @@ class Transient_Cache {
 	 * @return string
 	 */
 	private function get_brands_key( int $page, int $size ): string {
-		return 'trendyol_sync_cache_brands_' . $page . '_' . $size;
+		return $this->scoped_key( 'trendyol_sync_cache_brands_' . $page . '_' . $size );
+	}
+
+	/**
+	 * @param string $base Cheie de bază.
+	 * @return string
+	 */
+	private function scoped_key( string $base ): string {
+		return $base . '_' . $this->suffix;
 	}
 }
