@@ -17,6 +17,8 @@
 			placeholder: placeholder,
 			width: '100%',
 			minimumInputLength: 0,
+			dropdownParent: $(document.body),
+			dropdownCssClass: 'trendyol-sync-select-dropdown',
 			ajax: {
 				url: trendyolSyncProductData.ajaxUrl,
 				dataType: 'json',
@@ -27,16 +29,22 @@
 						action: trendyolSyncProductData.searchAction,
 						nonce: trendyolSyncProductData.nonce,
 						type: type,
-						term: params.term || ''
+						term: params.term || '',
+						page: params.page || 1
 					};
 				},
-				processResults: function (response) {
+				processResults: function (response, params) {
+					params.page = params.page || 1;
+
 					if (!response || !response.success || !response.data) {
 						return { results: [] };
 					}
 
 					return {
-						results: response.data.results || []
+						results: response.data.results || [],
+						pagination: {
+							more: !!(response.data.pagination && response.data.pagination.more)
+						}
 					};
 				}
 			}

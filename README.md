@@ -4,7 +4,7 @@ Plugin WordPress pentru integrarea magazinului **WooCommerce** cu API-ul **Trend
 
 **Repository:** [github.com/alexandrubala/trendyol-sync](https://github.com/alexandrubala/trendyol-sync)
 
-**Versiune curentă:** 1.0.5
+**Versiune curentă:** 1.0.6
 
 ## Cerințe
 
@@ -93,6 +93,11 @@ trendyol-sync/
 ```
 
 ## Changelog
+
+### v1.0.6
+
+- Dropdown brand/categorie: paginare AJAX (50/pagină) și scroll corect în admin WooCommerce
+- Dropdown atașat la `body` — nu mai e tăiat de panoul produsului
 
 ### v1.0.5
 

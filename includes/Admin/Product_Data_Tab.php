@@ -341,11 +341,12 @@ class Product_Data_Tab {
 
 		$type = isset( $_GET['type'] ) ? sanitize_key( wp_unslash( (string) $_GET['type'] ) ) : '';
 		$term = isset( $_GET['term'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['term'] ) ) : '';
+		$page = isset( $_GET['page'] ) ? absint( wp_unslash( $_GET['page'] ) ) : 1;
 
 		if ( 'brand' === $type ) {
-			$results = $this->catalog->search_brands( $term );
+			$payload = $this->catalog->search_brands( $term, $page );
 		} elseif ( 'category' === $type ) {
-			$results = $this->catalog->search_categories( $term );
+			$payload = $this->catalog->search_categories( $term, $page );
 		} else {
 			wp_send_json_error(
 				array(
@@ -355,11 +356,7 @@ class Product_Data_Tab {
 			);
 		}
 
-		wp_send_json_success(
-			array(
-				'results' => $results,
-			)
-		);
+		wp_send_json_success( $payload );
 	}
 
 	/**

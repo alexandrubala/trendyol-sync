@@ -2,6 +2,15 @@
 	min-width: 50%;
 }
 
+.trendyol-sync-select-dropdown.select2-dropdown {
+	z-index: 100000;
+}
+
+.trendyol-sync-select-dropdown .select2-results__options {
+	max-height: 320px;
+	overflow-y: auto;
+}
+
 #trendyol_sync_product_data .trendyol-sync-cache-notice {
 	padding: 0 12px 8px;
 	color: #856404;

@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class Catalog_Options {
 
-	private const SEARCH_LIMIT = 30;
+	private const SEARCH_LIMIT = 50;
 
 	/**
 	 * @var Transient_Cache
@@ -79,25 +79,27 @@ class Catalog_Options {
 	}
 
 	/**
-	 * Căutare branduri pentru Select2 AJAX.
+	 * Căutare branduri pentru Select2 AJAX (paginat).
 	 *
 	 * @param string $term  Termen căutare.
-	 * @param int    $limit Număr maxim rezultate.
-	 * @return array<int, array{id: int, text: string}>
+	 * @param int    $page  Pagină (1-based).
+	 * @param int    $limit Rezultate per pagină.
+	 * @return array{results: array<int, array{id: int, text: string}>, pagination: array{more: bool}}
 	 */
-	public function search_brands( string $term, int $limit = self::SEARCH_LIMIT ): array {
-		return $this->search_options( $this->get_brand_options(), $term, $limit );
+	public function search_brands( string $term, int $page = 1, int $limit = self::SEARCH_LIMIT ): array {
+		return $this->search_options( $this->get_brand_options(), $term, $page, $limit );
 	}
 
 	/**
-	 * Căutare categorii pentru Select2 AJAX.
+	 * Căutare categorii pentru Select2 AJAX (paginat).
 	 *
 	 * @param string $term  Termen căutare.
-	 * @param int    $limit Număr maxim rezultate.
-	 * @return array<int, array{id: int, text: string}>
+	 * @param int    $page  Pagină (1-based).
+	 * @param int    $limit Rezultate per pagină.
+	 * @return array{results: array<int, array{id: int, text: string}>, pagination: array{more: bool}}
 	 */
-	public function search_categories( string $term, int $limit = self::SEARCH_LIMIT ): array {
-		return $this->search_options( $this->get_category_options(), $term, $limit );
+	public function search_categories( string $term, int $page = 1, int $limit = self::SEARCH_LIMIT ): array {
+		return $this->search_options( $this->get_category_options(), $term, $page, $limit );
 	}
 
 	/**
@@ -198,44 +200,52 @@ class Catalog_Options {
 
 	/**
 	 * @param array<int, string> $options Opțiuni id => label.
-	 * @param string           $term    Termen.
-	 * @param int              $limit   Limită.
-	 * @return array<int, array{id: int, text: string}>
+	 * @param string             $term    Termen.
+	 * @param int                $page    Pagină (1-based).
+	 * @param int                $limit   Rezultate per pagină.
+	 * @return array{results: array<int, array{id: int, text: string}>, pagination: array{more: bool}}
 	 */
-	private function search_options( array $options, string $term, int $limit ): array {
-		$term    = trim( $this->to_lower( $term ) );
-		$results = array();
-		$limit   = max( 1, min( 100, $limit ) );
+	private function search_options( array $options, string $term, int $page, int $limit ): array {
+		$term   = trim( $this->to_lower( $term ) );
+		$page   = max( 1, $page );
+		$limit  = max( 1, min( 100, $limit ) );
+		$offset = ( $page - 1 ) * $limit;
 
-		if ( '' === $term ) {
-			$slice = array_slice( $options, 0, $limit, true );
+		$results     = array();
+		$matched     = 0;
+		$has_more    = false;
+		$need_total  = $offset + $limit + 1;
 
-			foreach ( $slice as $id => $label ) {
+		foreach ( $options as $id => $label ) {
+			if ( '' !== $term && false === $this->contains_insensitive( (string) $label, $term ) ) {
+				continue;
+			}
+
+			if ( $matched >= $offset && count( $results ) < $limit ) {
 				$results[] = array(
 					'id'   => (int) $id,
 					'text' => (string) $label,
 				);
 			}
 
-			return $results;
-		}
+			++$matched;
 
-		foreach ( $options as $id => $label ) {
-			if ( false === $this->contains_insensitive( (string) $label, $term ) ) {
-				continue;
-			}
-
-			$results[] = array(
-				'id'   => (int) $id,
-				'text' => (string) $label,
-			);
-
-			if ( count( $results ) >= $limit ) {
+			if ( $matched >= $need_total ) {
+				$has_more = true;
 				break;
 			}
 		}
 
-		return $results;
+		if ( ! $has_more && $matched > $offset + $limit ) {
+			$has_more = true;
+		}
+
+		return array(
+			'results'    => $results,
+			'pagination' => array(
+				'more' => $has_more,
+			),
+		);
 	}
 
 	/**
