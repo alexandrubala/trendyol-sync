@@ -67,7 +67,12 @@ class Updater {
 	 * @return object
 	 */
 	public function filter_site_transient_update_plugins( $transient ) {
-		if ( ! is_admin() || empty( $transient ) || ! is_object( $transient ) ) {
+		if ( ! is_object( $transient ) ) {
+			return $transient;
+		}
+
+		// Evită check-uri inutile în frontend; permite cron-ul WP (wp_version_check).
+		if ( ! is_admin() && ! wp_doing_cron() ) {
 			return $transient;
 		}
 
@@ -290,19 +295,51 @@ class Updater {
 		$zipball  = (string) ( $decoded['zipball_url'] ?? '' );
 		$html_url = (string) ( $decoded['html_url'] ?? '' );
 		$body     = (string) ( $decoded['body'] ?? '' );
+		$download = $this->resolve_release_download_url( $decoded, $zipball );
 
 		$version = $this->normalize_tag_to_version( $tag );
-		if ( '' === $version || '' === $zipball ) {
+		if ( '' === $version || '' === $download ) {
 			return null;
 		}
 
 		return array(
 			'version'      => $version,
 			'tag_name'     => $tag,
-			'zipball_url'  => esc_url_raw( $zipball ),
+			'zipball_url'  => esc_url_raw( $download ),
 			'html_url'     => esc_url_raw( $html_url ),
 			'body'         => $body,
 		);
+	}
+
+	/**
+	 * Preferă asset-ul `.zip` din release (structură corectă pentru WP) față de zipball GitHub.
+	 *
+	 * @param array<string, mixed> $release Răspuns JSON GitHub release.
+	 * @param string               $zipball URL zipball fallback.
+	 * @return string
+	 */
+	private function resolve_release_download_url( array $release, string $zipball ): string {
+		$assets = $release['assets'] ?? array();
+		if ( ! is_array( $assets ) ) {
+			return trim( $zipball );
+		}
+
+		foreach ( $assets as $asset ) {
+			if ( ! is_array( $asset ) ) {
+				continue;
+			}
+
+			$name = (string) ( $asset['name'] ?? '' );
+			$url  = (string) ( $asset['browser_download_url'] ?? '' );
+
+			if ( '' === $url || ! preg_match( '/\.zip$/i', $name ) ) {
+				continue;
+			}
+
+			return $url;
+		}
+
+		return trim( $zipball );
 	}
 
 	/**

@@ -70,6 +70,11 @@ trendyol-sync/
 - [x] `uninstall.php` cu cleanup complet: opțiune, transient-uri `trendyol_*`, tabele custom
 - [x] Bază i18n (`/languages/trendyol-sync.pot`) și încărcare textdomain pe `init`
 
+### v1.0.4
+
+- [x] Fix updater: funcționează și via WP-Cron (nu doar în admin)
+- [x] Release GitHub cu ZIP WordPress (`trendyol-sync/` root) în loc de zipball brut
+
 ### v1.0.3
 
 - [x] Buton **Sincronizează catalog** în setări (branduri + categorii Trendyol în cache)
