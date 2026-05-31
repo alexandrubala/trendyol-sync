@@ -82,6 +82,7 @@ class Product_Data_Tab {
 		$product_id = (int) $post->ID;
 		$brands     = $this->catalog->get_brand_options();
 		$categories = $this->catalog->get_category_options();
+		$cache_empty = empty( $brands ) || empty( $categories );
 
 		$barcode     = Meta_Keys::get_string( $product_id, Meta_Keys::BARCODE );
 		$brand_id    = (int) Meta_Keys::get_string( $product_id, Meta_Keys::BRAND_ID );
@@ -92,6 +93,24 @@ class Product_Data_Tab {
 		wp_nonce_field( 'trendyol_sync_product_meta', 'trendyol_sync_product_nonce' );
 		?>
 		<div id="trendyol_sync_product_data" class="panel woocommerce_options_panel hidden">
+			<?php if ( $cache_empty ) : ?>
+				<p class="trendyol-sync-cache-notice">
+					<?php
+					echo wp_kses(
+						sprintf(
+							/* translators: %s: settings page URL */
+							__( 'Listele de branduri și categorii nu sunt în cache. Rulează o sincronizare din <a href="%s">setările Trendyol Sync</a>.', 'trendyol-sync' ),
+							esc_url( trendyol_sync()->settings()->get_page_url() )
+						),
+						array(
+							'a' => array(
+								'href' => array(),
+							),
+						)
+					);
+					?>
+				</p>
+			<?php endif; ?>
 			<?php
 			woocommerce_wp_text_input(
 				array(

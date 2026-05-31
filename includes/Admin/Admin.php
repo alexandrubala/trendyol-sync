@@ -36,6 +36,13 @@ class Admin {
 	private $connection_checker;
 
 	/**
+	 * Sincronizare catalog (branduri / categorii).
+	 *
+	 * @var Catalog_Syncer
+	 */
+	private $catalog_syncer;
+
+	/**
 	 * Endpoints AJAX pentru sincronizare.
 	 *
 	 * @var Sync_Ajax
@@ -56,6 +63,7 @@ class Admin {
 		$this->settings           = trendyol_sync()->settings();
 		$this->settings_page      = new Settings_Page( $this->settings );
 		$this->connection_checker = new Connection_Checker( $this->settings );
+		$this->catalog_syncer     = new Catalog_Syncer( $this->settings );
 		$this->sync_ajax          = new Sync_Ajax();
 		$this->product_data_tab   = new Product_Data_Tab();
 	}
@@ -70,6 +78,7 @@ class Admin {
 		add_action( 'admin_init', array( $this->settings, 'register' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		$this->connection_checker->register_hooks();
+		$this->catalog_syncer->register_hooks();
 		$this->sync_ajax->register_hooks();
 		$this->product_data_tab->register_hooks();
 		( new Updater() )->register_hooks();
@@ -105,12 +114,20 @@ class Admin {
 			'trendyol-sync-admin-settings',
 			'trendyolSyncAdmin',
 			array(
-				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-				'action'  => Connection_Checker::AJAX_ACTION,
-				'nonce'   => wp_create_nonce( Connection_Checker::NONCE_ACTION ),
-				'i18n'    => array(
-					'checking' => __( 'Se testează conexiunea…', 'trendyol-sync' ),
-					'button'   => __( 'Check API Status', 'trendyol-sync' ),
+				'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
+				'connection' => array(
+					'action' => Connection_Checker::AJAX_ACTION,
+					'nonce'  => wp_create_nonce( Connection_Checker::NONCE_ACTION ),
+				),
+				'catalog'    => array(
+					'action' => Catalog_Syncer::AJAX_ACTION,
+					'nonce'  => wp_create_nonce( Catalog_Syncer::NONCE_ACTION ),
+				),
+				'i18n'       => array(
+					'checkingConnection' => __( 'Se testează conexiunea…', 'trendyol-sync' ),
+					'connectionButton'   => __( 'Check API Status', 'trendyol-sync' ),
+					'syncingCatalog'     => __( 'Se sincronizează catalogul…', 'trendyol-sync' ),
+					'catalogButton'      => __( 'Sincronizează catalog', 'trendyol-sync' ),
 				),
 			)
 		);

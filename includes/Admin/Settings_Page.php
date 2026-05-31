@@ -69,6 +69,23 @@ class Settings_Page {
 						</button>
 						<span id="trendyol-connection-status" class="trendyol-connection-status" role="status" aria-live="polite"></span>
 					</p>
+
+					<hr class="trendyol-sync-settings-divider" />
+					<h2><?php esc_html_e( 'Catalog Trendyol', 'trendyol-sync' ); ?></h2>
+					<p class="description">
+						<?php esc_html_e( 'Descarcă listele de branduri și categorii în cache local. Necesar pentru dropdown-urile de pe pagina de produs.', 'trendyol-sync' ); ?>
+					</p>
+					<p>
+						<button
+							type="button"
+							id="trendyol-sync-catalog"
+							class="button button-secondary"
+							<?php echo $this->settings->has_credentials() ? '' : ' disabled'; ?>
+						>
+							<?php esc_html_e( 'Sincronizează catalog', 'trendyol-sync' ); ?>
+						</button>
+						<span id="trendyol-catalog-status" class="trendyol-connection-status" role="status" aria-live="polite"></span>
+					</p>
 				<?php endif; ?>
 			</form>
 		</div>
