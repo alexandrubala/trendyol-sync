@@ -24,6 +24,10 @@ class Select_Woo_Assets {
 			return;
 		}
 
+		if ( wp_script_is( 'selectWoo', 'registered' ) ) {
+			return;
+		}
+
 		$script_src = self::resolve_script_src();
 		$style_src  = self::resolve_style_src();
 
@@ -31,10 +35,8 @@ class Select_Woo_Assets {
 			return;
 		}
 
-		$suffix  = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 		$version = WC()->version;
 
-		wp_deregister_script( 'selectWoo' );
 		wp_register_script(
 			'selectWoo',
 			$script_src,
@@ -44,7 +46,6 @@ class Select_Woo_Assets {
 		);
 
 		if ( null !== $style_src ) {
-			wp_deregister_style( 'select2' );
 			wp_register_style(
 				'select2',
 				$style_src,

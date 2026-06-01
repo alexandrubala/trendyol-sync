@@ -89,6 +89,11 @@ class Admin {
 	private $onboarding_wizard_page;
 
 	/**
+	 * @var Catalog_Search
+	 */
+	private $catalog_search;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -103,6 +108,7 @@ class Admin {
 		$this->bulk_actions = new Bulk_Actions();
 		$this->sync_dashboard_page = new Sync_Dashboard_Page();
 		$this->onboarding_wizard_page = new Onboarding_Wizard_Page();
+		$this->catalog_search         = new Catalog_Search();
 	}
 
 	/**
@@ -123,6 +129,7 @@ class Admin {
 		$this->bulk_actions->register_hooks();
 		$this->sync_dashboard_page->register_hooks();
 		$this->onboarding_wizard_page->register_hooks();
+		$this->catalog_search->register_hooks();
 		( new Updater() )->register_hooks();
 	}
 
@@ -192,17 +199,22 @@ class Admin {
 				TRENDYOL_SYNC_VERSION,
 				true
 			);
+			$category_options = $this->catalog_search->get_category_select2_data();
+
 			wp_localize_script(
 				'trendyol-sync-category-mapping',
 				'trendyolSyncMappingData',
 				array(
-					'ajaxUrl'           => admin_url( 'admin-ajax.php' ),
-					'searchAction'      => Product_Data_Tab::AJAX_SEARCH_ACTION,
-					'nonce'             => wp_create_nonce( Product_Data_Tab::SEARCH_NONCE_ACTION ),
-					'emptyLabel'        => __( '— Fără mapare —', 'trendyol-sync-for-woocommerce' ),
-					'noResults'         => __( 'Niciun rezultat găsit. Sincronizează catalogul din Setări.', 'trendyol-sync-for-woocommerce' ),
-					'searching'         => __( 'Se caută…', 'trendyol-sync-for-woocommerce' ),
-					'selectWooMissing'  => __( 'Componenta de căutare nu s-a încărcat. Verifică că WooCommerce este activ și reîncarcă pagina.', 'trendyol-sync-for-woocommerce' ),
+					'ajaxUrl'          => admin_url( 'admin-ajax.php' ),
+					'searchAction'     => Catalog_Search::AJAX_ACTION,
+					'nonce'            => wp_create_nonce( Catalog_Search::NONCE_ACTION ),
+					'categories'       => $category_options,
+					'categoryCount'    => count( $category_options ),
+					'emptyLabel'       => __( '— Fără mapare —', 'trendyol-sync-for-woocommerce' ),
+					'noResults'        => __( 'Niciun rezultat găsit. Sincronizează catalogul din Setări.', 'trendyol-sync-for-woocommerce' ),
+					'searching'        => __( 'Se caută…', 'trendyol-sync-for-woocommerce' ),
+					'selectWooMissing' => __( 'Componenta de căutare nu s-a încărcat. Verifică că WooCommerce este activ și reîncarcă pagina.', 'trendyol-sync-for-woocommerce' ),
+					'catalogEmpty'     => __( 'Nu există categorii Trendyol în cache. Rulează „Sincronizează catalog” din Setări.', 'trendyol-sync-for-woocommerce' ),
 				)
 			);
 			wp_enqueue_style(

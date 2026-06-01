@@ -296,7 +296,15 @@ class Catalog_Options {
 			return $data['categories'];
 		}
 
-		if ( isset( $data['id'], $data['name'] ) ) {
+		if ( isset( $data['categoryTree'] ) && is_array( $data['categoryTree'] ) ) {
+			return $data['categoryTree'];
+		}
+
+		if ( isset( $data['data'] ) && is_array( $data['data'] ) ) {
+			return $this->extract_category_nodes( $data['data'] );
+		}
+
+		if ( isset( $data['id'] ) && ( isset( $data['name'] ) || isset( $data['displayName'] ) || isset( $data['subCategories'] ) || isset( $data['subcategories'] ) ) ) {
 			return array( $data );
 		}
 
@@ -319,7 +327,12 @@ class Catalog_Options {
 				continue;
 			}
 
-			$id   = isset( $node['id'] ) ? (int) $node['id'] : 0;
+			$id = isset( $node['id'] ) ? (int) $node['id'] : 0;
+
+			if ( $id <= 0 && isset( $node['categoryId'] ) ) {
+				$id = (int) $node['categoryId'];
+			}
+
 			$name = isset( $node['name'] ) ? (string) $node['name'] : '';
 
 			if ( '' === $name && isset( $node['displayName'] ) ) {
@@ -336,6 +349,8 @@ class Catalog_Options {
 
 			if ( ! empty( $node['subCategories'] ) && is_array( $node['subCategories'] ) ) {
 				$children = $node['subCategories'];
+			} elseif ( ! empty( $node['subcategories'] ) && is_array( $node['subcategories'] ) ) {
+				$children = $node['subcategories'];
 			} elseif ( ! empty( $node['children'] ) && is_array( $node['children'] ) ) {
 				$children = $node['children'];
 			}

@@ -21,8 +21,8 @@ class Product_Data_Tab {
 
 	public const TAB_ID = 'trendyol_sync';
 
-	public const AJAX_SEARCH_ACTION  = 'trendyol_sync_search_catalog';
-	public const SEARCH_NONCE_ACTION = 'trendyol_sync_search_catalog';
+	public const AJAX_SEARCH_ACTION  = Catalog_Search::AJAX_ACTION;
+	public const SEARCH_NONCE_ACTION = Catalog_Search::NONCE_ACTION;
 
 	/**
 	 * @var Catalog_Options
@@ -70,7 +70,6 @@ class Product_Data_Tab {
 		add_action( 'woocommerce_product_data_panels', array( $this, 'render_product_panel' ) );
 		add_action( 'save_post_product', array( $this, 'save_product_meta' ), 10, 2 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
-		add_action( 'wp_ajax_' . self::AJAX_SEARCH_ACTION, array( $this, 'handle_search_catalog' ) );
 	}
 
 	/**
@@ -403,62 +402,17 @@ class Product_Data_Tab {
 			true
 		);
 
+		$catalog_search = new Catalog_Search( $this->catalog );
+
 		wp_localize_script(
 			'trendyol-sync-product-data',
 			'trendyolSyncProductData',
 			array(
 				'ajaxUrl'      => admin_url( 'admin-ajax.php' ),
-				'searchAction' => self::AJAX_SEARCH_ACTION,
-				'nonce'        => wp_create_nonce( self::SEARCH_NONCE_ACTION ),
+				'searchAction' => Catalog_Search::AJAX_ACTION,
+				'nonce'        => wp_create_nonce( Catalog_Search::NONCE_ACTION ),
+				'categories'   => $catalog_search->get_category_select2_data(),
 			)
 		);
 	}
-
-	/**
-	 * Căutare AJAX brand / categorie pentru Select2.
-	 *
-	 * @return void
-	 */
-	public function handle_search_catalog(): void {
-		check_ajax_referer( self::SEARCH_NONCE_ACTION, 'nonce' );
-
-		if ( ! current_user_can( 'edit_products' ) && ! current_user_can( TRENDYOL_SYNC_CAPABILITY ) ) {
-			wp_send_json_error(
-				array(
-					'message' => __( 'Nu ai permisiunea de a căuta în catalog.', 'trendyol-sync-for-woocommerce' ),
-				),
-				403
-			);
-		}
-
-		$market = Market_Context::for_site();
-
-		if ( ! $market->is_supported() || ! $this->catalog->has_cached_catalog() ) {
-			wp_send_json_success(
-				array(
-					'results' => array(),
-				)
-			);
-		}
-
-		$type = isset( $_GET['type'] ) ? sanitize_key( wp_unslash( (string) $_GET['type'] ) ) : '';
-		$term = isset( $_GET['term'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['term'] ) ) : '';
-		$page = isset( $_GET['page'] ) ? absint( wp_unslash( $_GET['page'] ) ) : 1;
-
-		if ( 'brand' === $type ) {
-			$payload = $this->catalog->search_brands( $term, $page );
-		} elseif ( 'category' === $type ) {
-			$payload = $this->catalog->search_categories( $term, $page );
-		} else {
-			wp_send_json_error(
-				array(
-					'message' => __( 'Tip de căutare invalid.', 'trendyol-sync-for-woocommerce' ),
-				),
-				400
-			);
-		}
-
-		wp_send_json_success( $payload );
-	}
-
 }
