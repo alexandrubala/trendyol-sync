@@ -83,6 +83,15 @@ class Catalog_Search {
 		}
 
 		if ( 'category' === $type ) {
+			if ( ! $this->catalog->has_cached_catalog() ) {
+				wp_send_json_success(
+					array(
+						'results'    => array(),
+						'pagination' => array( 'more' => false ),
+					)
+				);
+			}
+
 			$payload = $this->catalog->search_categories( $term, $page );
 			wp_send_json_success( $payload );
 		}

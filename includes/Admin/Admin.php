@@ -199,7 +199,7 @@ class Admin {
 				TRENDYOL_SYNC_VERSION,
 				true
 			);
-			$category_options = $this->catalog_search->get_category_select2_data();
+			$catalog_options = new Catalog_Options();
 
 			wp_localize_script(
 				'trendyol-sync-category-mapping',
@@ -208,13 +208,11 @@ class Admin {
 					'ajaxUrl'          => admin_url( 'admin-ajax.php' ),
 					'searchAction'     => Catalog_Search::AJAX_ACTION,
 					'nonce'            => wp_create_nonce( Catalog_Search::NONCE_ACTION ),
-					'categories'       => $category_options,
-					'categoryCount'    => count( $category_options ),
-					'emptyLabel'       => __( '— Fără mapare —', 'trendyol-sync-for-woocommerce' ),
+					'catalogReady'     => $catalog_options->has_cached_catalog(),
 					'noResults'        => __( 'Niciun rezultat găsit. Sincronizează catalogul din Setări.', 'trendyol-sync-for-woocommerce' ),
 					'searching'        => __( 'Se caută…', 'trendyol-sync-for-woocommerce' ),
 					'selectWooMissing' => __( 'Componenta de căutare nu s-a încărcat. Verifică că WooCommerce este activ și reîncarcă pagina.', 'trendyol-sync-for-woocommerce' ),
-					'catalogEmpty'     => __( 'Nu există categorii Trendyol în cache. Rulează „Sincronizează catalog” din Setări.', 'trendyol-sync-for-woocommerce' ),
+					'catalogEmpty'     => __( 'Catalogul Trendyol nu este în cache. Rulează „Sincronizează catalog” din Setări.', 'trendyol-sync-for-woocommerce' ),
 				)
 			);
 			wp_enqueue_style(

@@ -23,6 +23,10 @@
 		return;
 	}
 
+	if (!trendyolSyncMappingData.catalogReady) {
+		showInitError(trendyolSyncMappingData.catalogEmpty || '');
+	}
+
 	function buildAjaxConfig(type) {
 		return {
 			url: trendyolSyncMappingData.ajaxUrl,
@@ -63,30 +67,13 @@
 		};
 	}
 
-	function initCategorySelect($select) {
-		var placeholder = $select.data('placeholder') || '';
-		var categories = trendyolSyncMappingData.categories || [];
+	function initCatalogSelect($select) {
+		var type = $select.data('type');
 
-		if (!categories.length) {
-			showInitError(trendyolSyncMappingData.catalogEmpty || '');
+		if (!type) {
+			return;
 		}
 
-		$select.selectWoo({
-			allowClear: true,
-			placeholder: placeholder,
-			width: '100%',
-			dropdownParent: $(document.body),
-			dropdownCssClass: 'trendyol-sync-select-dropdown',
-			data: categories,
-			language: {
-				noResults: function () {
-					return trendyolSyncMappingData.noResults || 'Niciun rezultat';
-				}
-			}
-		});
-	}
-
-	function initBrandSelect($select) {
 		var placeholder = $select.data('placeholder') || '';
 
 		$select.selectWoo({
@@ -96,7 +83,7 @@
 			minimumInputLength: 0,
 			dropdownParent: $(document.body),
 			dropdownCssClass: 'trendyol-sync-select-dropdown',
-			ajax: buildAjaxConfig('brand'),
+			ajax: buildAjaxConfig(type),
 			language: {
 				noResults: function () {
 					return trendyolSyncMappingData.noResults || 'Niciun rezultat';
@@ -116,26 +103,9 @@
 		});
 	}
 
-	function initSelect($select) {
-		var type = $select.data('type');
-
-		if (!type) {
-			return;
-		}
-
-		if (type === 'category') {
-			initCategorySelect($select);
-			return;
-		}
-
-		if (type === 'brand') {
-			initBrandSelect($select);
-		}
-	}
-
 	$(function () {
 		$('.trendyol-sync-mapping-select').each(function () {
-			initSelect($(this));
+			initCatalogSelect($(this));
 		});
 	});
 })(jQuery);

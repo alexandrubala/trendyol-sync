@@ -1,5 +1,11 @@
-#trendyol_sync_product_data .trendyol-sync-select {
-	min-width: 50%;
+#trendyol_sync_product_data .trendyol-sync-select,
+.trendyol-sync-mapping-select {
+	min-width: 280px;
+	max-width: 100%;
+}
+
+.trendyol-sync-settings-wrap .widefat .select2-container {
+	min-width: 280px;
 }
 
 .trendyol-sync-select-dropdown.select2-dropdown {

@@ -65,8 +65,7 @@ class Category_Mapping_Page {
 		$category_map = $this->mapper->get_category_map();
 		$brand_map    = $this->mapper->get_brand_map();
 		$market       = Market_Context::for_site();
-		$category_count = count( ( new Catalog_Search( $this->catalog ) )->get_category_select2_data() );
-		$cache_empty    = ! $market->is_supported() || $category_count < 1;
+		$cache_empty  = ! $market->is_supported() || ! $this->catalog->has_cached_catalog();
 		?>
 		<div class="wrap trendyol-sync-settings-wrap">
 			<h1><?php esc_html_e( 'Mapare categorii WooCommerce -> Trendyol', 'trendyol-sync-for-woocommerce' ); ?></h1>
