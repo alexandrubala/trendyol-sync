@@ -27,9 +27,10 @@
 		showInitError(trendyolSyncMappingData.catalogEmpty || '');
 	}
 
-	function buildAjaxConfig(type) {
+	function buildBrandAjaxConfig() {
 		return {
 			url: trendyolSyncMappingData.ajaxUrl,
+			type: 'POST',
 			dataType: 'json',
 			delay: 250,
 			cache: true,
@@ -37,20 +38,10 @@
 				return {
 					action: trendyolSyncMappingData.searchAction,
 					nonce: trendyolSyncMappingData.nonce,
-					type: type,
+					type: 'brand',
 					term: params.term || '',
 					page: params.page || 1
 				};
-			},
-			transport: function (params, success, failure) {
-				$.ajax({
-					url: params.url,
-					dataType: params.dataType,
-					data: params.data,
-					type: 'GET'
-				})
-					.done(success)
-					.fail(failure);
 			},
 			processResults: function (response) {
 				if (!response || !response.success || !response.data) {
@@ -67,14 +58,27 @@
 		};
 	}
 
-	function initCatalogSelect($select) {
-		var type = $select.data('type');
+	function initCategorySelect($select) {
+		var placeholder = $select.attr('data-placeholder') || '';
+		var categories = trendyolSyncMappingData.categories || [];
 
-		if (!type) {
-			return;
-		}
+		$select.selectWoo({
+			allowClear: true,
+			placeholder: placeholder,
+			width: '100%',
+			dropdownParent: $(document.body),
+			dropdownCssClass: 'trendyol-sync-select-dropdown',
+			data: categories,
+			language: {
+				noResults: function () {
+					return trendyolSyncMappingData.noResults || 'Niciun rezultat';
+				}
+			}
+		});
+	}
 
-		var placeholder = $select.data('placeholder') || '';
+	function initBrandSelect($select) {
+		var placeholder = $select.attr('data-placeholder') || '';
 
 		$select.selectWoo({
 			allowClear: true,
@@ -83,7 +87,7 @@
 			minimumInputLength: 0,
 			dropdownParent: $(document.body),
 			dropdownCssClass: 'trendyol-sync-select-dropdown',
-			ajax: buildAjaxConfig(type),
+			ajax: buildBrandAjaxConfig(),
 			language: {
 				noResults: function () {
 					return trendyolSyncMappingData.noResults || 'Niciun rezultat';
@@ -94,18 +98,70 @@
 			}
 		});
 
-		$select.on('select2:open', function () {
-			var $search = $('.select2-container--open .select2-search__field');
+		bindAjaxOpenLoad($select);
+	}
 
-			if ($search.length) {
-				$search.trigger('input');
+	/**
+	 * Încarcă prima pagină AJAX la deschidere (desktop + mobile; nu depinde de câmpul de căutare).
+	 *
+	 * @param {jQuery} $select Element select.
+	 */
+	function bindAjaxOpenLoad($select) {
+		$select.on('select2:open', function () {
+			var select2 = $select.data('select2');
+
+			if (!select2 || !select2.dataAdapter || typeof select2.dataAdapter.query !== 'function') {
+				return;
 			}
+
+			select2.dataAdapter.query(
+				{
+					term: '',
+					page: 1
+				},
+				function () {}
+			);
 		});
 	}
 
+	function initSelect($select) {
+		if ($select.data('trendyolSyncInited')) {
+			return;
+		}
+
+		var type = $select.attr('data-type');
+
+		if (!type) {
+			return;
+		}
+
+		$select.data('trendyolSyncInited', true);
+
+		if (type === 'category') {
+			initCategorySelect($select);
+			return;
+		}
+
+		if (type === 'brand') {
+			initBrandSelect($select);
+		}
+	}
+
 	$(function () {
-		$('.trendyol-sync-mapping-select').each(function () {
-			initCatalogSelect($(this));
+		var $selects = $('.trendyol-sync-mapping-select');
+		var deferCategoryInit = $selects.filter('[data-type="category"]').length > 10;
+
+		$selects.each(function () {
+			var $select = $(this);
+
+			if (deferCategoryInit && $select.attr('data-type') === 'category') {
+				$select.one('mousedown.trendyolSync', function () {
+					initSelect($select);
+				});
+				return;
+			}
+
+			initSelect($select);
 		});
 	});
 })(jQuery);

@@ -59,6 +59,18 @@ class Select_Woo_Assets {
 	 * @return void
 	 */
 	public static function enqueue(): void {
+		if ( ! function_exists( 'WC' ) ) {
+			return;
+		}
+
+		// Scripturile WooCommerce admin (selectWoo + CSS) — același set ca pe editarea produsului.
+		if ( wp_script_is( 'wc-enhanced-select', 'registered' ) ) {
+			wp_enqueue_style( 'select2' );
+			wp_enqueue_script( 'wc-enhanced-select' );
+
+			return;
+		}
+
 		self::register();
 
 		if ( wp_script_is( 'selectWoo', 'registered' ) ) {

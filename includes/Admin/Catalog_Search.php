@@ -69,29 +69,11 @@ class Catalog_Search {
 		$page = isset( $_REQUEST['page'] ) ? absint( wp_unslash( $_REQUEST['page'] ) ) : 1;
 
 		if ( 'brand' === $type ) {
-			if ( ! $this->catalog->has_cached_catalog() ) {
-				wp_send_json_success(
-					array(
-						'results'    => array(),
-						'pagination' => array( 'more' => false ),
-					)
-				);
-			}
-
 			$payload = $this->catalog->search_brands( $term, $page );
 			wp_send_json_success( $payload );
 		}
 
 		if ( 'category' === $type ) {
-			if ( ! $this->catalog->has_cached_catalog() ) {
-				wp_send_json_success(
-					array(
-						'results'    => array(),
-						'pagination' => array( 'more' => false ),
-					)
-				);
-			}
-
 			$payload = $this->catalog->search_categories( $term, $page );
 			wp_send_json_success( $payload );
 		}

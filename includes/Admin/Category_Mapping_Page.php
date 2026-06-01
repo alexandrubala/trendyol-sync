@@ -137,7 +137,7 @@ class Category_Mapping_Page {
 									<td>
 										<select
 											name="category_map[<?php echo esc_attr( (string) $term_id ); ?>]"
-											class="trendyol-sync-mapping-select"
+											class="trendyol-sync-select trendyol-sync-mapping-select"
 											data-type="category"
 											data-placeholder="<?php esc_attr_e( 'Caută categoria…', 'trendyol-sync-for-woocommerce' ); ?>"
 										>
@@ -150,7 +150,7 @@ class Category_Mapping_Page {
 									<td>
 										<select
 											name="brand_map[<?php echo esc_attr( (string) $term_id ); ?>]"
-											class="trendyol-sync-mapping-select"
+											class="trendyol-sync-select trendyol-sync-mapping-select"
 											data-type="brand"
 											data-placeholder="<?php esc_attr_e( 'Caută brandul…', 'trendyol-sync-for-woocommerce' ); ?>"
 										>

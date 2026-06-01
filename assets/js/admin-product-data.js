@@ -8,6 +8,7 @@
 	function buildBrandAjaxConfig() {
 		return {
 			url: trendyolSyncProductData.ajaxUrl,
+			type: 'POST',
 			dataType: 'json',
 			delay: 250,
 			cache: true,
@@ -19,16 +20,6 @@
 					term: params.term || '',
 					page: params.page || 1
 				};
-			},
-			transport: function (params, success, failure) {
-				$.ajax({
-					url: params.url,
-					dataType: params.dataType,
-					data: params.data,
-					type: 'GET'
-				})
-					.done(success)
-					.fail(failure);
 			},
 			processResults: function (response) {
 				if (!response || !response.success || !response.data) {
@@ -80,12 +71,24 @@
 			ajax: buildBrandAjaxConfig()
 		});
 
-		$select.on('select2:open', function () {
-			var $search = $('.select2-container--open .select2-search__field');
+		bindAjaxOpenLoad($select);
+	}
 
-			if ($search.length) {
-				$search.trigger('input');
+	function bindAjaxOpenLoad($select) {
+		$select.on('select2:open', function () {
+			var select2 = $select.data('select2');
+
+			if (!select2 || !select2.dataAdapter || typeof select2.dataAdapter.query !== 'function') {
+				return;
 			}
+
+			select2.dataAdapter.query(
+				{
+					term: '',
+					page: 1
+				},
+				function () {}
+			);
 		});
 	}
 
