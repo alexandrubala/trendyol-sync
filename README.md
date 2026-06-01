@@ -51,7 +51,7 @@ Plugin WordPress pentru integrarea magazinului **WooCommerce** cu API-ul **Trend
 
 ### Catalog (branduri & categorii)
 
-Pe tab-ul **Credentials**, apasă **Sincronizează catalog** pentru a descărca brandurile și categoriile Trendyol în cache local. Dropdown-urile de pe pagina de produs depind de acest pas.
+Pe tab-ul **Credentials**, apasă **Sincronizează catalog** pentru a descărca brandurile și categoriile Trendyol în cache local. Dropdown-urile de pe pagina de produs și de pe pagina Mapping depind de acest pas.
 
 Pluginul detectează automat piața Trendyol din:
 

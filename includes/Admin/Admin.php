@@ -184,8 +184,7 @@ class Admin {
 		);
 
 		if ( self::MENU_SLUG . '_page_' . Category_Mapping_Page::PAGE_SLUG === $hook_suffix ) {
-			wp_enqueue_script( 'selectWoo' );
-			wp_enqueue_style( 'select2' );
+			Select_Woo_Assets::enqueue();
 			wp_enqueue_script(
 				'trendyol-sync-category-mapping',
 				TRENDYOL_SYNC_URL . 'assets/js/admin-category-mapping.js',

@@ -7,6 +7,8 @@
 
 namespace TrendyolSync\Admin;
 
+use TrendyolSync\API\Market_Context;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -62,9 +64,31 @@ class Category_Mapping_Page {
 
 		$category_map = $this->mapper->get_category_map();
 		$brand_map    = $this->mapper->get_brand_map();
+		$market       = Market_Context::for_site();
+		$cache_empty  = ! $market->is_supported() || ! $this->catalog->has_cached_catalog();
 		?>
 		<div class="wrap trendyol-sync-settings-wrap">
 			<h1><?php esc_html_e( 'Mapare categorii WooCommerce -> Trendyol', 'trendyol-sync-for-woocommerce' ); ?></h1>
+			<?php if ( $cache_empty ) : ?>
+				<div class="notice notice-warning">
+					<p>
+						<?php
+						echo wp_kses(
+							sprintf(
+								/* translators: %s: settings page URL */
+								__( 'Catalogul Trendyol nu este în cache. Rulează „Sincronizează catalog” din <a href="%s">setările Trendyol Sync</a> înainte de mapare.', 'trendyol-sync-for-woocommerce' ),
+								esc_url( admin_url( 'admin.php?page=' . Admin::MENU_SLUG ) )
+							),
+							array(
+								'a' => array(
+									'href' => array(),
+								),
+							)
+						);
+						?>
+					</p>
+				</div>
+			<?php endif; ?>
 			<?php if ( isset( $_GET['mapping_updated'] ) ) : ?>
 				<div class="notice notice-success is-dismissible">
 					<p>

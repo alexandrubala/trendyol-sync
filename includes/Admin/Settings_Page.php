@@ -93,7 +93,7 @@ class Settings_Page {
 						</p>
 					<?php endif; ?>
 					<p class="description">
-						<?php esc_html_e( 'Descarcă listele de branduri și categorii în cache local. Necesar pentru dropdown-urile de pe pagina de produs.', 'trendyol-sync-for-woocommerce' ); ?>
+						<?php esc_html_e( 'Descarcă listele de branduri și categorii în cache local. Necesar pentru dropdown-urile de pe pagina de produs și pentru pagina Mapping.', 'trendyol-sync-for-woocommerce' ); ?>
 					</p>
 					<p>
 						<button

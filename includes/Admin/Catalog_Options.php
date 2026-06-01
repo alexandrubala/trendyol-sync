@@ -103,6 +103,29 @@ class Catalog_Options {
 	}
 
 	/**
+	 * Verifică dacă există date de catalog în cache (arbore/pagini sau opțiuni flatten).
+	 *
+	 * @return bool
+	 */
+	public function has_cached_catalog(): bool {
+		if ( null !== $this->cache->get_category_tree() ) {
+			return true;
+		}
+
+		if ( null !== $this->cache->get_brand_options() || null !== $this->cache->get_category_options() ) {
+			return true;
+		}
+
+		for ( $page = 0; $page < 5; ++$page ) {
+			if ( null !== $this->cache->get_brands( $page, 1000 ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Etichetă brand după ID (pentru valoarea selectată).
 	 *
 	 * @param int $brand_id ID brand.

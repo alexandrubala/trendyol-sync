@@ -104,7 +104,7 @@ class Product_Data_Tab {
 
 		$product_id = (int) $post->ID;
 		$market     = Market_Context::for_site();
-		$cache_empty = ! $market->is_supported() || ! $this->has_catalog_cache();
+		$cache_empty = ! $market->is_supported() || ! $this->catalog->has_cached_catalog();
 
 		$barcode        = Meta_Keys::get_string( $product_id, Meta_Keys::BARCODE );
 		$brand_id       = (int) Meta_Keys::get_string( $product_id, Meta_Keys::BRAND_ID );
@@ -393,8 +393,7 @@ class Product_Data_Tab {
 			TRENDYOL_SYNC_VERSION
 		);
 
-		wp_enqueue_script( 'selectWoo' );
-		wp_enqueue_style( 'select2' );
+		Select_Woo_Assets::enqueue();
 
 		wp_enqueue_script(
 			'trendyol-sync-product-data',
@@ -423,7 +422,7 @@ class Product_Data_Tab {
 	public function handle_search_catalog(): void {
 		check_ajax_referer( self::SEARCH_NONCE_ACTION, 'nonce' );
 
-		if ( ! current_user_can( 'edit_products' ) ) {
+		if ( ! current_user_can( 'edit_products' ) && ! current_user_can( TRENDYOL_SYNC_CAPABILITY ) ) {
 			wp_send_json_error(
 				array(
 					'message' => __( 'Nu ai permisiunea de a căuta în catalog.', 'trendyol-sync-for-woocommerce' ),
@@ -434,7 +433,7 @@ class Product_Data_Tab {
 
 		$market = Market_Context::for_site();
 
-		if ( ! $market->is_supported() || ! $this->has_catalog_cache() ) {
+		if ( ! $market->is_supported() || ! $this->catalog->has_cached_catalog() ) {
 			wp_send_json_success(
 				array(
 					'results' => array(),
@@ -462,14 +461,4 @@ class Product_Data_Tab {
 		wp_send_json_success( $payload );
 	}
 
-	/**
-	 * Verifică dacă există cache catalog pentru piața detectată.
-	 *
-	 * @return bool
-	 */
-	private function has_catalog_cache(): bool {
-		$cache = trendyol_sync()->cache();
-
-		return null !== $cache->get_brand_options() && null !== $cache->get_category_options();
-	}
 }

@@ -136,7 +136,6 @@ class Onboarding_Wizard_Page {
 	 */
 	private function compute_preview(): array {
 		$settings = trendyol_sync()->settings();
-		$cache    = trendyol_sync()->cache();
 		$products = wc_get_products(
 			array(
 				'type'   => array( 'simple', 'variable' ),
@@ -171,7 +170,7 @@ class Onboarding_Wizard_Page {
 
 		return array(
 			'credentials_ok' => $settings->has_credentials(),
-			'catalog_ok'     => null !== $cache->get_brand_options() && null !== $cache->get_category_options(),
+			'catalog_ok'     => ( new Catalog_Options() )->has_cached_catalog(),
 			'mapping_ok'     => ! empty( $this->mapper->get_category_map() ) || ! empty( $this->mapper->get_brand_map() ),
 			'total_products' => $total,
 			'ready_products' => $ready,

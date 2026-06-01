@@ -17,6 +17,7 @@
 			allowClear: true,
 			placeholder: placeholder,
 			width: '100%',
+			minimumInputLength: 0,
 			dropdownParent: $(document.body),
 			ajax: {
 				url: trendyolSyncMappingData.ajaxUrl,
