@@ -41,6 +41,16 @@ class Sync_Queue {
 	private $logger;
 
 	/**
+	 * @var Barcode_Resolver
+	 */
+	private $barcode_resolver;
+
+	/**
+	 * @var Category_Attribute_Service
+	 */
+	private $category_attribute_service;
+
+	/**
 	 * @param Sync_Job_Repository|null $jobs      Repository job-uri.
 	 * @param Product_Mapper|null      $mapper    Mapper produse.
 	 * @param Payload_Validator|null   $validator Validator payload.
@@ -50,12 +60,16 @@ class Sync_Queue {
 		?Sync_Job_Repository $jobs = null,
 		?Product_Mapper $mapper = null,
 		?Payload_Validator $validator = null,
-		?Logger $logger = null
+		?Logger $logger = null,
+		?Barcode_Resolver $barcode_resolver = null,
+		?Category_Attribute_Service $category_attribute_service = null
 	) {
 		$this->jobs      = $jobs ?? new Sync_Job_Repository();
 		$this->mapper    = $mapper ?? new Product_Mapper();
 		$this->validator = $validator ?? new Payload_Validator();
 		$this->logger    = $logger ?? new Logger();
+		$this->barcode_resolver = $barcode_resolver ?? new Barcode_Resolver();
+		$this->category_attribute_service = $category_attribute_service ?? new Category_Attribute_Service();
 	}
 
 	/**
@@ -197,6 +211,26 @@ class Sync_Queue {
 			)
 		);
 
+		$settings = trendyol_sync()->settings()->get_stored_settings();
+		if ( isset( $settings['sync_only_modified'] ) && 'yes' === $settings['sync_only_modified'] ) {
+			$products = array_filter(
+				$products,
+				static function ( $product ) {
+					if ( ! $product instanceof \WC_Product ) {
+						return false;
+					}
+					$last_sync = Meta_Keys::get_last_sync_at( $product->get_id() );
+					if ( '' === $last_sync ) {
+						return true;
+					}
+					$last_sync_ts = strtotime( $last_sync . ' UTC' );
+					$modified_ts  = strtotime( $product->get_date_modified( 'edit' ) ? $product->get_date_modified( 'edit' )->date( 'Y-m-d H:i:s' ) . ' UTC' : '' );
+
+					return false === $last_sync_ts || false === $modified_ts || $modified_ts > $last_sync_ts;
+				}
+			);
+		}
+
 		return array_filter(
 			$products,
 			static function ( $product ) {
@@ -212,12 +246,26 @@ class Sync_Queue {
 	 * @return array{items: array<int, array<string, mixed>>, product_map: array<string, int>, failed_count: int}
 	 */
 	private function prepare_items( array $products ): array {
+		$this->ensure_barcodes( $products );
+
 		$payload       = $this->mapper->map_products( $products );
+		$this->hydrate_category_required_attributes( $payload['items'] );
 		$valid_items   = array();
 		$product_map   = array();
 		$failed_count  = 0;
 
-		$barcode_to_product = $this->build_barcode_product_index( $products );
+		$barcode_index_result = $this->build_barcode_product_index( $products );
+		$barcode_to_product   = $barcode_index_result['index'];
+
+		if ( ! empty( $barcode_index_result['duplicates'] ) ) {
+			throw new \RuntimeException(
+				sprintf(
+					/* translators: %s list of duplicate barcodes */
+					__( 'Există barcode-uri duplicate: %s', 'trendyol-sync' ),
+					implode( ', ', $barcode_index_result['duplicates'] )
+				)
+			);
+		}
 
 		foreach ( $payload['items'] as $item ) {
 			$validation = $this->validator->validate_item( $item );
@@ -267,10 +315,11 @@ class Sync_Queue {
 	 * Index barcode → product_id pentru toate liniile mapate.
 	 *
 	 * @param \WC_Product[] $products Produse sursă.
-	 * @return array<string, int>
+	 * @return array{index: array<string, int>, duplicates: string[]}
 	 */
 	private function build_barcode_product_index( array $products ): array {
 		$index   = array();
+		$duplicates = array();
 		$adapter = new \TrendyolSync\WooCommerce\Product_Adapter();
 		$grouper = new Variant_Grouper( $adapter );
 
@@ -285,12 +334,65 @@ class Sync_Queue {
 				$barcode = (string) ( $adapted['barcode'] ?? '' );
 
 				if ( '' !== $barcode ) {
+					if ( isset( $index[ $barcode ] ) && (int) $index[ $barcode ] !== (int) ( $adapted['product_id'] ?? 0 ) ) {
+						$duplicates[] = $barcode;
+					}
 					$index[ $barcode ] = (int) ( $adapted['product_id'] ?? 0 );
 				}
 			}
 		}
 
-		return $index;
+		return array(
+			'index'      => $index,
+			'duplicates' => array_values( array_unique( $duplicates ) ),
+		);
+	}
+
+	/**
+	 * @param \WC_Product[] $products Produse.
+	 * @return void
+	 */
+	private function ensure_barcodes( array $products ): void {
+		foreach ( $products as $product ) {
+			if ( ! $product instanceof \WC_Product ) {
+				continue;
+			}
+
+			$this->barcode_resolver->persist_missing_for_product( $product );
+
+			if ( $product->is_type( 'variable' ) ) {
+				foreach ( $product->get_children() as $variation_id ) {
+					$variation = wc_get_product( (int) $variation_id );
+					if ( $variation instanceof \WC_Product ) {
+						$this->barcode_resolver->persist_missing_for_product( $variation );
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * @param array<int, array<string, mixed>> $items Linii payload.
+	 * @return void
+	 */
+	private function hydrate_category_required_attributes( array $items ): void {
+		$category_ids = array();
+
+		foreach ( $items as $item ) {
+			$category_id = isset( $item['categoryId'] ) ? absint( $item['categoryId'] ) : 0;
+			if ( $category_id > 0 ) {
+				$category_ids[] = $category_id;
+			}
+		}
+
+		$category_ids = array_values( array_unique( $category_ids ) );
+
+		foreach ( $category_ids as $category_id ) {
+			$schema = $this->category_attribute_service->get_required_attribute_schema( $category_id );
+			if ( ! empty( $schema ) ) {
+				$this->validator->set_required_attributes_for_category( $category_id, $schema );
+			}
+		}
 	}
 
 	/**

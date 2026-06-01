@@ -19,10 +19,12 @@ class Transient_Cache {
 	private const KEY_CATEGORY_TREE   = 'trendyol_sync_cache_categories';
 	private const KEY_BRAND_OPTIONS   = 'trendyol_sync_cache_brand_options';
 	private const KEY_CATEGORY_OPTIONS = 'trendyol_sync_cache_category_options';
+	private const KEY_CATEGORY_ATTRIBUTES = 'trendyol_sync_cache_category_attributes';
 
 	private const TTL_CATEGORY_TREE = 7 * DAY_IN_SECONDS;
 	private const TTL_BRANDS        = DAY_IN_SECONDS;
 	private const TTL_OPTIONS       = 7 * DAY_IN_SECONDS;
+	private const TTL_CATEGORY_ATTRIBUTES = 7 * DAY_IN_SECONDS;
 
 	/**
 	 * @var Market_Context
@@ -167,6 +169,33 @@ class Transient_Cache {
 	 */
 	public function delete_brands( int $page, int $size ): void {
 		delete_transient( $this->get_brands_key( $page, $size ) );
+	}
+
+	/**
+	 * @param int $category_id ID categorie Trendyol.
+	 * @return array<string, mixed>|null
+	 */
+	public function get_category_attributes( int $category_id ): ?array {
+		$cached = get_transient( $this->scoped_key( self::KEY_CATEGORY_ATTRIBUTES . '_' . $category_id ) );
+
+		return is_array( $cached ) ? $cached : null;
+	}
+
+	/**
+	 * @param int                  $category_id ID categorie Trendyol.
+	 * @param array<string, mixed> $data Atribute categorie.
+	 * @return void
+	 */
+	public function set_category_attributes( int $category_id, array $data ): void {
+		if ( $category_id <= 0 ) {
+			return;
+		}
+
+		set_transient(
+			$this->scoped_key( self::KEY_CATEGORY_ATTRIBUTES . '_' . $category_id ),
+			$data,
+			self::TTL_CATEGORY_ATTRIBUTES
+		);
 	}
 
 	/**

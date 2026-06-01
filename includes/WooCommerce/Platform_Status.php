@@ -7,6 +7,9 @@
 
 namespace TrendyolSync\WooCommerce;
 
+use TrendyolSync\Sync\Payload_Validator;
+use TrendyolSync\Sync\Product_Mapper;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -33,6 +36,24 @@ class Platform_Status {
 	 * @var array<int, int[]>
 	 */
 	private $children_map = array();
+
+	/**
+	 * @var Product_Mapper
+	 */
+	private $mapper;
+
+	/**
+	 * @var Payload_Validator
+	 */
+	private $validator;
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		$this->mapper     = new Product_Mapper();
+		$this->validator  = new Payload_Validator();
+	}
 
 	/**
 	 * @param int[] $product_ids ID-uri produse afișate în listă.
@@ -150,10 +171,20 @@ class Platform_Status {
 			);
 		}
 
+		$product = wc_get_product( $product_id );
+		$tooltip = __( 'Produsul nu este încă pe platforma Trendyol.', 'trendyol-sync' );
+
+		if ( $product instanceof \WC_Product ) {
+			$diagnostic = $this->build_validation_tooltip( $product );
+			if ( '' !== $diagnostic ) {
+				$tooltip = $diagnostic;
+			}
+		}
+
 		return array(
 			'state'   => self::STATE_NOT_LIVE,
 			'label'   => __( 'Nu este pe Trendyol', 'trendyol-sync' ),
-			'tooltip' => __( 'Produsul nu este încă pe platforma Trendyol.', 'trendyol-sync' ),
+			'tooltip' => $tooltip,
 		);
 	}
 
@@ -302,5 +333,29 @@ class Platform_Status {
 			__( 'Produs pe Trendyol (ultimul sync: %s).', 'trendyol-sync' ),
 			$formatted
 		);
+	}
+
+	/**
+	 * @param \WC_Product $product Produs curent.
+	 * @return string
+	 */
+	private function build_validation_tooltip( \WC_Product $product ): string {
+		$payload = $this->mapper->map_product_group( $product );
+		$errors  = array();
+
+		foreach ( $payload['items'] as $item ) {
+			$result = $this->validator->validate_item( $item );
+			if ( ! $result['valid'] ) {
+				$errors = array_merge( $errors, $result['errors'] );
+			}
+		}
+
+		$errors = array_values( array_unique( array_filter( $errors ) ) );
+
+		if ( empty( $errors ) ) {
+			return '';
+		}
+
+		return implode( ' | ', array_slice( $errors, 0, 3 ) );
 	}
 }

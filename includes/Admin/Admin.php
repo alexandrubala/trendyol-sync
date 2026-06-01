@@ -64,6 +64,26 @@ class Admin {
 	private $product_list_column;
 
 	/**
+	 * @var Category_Mapping_Page
+	 */
+	private $category_mapping_page;
+
+	/**
+	 * @var Bulk_Actions
+	 */
+	private $bulk_actions;
+
+	/**
+	 * @var Sync_Dashboard_Page
+	 */
+	private $sync_dashboard_page;
+
+	/**
+	 * @var Onboarding_Wizard_Page
+	 */
+	private $onboarding_wizard_page;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -74,6 +94,10 @@ class Admin {
 		$this->sync_ajax          = new Sync_Ajax();
 		$this->product_data_tab   = new Product_Data_Tab();
 		$this->product_list_column = new Product_List_Column();
+		$this->category_mapping_page = new Category_Mapping_Page();
+		$this->bulk_actions = new Bulk_Actions();
+		$this->sync_dashboard_page = new Sync_Dashboard_Page();
+		$this->onboarding_wizard_page = new Onboarding_Wizard_Page();
 	}
 
 	/**
@@ -90,6 +114,10 @@ class Admin {
 		$this->sync_ajax->register_hooks();
 		$this->product_data_tab->register_hooks();
 		$this->product_list_column->register_hooks();
+		$this->category_mapping_page->register_hooks();
+		$this->bulk_actions->register_hooks();
+		$this->sync_dashboard_page->register_hooks();
+		$this->onboarding_wizard_page->register_hooks();
 		( new Updater() )->register_hooks();
 	}
 
@@ -101,7 +129,13 @@ class Admin {
 	 */
 	public function enqueue_assets( string $hook_suffix ): void {
 		if ( 'woocommerce_page_trendyol-sync-settings' !== $hook_suffix ) {
-			return;
+			$is_mapping_page = 'woocommerce_page_' . Category_Mapping_Page::PAGE_SLUG === $hook_suffix;
+			$is_sync_page    = 'woocommerce_page_' . Sync_Dashboard_Page::PAGE_SLUG === $hook_suffix;
+			$is_wizard_page  = 'woocommerce_page_' . Onboarding_Wizard_Page::PAGE_SLUG === $hook_suffix;
+
+			if ( ! $is_mapping_page && ! $is_sync_page && ! $is_wizard_page ) {
+				return;
+			}
 		}
 
 		wp_enqueue_style(
@@ -132,14 +166,44 @@ class Admin {
 					'action' => Catalog_Syncer::AJAX_ACTION,
 					'nonce'  => wp_create_nonce( Catalog_Syncer::NONCE_ACTION ),
 				),
+				'sync'       => array(
+					'startAction'  => Sync_Ajax::ACTION_START_SYNC,
+					'statusAction' => Sync_Ajax::ACTION_STATUS,
+					'nonce'        => wp_create_nonce( Sync_Ajax::NONCE_ACTION ),
+				),
 				'i18n'       => array(
 					'checkingConnection' => __( 'Se testează conexiunea…', 'trendyol-sync' ),
 					'connectionButton'   => __( 'Check API Status', 'trendyol-sync' ),
 					'syncingCatalog'     => __( 'Se sincronizează catalogul…', 'trendyol-sync' ),
 					'catalogButton'      => __( 'Sincronizează catalog', 'trendyol-sync' ),
+					'startingSync'       => __( 'Se pornește sincronizarea…', 'trendyol-sync' ),
+					'syncButton'         => __( 'Pornește sincronizarea', 'trendyol-sync' ),
+					'syncDone'           => __( 'Sincronizare finalizată.', 'trendyol-sync' ),
+					'statusIdle'         => __( 'Nu există job activ.', 'trendyol-sync' ),
 				),
 			)
 		);
+
+		if ( 'woocommerce_page_' . Category_Mapping_Page::PAGE_SLUG === $hook_suffix ) {
+			wp_enqueue_script( 'selectWoo' );
+			wp_enqueue_style( 'select2' );
+			wp_enqueue_script(
+				'trendyol-sync-category-mapping',
+				TRENDYOL_SYNC_URL . 'assets/js/admin-category-mapping.js',
+				array( 'jquery', 'selectWoo' ),
+				TRENDYOL_SYNC_VERSION,
+				true
+			);
+			wp_localize_script(
+				'trendyol-sync-category-mapping',
+				'trendyolSyncMappingData',
+				array(
+					'ajaxUrl'      => admin_url( 'admin-ajax.php' ),
+					'searchAction' => Product_Data_Tab::AJAX_SEARCH_ACTION,
+					'nonce'        => wp_create_nonce( Product_Data_Tab::SEARCH_NONCE_ACTION ),
+				)
+			);
+		}
 	}
 
 	/**
@@ -155,6 +219,33 @@ class Admin {
 			TRENDYOL_SYNC_CAPABILITY,
 			'trendyol-sync-settings',
 			array( $this->settings_page, 'render' )
+		);
+
+		add_submenu_page(
+			'woocommerce',
+			__( 'Trendyol Mapping', 'trendyol-sync' ),
+			__( 'Trendyol Mapping', 'trendyol-sync' ),
+			TRENDYOL_SYNC_CAPABILITY,
+			Category_Mapping_Page::PAGE_SLUG,
+			array( $this->category_mapping_page, 'render' )
+		);
+
+		add_submenu_page(
+			'woocommerce',
+			__( 'Trendyol Sync Queue', 'trendyol-sync' ),
+			__( 'Trendyol Sync Queue', 'trendyol-sync' ),
+			TRENDYOL_SYNC_CAPABILITY,
+			Sync_Dashboard_Page::PAGE_SLUG,
+			array( $this->sync_dashboard_page, 'render' )
+		);
+
+		add_submenu_page(
+			'woocommerce',
+			__( 'Trendyol Onboarding', 'trendyol-sync' ),
+			__( 'Trendyol Onboarding', 'trendyol-sync' ),
+			TRENDYOL_SYNC_CAPABILITY,
+			Onboarding_Wizard_Page::PAGE_SLUG,
+			array( $this->onboarding_wizard_page, 'render' )
 		);
 	}
 }

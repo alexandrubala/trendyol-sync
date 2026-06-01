@@ -18,6 +18,7 @@ use TrendyolSync\Sync\Batch_Poller;
 use TrendyolSync\Sync\Payload_Validator;
 use TrendyolSync\Sync\Product_Mapper;
 use TrendyolSync\Sync\Sync_Runner;
+use TrendyolSync\Sync\Sync_Scheduler;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -116,6 +117,7 @@ final class Plugin {
 
 		Sync_Runner::register_hooks();
 		Batch_Poller::register_hooks();
+		Sync_Scheduler::register_hooks();
 
 		if ( is_admin() ) {
 			$this->admin = new Admin();

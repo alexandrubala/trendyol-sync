@@ -4,7 +4,7 @@ Plugin WordPress pentru integrarea magazinului **WooCommerce** cu API-ul **Trend
 
 **Repository:** [github.com/alexandrubala/trendyol-sync](https://github.com/alexandrubala/trendyol-sync)
 
-**Versiune curentă:** 1.0.7
+**Versiune curentă:** 1.1.0
 
 ## Cerințe
 
@@ -94,6 +94,17 @@ trendyol-sync/
 
 ## Changelog
 
+### v1.1.0
+
+- Automatizare completă mapare WooCommerce `product_cat` -> categorie/brand Trendyol (global + per categorie + fallback pe produs).
+- Generare automată barcode (internal / sku_based / ean13_internal), persistență automată și validare duplicate înainte de sync.
+- Tab nou **Automation** în setări (defaults categorie/brand/TVA/greutate, strategie barcode, sync incremental, sync programat).
+- Câmpuri noi pe produs pentru TVA și greutate dimensională + fallback automat din tax class și dimensiuni/greutate WooCommerce.
+- Bulk actions noi în lista produse: enable/disable sync, aplică mapare, generează barcode, pregătește pentru Trendyol.
+- UI sincronizare produse în admin (start sync + polling status), pagini noi pentru mapping, queue dashboard și onboarding wizard.
+- Suport schema atribute categorie Trendyol (`Category Attributes`) cu cache și mapări JSON pentru default-uri pe categorie / mapare atribute WC.
+- Coloană produse îmbunătățită cu diagnostic pre-flight (afișează motive concrete pentru care produsul nu este gata de sync).
+
 ### v1.0.7
 
 - Coloană nouă **Trendyol Sync** în lista de produse WooCommerce (X roșu / bifa verde / pending / eroare / parțial).
@@ -141,10 +152,9 @@ trendyol-sync/
 
 ## Roadmap
 
-- [ ] Client API complet + test conexiune stabil (*Check API Status*)
-- [ ] Mapare produse WooCommerce → Trendyol + validare atribute categorie
-- [ ] Coadă Action Scheduler + `createProducts` v2 + polling `getBatchRequestResult`
-- [ ] Logger și dashboard sync
+- [ ] UI avansat pentru mapare atribute categorie (fără JSON manual)
+- [ ] Import/export CSV pentru mapări categorii/brand și reguli atribut
+- [ ] Notificări automate (email/webhook) pentru eșecuri masive de sync
 - [ ] Comenzi (`getShipmentPackages`) + procesare shipment flow
 
 ## Securitate

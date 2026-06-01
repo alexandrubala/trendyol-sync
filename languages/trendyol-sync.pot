@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Trendyol Sync 1.0.7\n"
+"Project-Id-Version: Trendyol Sync 1.1.0\n"
 "POT-Creation-Date: 2026-05-28 00:00+0000\n"
 "Language: \n"
 "MIME-Version: 1.0\n"

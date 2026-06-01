@@ -7,12 +7,34 @@
 
 namespace TrendyolSync\WooCommerce;
 
+use TrendyolSync\Admin\Category_Mapper;
+use TrendyolSync\Sync\Barcode_Resolver;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Class Product_Adapter
  */
 class Product_Adapter {
+
+	/**
+	 * @var Category_Mapper
+	 */
+	private $category_mapper;
+
+	/**
+	 * @var Barcode_Resolver
+	 */
+	private $barcode_resolver;
+
+	/**
+	 * @param Category_Mapper|null  $category_mapper Mapper categorie/brand.
+	 * @param Barcode_Resolver|null $barcode_resolver Resolver barcode.
+	 */
+	public function __construct( ?Category_Mapper $category_mapper = null, ?Barcode_Resolver $barcode_resolver = null ) {
+		$this->category_mapper  = $category_mapper ?? new Category_Mapper();
+		$this->barcode_resolver = $barcode_resolver ?? new Barcode_Resolver();
+	}
 
 	/**
 	 * Extrage un snapshot normalizat al produsului pentru mapare Trendyol.
@@ -27,6 +49,9 @@ class Product_Adapter {
 
 		$meta_source_id = $is_variation && $parent_id > 0 ? $parent_id : $product_id;
 
+		$brand_id    = $this->resolve_brand_id( $product, $meta_source_id );
+		$category_id = $this->resolve_category_id( $product, $meta_source_id );
+
 		return array(
 			'product_id'          => $product_id,
 			'parent_id'           => $parent_id,
@@ -39,13 +64,13 @@ class Product_Adapter {
 			'quantity'            => $this->get_quantity( $product ),
 			'description'         => $this->get_description( $product ),
 			'images'              => $this->get_image_urls( $product ),
-			'barcode'             => $this->get_barcode( $product_id, $meta_source_id ),
-			'brand_id'            => (int) Meta_Keys::get_string( $meta_source_id, Meta_Keys::BRAND_ID ),
-			'category_id'         => (int) Meta_Keys::get_string( $meta_source_id, Meta_Keys::CATEGORY_ID ),
+			'barcode'             => $this->get_barcode( $product, $meta_source_id ),
+			'brand_id'            => $brand_id,
+			'category_id'         => $category_id,
 			'product_main_id'     => Meta_Keys::get_string( $product_id, Meta_Keys::PRODUCT_MAIN_ID ),
 			'vat_rate'            => $this->get_vat_rate( $product_id, $meta_source_id ),
-			'dimensional_weight'  => $this->get_dimensional_weight( $product_id, $meta_source_id ),
-			'attributes'          => Meta_Keys::get_attributes( $product_id ),
+			'dimensional_weight'  => $this->get_dimensional_weight( $product, $product_id, $meta_source_id ),
+			'attributes'          => $this->get_attributes( $product_id, $product, $category_id ),
 			'sync_enabled'        => Meta_Keys::is_sync_enabled( $meta_source_id ),
 			'sync_status'         => Meta_Keys::get_string( $meta_source_id, Meta_Keys::SYNC_STATUS ),
 		);
@@ -225,10 +250,10 @@ class Product_Adapter {
 	 * @param int $meta_source_id ID părinte pentru fallback.
 	 * @return string
 	 */
-	private function get_barcode( int $product_id, int $meta_source_id ): string {
-		$barcode = Meta_Keys::get_string( $product_id, Meta_Keys::BARCODE );
+	private function get_barcode( \WC_Product $product, int $meta_source_id ): string {
+		$barcode = $this->barcode_resolver->resolve_for_product( $product );
 
-		if ( '' === $barcode && $meta_source_id !== $product_id ) {
+		if ( '' === $barcode && $meta_source_id > 0 && $meta_source_id !== $product->get_id() ) {
 			$barcode = Meta_Keys::get_string( $meta_source_id, Meta_Keys::BARCODE );
 		}
 
@@ -249,7 +274,25 @@ class Product_Adapter {
 			$rate = Meta_Keys::get_string( $meta_source_id, Meta_Keys::VAT_RATE );
 		}
 
-		return '' !== $rate ? (int) $rate : 0;
+		if ( '' !== $rate ) {
+			return (int) $rate;
+		}
+
+		$product = wc_get_product( $product_id );
+		if ( $product instanceof \WC_Product ) {
+			$tax_class = (string) $product->get_tax_class();
+			$tax_map   = get_option( 'trendyol_sync_tax_class_map', array() );
+			if ( is_array( $tax_map ) && isset( $tax_map[ $tax_class ] ) && is_numeric( $tax_map[ $tax_class ] ) ) {
+				return (int) $tax_map[ $tax_class ];
+			}
+			if ( is_array( $tax_map ) && '' === $tax_class && isset( $tax_map['standard'] ) && is_numeric( $tax_map['standard'] ) ) {
+				return (int) $tax_map['standard'];
+			}
+		}
+
+		$settings = trendyol_sync()->settings()->get_stored_settings();
+
+		return isset( $settings['default_vat_rate'] ) ? (int) $settings['default_vat_rate'] : 20;
 	}
 
 	/**
@@ -259,14 +302,180 @@ class Product_Adapter {
 	 * @param int $meta_source_id ID meta partajată.
 	 * @return float
 	 */
-	private function get_dimensional_weight( int $product_id, int $meta_source_id ): float {
+	private function get_dimensional_weight( \WC_Product $product, int $product_id, int $meta_source_id ): float {
 		$weight = Meta_Keys::get_string( $product_id, Meta_Keys::DIMENSIONAL_WEIGHT );
 
 		if ( '' === $weight ) {
 			$weight = Meta_Keys::get_string( $meta_source_id, Meta_Keys::DIMENSIONAL_WEIGHT );
 		}
 
-		return '' !== $weight ? $this->to_float( $weight ) : 0.0;
+		if ( '' !== $weight ) {
+			return $this->to_float( $weight );
+		}
+
+		$length = $this->to_float( (string) $product->get_length() );
+		$width  = $this->to_float( (string) $product->get_width() );
+		$height = $this->to_float( (string) $product->get_height() );
+
+		if ( $length > 0 && $width > 0 && $height > 0 ) {
+			return round( ( $length * $width * $height ) / 3000, 2 );
+		}
+
+		$wc_weight = $this->to_float( (string) $product->get_weight() );
+		if ( $wc_weight > 0 ) {
+			return $wc_weight;
+		}
+
+		$settings = trendyol_sync()->settings()->get_stored_settings();
+
+		if ( isset( $settings['default_dimensional_weight'] ) && is_numeric( $settings['default_dimensional_weight'] ) ) {
+			return round( (float) $settings['default_dimensional_weight'], 2 );
+		}
+
+		return 1.0;
+	}
+
+	/**
+	 * @param \WC_Product $product Produs.
+	 * @param int         $meta_source_id Parent/meta source.
+	 * @return int
+	 */
+	private function resolve_brand_id( \WC_Product $product, int $meta_source_id ): int {
+		$brand_id = (int) Meta_Keys::get_string( $meta_source_id, Meta_Keys::BRAND_ID );
+
+		if ( $brand_id > 0 ) {
+			return $brand_id;
+		}
+
+		return $this->category_mapper->resolve_brand_for_product( $product );
+	}
+
+	/**
+	 * @param \WC_Product $product Produs.
+	 * @param int         $meta_source_id Parent/meta source.
+	 * @return int
+	 */
+	private function resolve_category_id( \WC_Product $product, int $meta_source_id ): int {
+		$category_id = (int) Meta_Keys::get_string( $meta_source_id, Meta_Keys::CATEGORY_ID );
+
+		if ( $category_id > 0 ) {
+			return $category_id;
+		}
+
+		return $this->category_mapper->resolve_category_for_product( $product );
+	}
+
+	/**
+	 * @param int         $product_id ID produs.
+	 * @param \WC_Product $product Produs curent.
+	 * @param int         $category_id Categorie Trendyol.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function get_attributes( int $product_id, \WC_Product $product, int $category_id ): array {
+		$attributes = Meta_Keys::get_attributes( $product_id );
+
+		if ( ! empty( $attributes ) ) {
+			return $attributes;
+		}
+
+		$defaults = get_option( 'trendyol_sync_category_attribute_defaults', array() );
+
+		if ( ! is_array( $defaults ) || $category_id <= 0 || empty( $defaults[ $category_id ] ) || ! is_array( $defaults[ $category_id ] ) ) {
+			return array();
+		}
+
+		$resolved = array();
+
+		foreach ( $defaults[ $category_id ] as $attribute_id => $value ) {
+			$attribute_id = absint( $attribute_id );
+			if ( $attribute_id <= 0 ) {
+				continue;
+			}
+
+			if ( is_numeric( $value ) ) {
+				$resolved[] = array(
+					'attributeId'      => $attribute_id,
+					'attributeValueId' => (int) $value,
+				);
+				continue;
+			}
+
+			$value = is_scalar( $value ) ? trim( (string) $value ) : '';
+
+			if ( '' !== $value ) {
+				$resolved[] = array(
+					'attributeId'          => $attribute_id,
+					'customAttributeValue' => $value,
+				);
+			}
+		}
+
+		$wc_map = get_option( 'trendyol_sync_wc_attribute_map', array() );
+
+		if ( is_array( $wc_map ) && ! empty( $wc_map ) ) {
+			$product_attributes = $product->get_attributes();
+			foreach ( $product_attributes as $taxonomy => $raw_value ) {
+				$key = wc_sanitize_taxonomy_name( (string) $taxonomy );
+				if ( empty( $wc_map[ $key ] ) || ! is_array( $wc_map[ $key ] ) ) {
+					continue;
+				}
+
+				$map_config = $wc_map[ $key ];
+				$attribute_id = isset( $map_config['attribute_id'] ) ? absint( $map_config['attribute_id'] ) : 0;
+				if ( $attribute_id <= 0 ) {
+					continue;
+				}
+
+				$value_map = isset( $map_config['values'] ) && is_array( $map_config['values'] ) ? $map_config['values'] : array();
+				$allow_custom = ! empty( $map_config['allow_custom'] );
+				$resolved_values = array();
+
+				if ( is_string( $raw_value ) ) {
+					$resolved_values[] = $raw_value;
+				} elseif ( is_array( $raw_value ) ) {
+					$resolved_values = array_map( 'strval', $raw_value );
+				} elseif ( $raw_value instanceof \WC_Product_Attribute ) {
+					if ( $raw_value->is_taxonomy() ) {
+						$terms = wc_get_product_terms( $product_id, $raw_value->get_name(), array( 'fields' => 'slugs' ) );
+						$resolved_values = is_array( $terms ) ? array_map( 'strval', $terms ) : array();
+					} else {
+						$resolved_values = array_map( 'strval', $raw_value->get_options() );
+					}
+				}
+
+				foreach ( $resolved_values as $value_slug ) {
+					$value_slug = trim( (string) $value_slug );
+					if ( '' === $value_slug ) {
+						continue;
+					}
+					if ( isset( $value_map[ $value_slug ] ) && is_numeric( $value_map[ $value_slug ] ) ) {
+						$resolved[] = array(
+							'attributeId'      => $attribute_id,
+							'attributeValueId' => (int) $value_map[ $value_slug ],
+						);
+						continue;
+					}
+					if ( $allow_custom ) {
+						$resolved[] = array(
+							'attributeId'          => $attribute_id,
+							'customAttributeValue' => $value_slug,
+						);
+					}
+				}
+			}
+		}
+
+		if ( ! empty( $resolved ) ) {
+			$resolved = array_values(
+				array_map(
+					'array_filter',
+					$resolved
+				)
+			);
+			Meta_Keys::set_attributes( $product_id, $resolved );
+		}
+
+		return $resolved;
 	}
 
 	/**

@@ -21,6 +21,7 @@ class Settings {
 	 */
 	public const TAB_CREDENTIALS = 'credentials';
 	public const TAB_ENVIRONMENT = 'environment';
+	public const TAB_AUTOMATION  = 'automation';
 
 	/**
 	 * Valori permise pentru environment.
@@ -87,6 +88,87 @@ class Settings {
 			$existing['api_secret'] ?? ''
 		);
 
+		$output['default_trendyol_category_id'] = isset( $input['default_trendyol_category_id'] )
+			? absint( wp_unslash( $input['default_trendyol_category_id'] ) )
+			: absint( $existing['default_trendyol_category_id'] ?? 0 );
+
+		$output['default_trendyol_brand_id'] = isset( $input['default_trendyol_brand_id'] )
+			? absint( wp_unslash( $input['default_trendyol_brand_id'] ) )
+			: absint( $existing['default_trendyol_brand_id'] ?? 0 );
+
+		$vat_allowed = array( 0, 1, 10, 18, 20 );
+		$vat_rate    = isset( $input['default_vat_rate'] )
+			? absint( wp_unslash( $input['default_vat_rate'] ) )
+			: absint( $existing['default_vat_rate'] ?? 20 );
+		$output['default_vat_rate'] = in_array( $vat_rate, $vat_allowed, true ) ? $vat_rate : 20;
+
+		$default_weight = isset( $input['default_dimensional_weight'] )
+			? sanitize_text_field( wp_unslash( (string) $input['default_dimensional_weight'] ) )
+			: (string) ( $existing['default_dimensional_weight'] ?? '1' );
+		$output['default_dimensional_weight'] = is_numeric( $default_weight ) ? (string) max( 0.1, (float) $default_weight ) : '1';
+
+		$allowed_barcode_strategies = array( 'internal', 'sku_based', 'ean13_internal' );
+		$barcode_strategy = isset( $input['barcode_strategy'] )
+			? sanitize_key( wp_unslash( (string) $input['barcode_strategy'] ) )
+			: (string) ( $existing['barcode_strategy'] ?? 'internal' );
+		$output['barcode_strategy'] = in_array( $barcode_strategy, $allowed_barcode_strategies, true ) ? $barcode_strategy : 'internal';
+
+		$output['barcode_prefix'] = isset( $input['barcode_prefix'] )
+			? sanitize_text_field( wp_unslash( (string) $input['barcode_prefix'] ) )
+			: (string) ( $existing['barcode_prefix'] ?? 'TY-' );
+
+		$ean_prefix = isset( $input['barcode_ean_prefix'] )
+			? absint( wp_unslash( $input['barcode_ean_prefix'] ) )
+			: absint( $existing['barcode_ean_prefix'] ?? 200 );
+		$output['barcode_ean_prefix'] = max( 200, min( 299, $ean_prefix ) );
+
+		$output['auto_enable_sync'] = isset( $input['auto_enable_sync'] ) && 'yes' === sanitize_text_field( wp_unslash( (string) $input['auto_enable_sync'] ) )
+			? 'yes'
+			: 'no';
+
+		$allowed_intervals = array( 'none', 'hourly', 'twicedaily', 'daily' );
+		$interval = isset( $input['scheduled_sync_interval'] )
+			? sanitize_key( wp_unslash( (string) $input['scheduled_sync_interval'] ) )
+			: (string) ( $existing['scheduled_sync_interval'] ?? 'none' );
+		$output['scheduled_sync_interval'] = in_array( $interval, $allowed_intervals, true ) ? $interval : 'none';
+
+		$output['sync_only_modified'] = isset( $input['sync_only_modified'] ) && 'yes' === sanitize_text_field( wp_unslash( (string) $input['sync_only_modified'] ) )
+			? 'yes'
+			: 'no';
+
+		$category_defaults_json = isset( $input['category_attribute_defaults_json'] )
+			? trim( (string) wp_unslash( $input['category_attribute_defaults_json'] ) )
+			: (string) ( $existing['category_attribute_defaults_json'] ?? '{}' );
+		$decoded_category_defaults = json_decode( $category_defaults_json, true );
+		if ( is_array( $decoded_category_defaults ) ) {
+			update_option( 'trendyol_sync_category_attribute_defaults', $decoded_category_defaults );
+			$output['category_attribute_defaults_json'] = wp_json_encode( $decoded_category_defaults, JSON_PRETTY_PRINT );
+		} else {
+			$output['category_attribute_defaults_json'] = '{}';
+		}
+
+		$wc_attr_map_json = isset( $input['wc_attribute_map_json'] )
+			? trim( (string) wp_unslash( $input['wc_attribute_map_json'] ) )
+			: (string) ( $existing['wc_attribute_map_json'] ?? '{}' );
+		$decoded_wc_attr_map = json_decode( $wc_attr_map_json, true );
+		if ( is_array( $decoded_wc_attr_map ) ) {
+			update_option( 'trendyol_sync_wc_attribute_map', $decoded_wc_attr_map );
+			$output['wc_attribute_map_json'] = wp_json_encode( $decoded_wc_attr_map, JSON_PRETTY_PRINT );
+		} else {
+			$output['wc_attribute_map_json'] = '{}';
+		}
+
+		$tax_class_map_json = isset( $input['tax_class_map_json'] )
+			? trim( (string) wp_unslash( $input['tax_class_map_json'] ) )
+			: (string) ( $existing['tax_class_map_json'] ?? '{"standard":20,"reduced-rate":10,"zero-rate":0}' );
+		$decoded_tax_map = json_decode( $tax_class_map_json, true );
+		if ( is_array( $decoded_tax_map ) ) {
+			update_option( 'trendyol_sync_tax_class_map', $decoded_tax_map );
+			$output['tax_class_map_json'] = wp_json_encode( $decoded_tax_map, JSON_PRETTY_PRINT );
+		} else {
+			$output['tax_class_map_json'] = '{"standard":20,"reduced-rate":10,"zero-rate":0}';
+		}
+
 		if ( '' !== $output['supplier_id'] && ! ctype_digit( $output['supplier_id'] ) ) {
 			add_settings_error(
 				TRENDYOL_SYNC_OPTION_KEY,
@@ -111,15 +193,28 @@ class Settings {
 	/**
 	 * Returnează setările implicite.
 	 *
-	 * @return array<string, string>
+	 * @return array<string, mixed>
 	 */
 	public function get_defaults(): array {
 		return array(
-			'supplier_id'      => '',
-			'api_key'          => '',
-			'api_secret'       => '',
-			'environment'      => 'stage',
-			'integrator_name'  => 'SelfIntegration',
+			'supplier_id'                   => '',
+			'api_key'                       => '',
+			'api_secret'                    => '',
+			'environment'                   => 'stage',
+			'integrator_name'               => 'SelfIntegration',
+			'default_trendyol_category_id'  => 0,
+			'default_trendyol_brand_id'     => 0,
+			'default_vat_rate'              => 20,
+			'default_dimensional_weight'    => '1',
+			'barcode_strategy'              => 'internal',
+			'barcode_prefix'                => 'TY-',
+			'barcode_ean_prefix'            => 200,
+			'auto_enable_sync'              => 'no',
+			'scheduled_sync_interval'       => 'none',
+			'sync_only_modified'            => 'no',
+			'category_attribute_defaults_json' => '{}',
+			'wc_attribute_map_json'         => '{}',
+			'tax_class_map_json'            => '{"standard":20,"reduced-rate":10,"zero-rate":0}',
 		);
 	}
 
@@ -152,6 +247,19 @@ class Settings {
 			'integrator_name' => $stored['integrator_name'],
 			'has_api_key'     => '' !== ( $stored['api_key'] ?? '' ),
 			'has_api_secret'  => '' !== ( $stored['api_secret'] ?? '' ),
+			'default_trendyol_category_id' => absint( $stored['default_trendyol_category_id'] ?? 0 ),
+			'default_trendyol_brand_id'    => absint( $stored['default_trendyol_brand_id'] ?? 0 ),
+			'default_vat_rate'             => absint( $stored['default_vat_rate'] ?? 20 ),
+			'default_dimensional_weight'   => (string) ( $stored['default_dimensional_weight'] ?? '1' ),
+			'barcode_strategy'             => (string) ( $stored['barcode_strategy'] ?? 'internal' ),
+			'barcode_prefix'               => (string) ( $stored['barcode_prefix'] ?? 'TY-' ),
+			'barcode_ean_prefix'           => absint( $stored['barcode_ean_prefix'] ?? 200 ),
+			'auto_enable_sync'             => (string) ( $stored['auto_enable_sync'] ?? 'no' ),
+			'scheduled_sync_interval'      => (string) ( $stored['scheduled_sync_interval'] ?? 'none' ),
+			'sync_only_modified'           => (string) ( $stored['sync_only_modified'] ?? 'no' ),
+			'category_attribute_defaults_json' => (string) ( $stored['category_attribute_defaults_json'] ?? '{}' ),
+			'wc_attribute_map_json'        => (string) ( $stored['wc_attribute_map_json'] ?? '{}' ),
+			'tax_class_map_json'           => (string) ( $stored['tax_class_map_json'] ?? '{"standard":20,"reduced-rate":10,"zero-rate":0}' ),
 		);
 	}
 
@@ -214,7 +322,7 @@ class Settings {
 	public function get_active_tab(): string {
 		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( (string) $_GET['tab'] ) ) : self::TAB_CREDENTIALS;
 
-		$allowed = array( self::TAB_CREDENTIALS, self::TAB_ENVIRONMENT );
+		$allowed = array( self::TAB_CREDENTIALS, self::TAB_ENVIRONMENT, self::TAB_AUTOMATION );
 
 		return in_array( $tab, $allowed, true ) ? $tab : self::TAB_CREDENTIALS;
 	}
@@ -275,6 +383,93 @@ class Settings {
 			array( $this, 'render_environment_field' ),
 			'trendyol-sync-settings-environment',
 			'trendyol_sync_environment'
+		);
+
+		add_settings_section(
+			'trendyol_sync_automation',
+			__( 'Automatizare', 'trendyol-sync' ),
+			'__return_false',
+			'trendyol-sync-settings-automation'
+		);
+
+		add_settings_field(
+			'trendyol_sync_default_category_id',
+			__( 'Categorie implicită Trendyol', 'trendyol-sync' ),
+			array( $this, 'render_default_category_id_field' ),
+			'trendyol-sync-settings-automation',
+			'trendyol_sync_automation'
+		);
+
+		add_settings_field(
+			'trendyol_sync_default_brand_id',
+			__( 'Brand implicit Trendyol', 'trendyol-sync' ),
+			array( $this, 'render_default_brand_id_field' ),
+			'trendyol-sync-settings-automation',
+			'trendyol_sync_automation'
+		);
+
+		add_settings_field(
+			'trendyol_sync_default_vat_rate',
+			__( 'TVA implicit Trendyol', 'trendyol-sync' ),
+			array( $this, 'render_default_vat_rate_field' ),
+			'trendyol-sync-settings-automation',
+			'trendyol_sync_automation'
+		);
+
+		add_settings_field(
+			'trendyol_sync_default_dimensional_weight',
+			__( 'Greutate dimensională implicită', 'trendyol-sync' ),
+			array( $this, 'render_default_dimensional_weight_field' ),
+			'trendyol-sync-settings-automation',
+			'trendyol_sync_automation'
+		);
+
+		add_settings_field(
+			'trendyol_sync_barcode_strategy',
+			__( 'Strategie barcode', 'trendyol-sync' ),
+			array( $this, 'render_barcode_strategy_field' ),
+			'trendyol-sync-settings-automation',
+			'trendyol_sync_automation'
+		);
+
+		add_settings_field(
+			'trendyol_sync_auto_enable_sync',
+			__( 'Auto enable sync', 'trendyol-sync' ),
+			array( $this, 'render_auto_enable_sync_field' ),
+			'trendyol-sync-settings-automation',
+			'trendyol_sync_automation'
+		);
+
+		add_settings_field(
+			'trendyol_sync_scheduled_sync_interval',
+			__( 'Sincronizare programată', 'trendyol-sync' ),
+			array( $this, 'render_scheduled_sync_interval_field' ),
+			'trendyol-sync-settings-automation',
+			'trendyol_sync_automation'
+		);
+
+		add_settings_field(
+			'trendyol_sync_category_attribute_defaults_json',
+			__( 'Atribute implicite per categorie (JSON)', 'trendyol-sync' ),
+			array( $this, 'render_category_attribute_defaults_json_field' ),
+			'trendyol-sync-settings-automation',
+			'trendyol_sync_automation'
+		);
+
+		add_settings_field(
+			'trendyol_sync_wc_attribute_map_json',
+			__( 'Mapare WC attributes -> Trendyol (JSON)', 'trendyol-sync' ),
+			array( $this, 'render_wc_attribute_map_json_field' ),
+			'trendyol-sync-settings-automation',
+			'trendyol_sync_automation'
+		);
+
+		add_settings_field(
+			'trendyol_sync_tax_class_map_json',
+			__( 'Mapare tax class -> TVA Trendyol (JSON)', 'trendyol-sync' ),
+			array( $this, 'render_tax_class_map_json_field' ),
+			'trendyol-sync-settings-automation',
+			'trendyol_sync_automation'
 		);
 	}
 
@@ -350,6 +545,202 @@ class Settings {
 		echo '</fieldset>';
 		echo '<p class="description">';
 		esc_html_e( 'Credențialele Stage și Production sunt diferite. Folosește perechea corectă pentru mediul selectat.', 'trendyol-sync' );
+		echo '</p>';
+	}
+
+	/**
+	 * @return void
+	 */
+	public function render_default_category_id_field(): void {
+		$settings = $this->get_settings_for_display();
+		$name     = TRENDYOL_SYNC_OPTION_KEY . '[default_trendyol_category_id]';
+		printf(
+			'<input type="number" min="0" step="1" name="%1$s" value="%2$d" class="small-text" />',
+			esc_attr( $name ),
+			(int) $settings['default_trendyol_category_id']
+		);
+		echo '<p class="description">';
+		esc_html_e( 'Fallback global când produsul nu are categorie explicită și nu se găsește mapare pe product_cat.', 'trendyol-sync' );
+		echo '</p>';
+	}
+
+	/**
+	 * @return void
+	 */
+	public function render_default_brand_id_field(): void {
+		$settings = $this->get_settings_for_display();
+		$name     = TRENDYOL_SYNC_OPTION_KEY . '[default_trendyol_brand_id]';
+		printf(
+			'<input type="number" min="0" step="1" name="%1$s" value="%2$d" class="small-text" />',
+			esc_attr( $name ),
+			(int) $settings['default_trendyol_brand_id']
+		);
+	}
+
+	/**
+	 * @return void
+	 */
+	public function render_default_vat_rate_field(): void {
+		$settings = $this->get_settings_for_display();
+		$name     = TRENDYOL_SYNC_OPTION_KEY . '[default_vat_rate]';
+		$options  = array( 0, 1, 10, 18, 20 );
+		echo '<select name="' . esc_attr( $name ) . '">';
+		foreach ( $options as $value ) {
+			printf(
+				'<option value="%1$d" %2$s>%1$d</option>',
+				(int) $value,
+				selected( (int) $settings['default_vat_rate'], (int) $value, false )
+			);
+		}
+		echo '</select>';
+	}
+
+	/**
+	 * @return void
+	 */
+	public function render_default_dimensional_weight_field(): void {
+		$settings = $this->get_settings_for_display();
+		$name     = TRENDYOL_SYNC_OPTION_KEY . '[default_dimensional_weight]';
+		printf(
+			'<input type="number" min="0.1" step="0.1" name="%1$s" value="%2$s" class="small-text" />',
+			esc_attr( $name ),
+			esc_attr( (string) $settings['default_dimensional_weight'] )
+		);
+	}
+
+	/**
+	 * @return void
+	 */
+	public function render_barcode_strategy_field(): void {
+		$settings        = $this->get_settings_for_display();
+		$strategy_name   = TRENDYOL_SYNC_OPTION_KEY . '[barcode_strategy]';
+		$prefix_name     = TRENDYOL_SYNC_OPTION_KEY . '[barcode_prefix]';
+		$ean_prefix_name = TRENDYOL_SYNC_OPTION_KEY . '[barcode_ean_prefix]';
+		$options         = array(
+			'internal'       => __( 'internal: ty-{product_id}', 'trendyol-sync' ),
+			'sku_based'      => __( 'sku_based: prefix + SKU', 'trendyol-sync' ),
+			'ean13_internal' => __( 'ean13_internal: prefix 200-299 + check digit', 'trendyol-sync' ),
+		);
+
+		echo '<select name="' . esc_attr( $strategy_name ) . '">';
+		foreach ( $options as $value => $label ) {
+			printf(
+				'<option value="%1$s" %2$s>%3$s</option>',
+				esc_attr( $value ),
+				selected( (string) $settings['barcode_strategy'], $value, false ),
+				esc_html( $label )
+			);
+		}
+		echo '</select>';
+		echo '<p class="description">';
+		printf(
+			'<label>%1$s <input type="text" name="%2$s" value="%3$s" class="small-text" /></label> ',
+			esc_html__( 'Prefix SKU:', 'trendyol-sync' ),
+			esc_attr( $prefix_name ),
+			esc_attr( (string) $settings['barcode_prefix'] )
+		);
+		printf(
+			'<label>%1$s <input type="number" min="200" max="299" step="1" name="%2$s" value="%3$d" class="small-text" /></label>',
+			esc_html__( 'Prefix EAN:', 'trendyol-sync' ),
+			esc_attr( $ean_prefix_name ),
+			(int) $settings['barcode_ean_prefix']
+		);
+		echo '</p>';
+	}
+
+	/**
+	 * @return void
+	 */
+	public function render_auto_enable_sync_field(): void {
+		$settings = $this->get_settings_for_display();
+		$name     = TRENDYOL_SYNC_OPTION_KEY . '[auto_enable_sync]';
+		printf(
+			'<label><input type="checkbox" name="%1$s" value="yes" %2$s /> %3$s</label>',
+			esc_attr( $name ),
+			checked( (string) $settings['auto_enable_sync'], 'yes', false ),
+			esc_html__( 'Activează automat sync când produsul are câmpurile minime completate.', 'trendyol-sync' )
+		);
+	}
+
+	/**
+	 * @return void
+	 */
+	public function render_scheduled_sync_interval_field(): void {
+		$settings      = $this->get_settings_for_display();
+		$interval_name = TRENDYOL_SYNC_OPTION_KEY . '[scheduled_sync_interval]';
+		$modified_name = TRENDYOL_SYNC_OPTION_KEY . '[sync_only_modified]';
+		$intervals     = array(
+			'none'       => __( 'Dezactivat', 'trendyol-sync' ),
+			'hourly'     => __( 'Din oră în oră', 'trendyol-sync' ),
+			'twicedaily' => __( 'De două ori pe zi', 'trendyol-sync' ),
+			'daily'      => __( 'Zilnic', 'trendyol-sync' ),
+		);
+
+		echo '<select name="' . esc_attr( $interval_name ) . '">';
+		foreach ( $intervals as $value => $label ) {
+			printf(
+				'<option value="%1$s" %2$s>%3$s</option>',
+				esc_attr( $value ),
+				selected( (string) $settings['scheduled_sync_interval'], $value, false ),
+				esc_html( $label )
+			);
+		}
+		echo '</select>';
+		echo '<p class="description">';
+		printf(
+			'<label><input type="checkbox" name="%1$s" value="yes" %2$s /> %3$s</label>',
+			esc_attr( $modified_name ),
+			checked( (string) $settings['sync_only_modified'], 'yes', false ),
+			esc_html__( 'Trimite doar produsele modificate de la ultimul sync.', 'trendyol-sync' )
+		);
+		echo '</p>';
+	}
+
+	/**
+	 * @return void
+	 */
+	public function render_category_attribute_defaults_json_field(): void {
+		$settings = $this->get_settings_for_display();
+		$name     = TRENDYOL_SYNC_OPTION_KEY . '[category_attribute_defaults_json]';
+		printf(
+			'<textarea name="%1$s" rows="8" cols="80" class="large-text code">%2$s</textarea>',
+			esc_attr( $name ),
+			esc_textarea( (string) $settings['category_attribute_defaults_json'] )
+		);
+		echo '<p class="description">';
+		esc_html_e( 'Format: { "123": { "338": 456, "339": "Custom" } } (categoryId -> attributeId -> value/valueId).', 'trendyol-sync' );
+		echo '</p>';
+	}
+
+	/**
+	 * @return void
+	 */
+	public function render_wc_attribute_map_json_field(): void {
+		$settings = $this->get_settings_for_display();
+		$name     = TRENDYOL_SYNC_OPTION_KEY . '[wc_attribute_map_json]';
+		printf(
+			'<textarea name="%1$s" rows="10" cols="80" class="large-text code">%2$s</textarea>',
+			esc_attr( $name ),
+			esc_textarea( (string) $settings['wc_attribute_map_json'] )
+		);
+		echo '<p class="description">';
+		esc_html_e( 'Format: { "pa_color": { "attribute_id": 47, "values": { "red": 12 }, "allow_custom": true } }.', 'trendyol-sync' );
+		echo '</p>';
+	}
+
+	/**
+	 * @return void
+	 */
+	public function render_tax_class_map_json_field(): void {
+		$settings = $this->get_settings_for_display();
+		$name     = TRENDYOL_SYNC_OPTION_KEY . '[tax_class_map_json]';
+		printf(
+			'<textarea name="%1$s" rows="6" cols="80" class="large-text code">%2$s</textarea>',
+			esc_attr( $name ),
+			esc_textarea( (string) $settings['tax_class_map_json'] )
+		);
+		echo '<p class="description">';
+		esc_html_e( 'Format: { "standard":20, "reduced-rate":10, "zero-rate":0 }.', 'trendyol-sync' );
 		echo '</p>';
 	}
 

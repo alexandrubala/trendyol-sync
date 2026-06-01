@@ -106,6 +106,23 @@ class Settings_Page {
 						</button>
 						<span id="trendyol-catalog-status" class="trendyol-connection-status" role="status" aria-live="polite"></span>
 					</p>
+
+					<hr class="trendyol-sync-settings-divider" />
+					<h2><?php esc_html_e( 'Sincronizare produse', 'trendyol-sync' ); ?></h2>
+					<p class="description">
+						<?php esc_html_e( 'Pornește sincronizarea produselor în coadă și urmărește progresul job-ului curent.', 'trendyol-sync' ); ?>
+					</p>
+					<p>
+						<button
+							type="button"
+							id="trendyol-start-sync"
+							class="button button-primary"
+							<?php echo $this->settings->has_credentials() ? '' : ' disabled'; ?>
+						>
+							<?php esc_html_e( 'Pornește sincronizarea', 'trendyol-sync' ); ?>
+						</button>
+						<span id="trendyol-sync-status" class="trendyol-connection-status" role="status" aria-live="polite"></span>
+					</p>
 				<?php endif; ?>
 			</form>
 		</div>
@@ -122,6 +139,7 @@ class Settings_Page {
 		$tabs = array(
 			Settings::TAB_CREDENTIALS  => __( 'Credentials', 'trendyol-sync' ),
 			Settings::TAB_ENVIRONMENT  => __( 'Environment', 'trendyol-sync' ),
+			Settings::TAB_AUTOMATION   => __( 'Automation', 'trendyol-sync' ),
 		);
 
 		echo '<nav class="nav-tab-wrapper wp-clearfix" aria-label="' . esc_attr__( 'Setări Trendyol', 'trendyol-sync' ) . '">';
@@ -151,6 +169,7 @@ class Settings_Page {
 		$map = array(
 			Settings::TAB_CREDENTIALS  => 'trendyol-sync-settings-credentials',
 			Settings::TAB_ENVIRONMENT  => 'trendyol-sync-settings-environment',
+			Settings::TAB_AUTOMATION   => 'trendyol-sync-settings-automation',
 		);
 
 		return $map[ $tab ] ?? 'trendyol-sync-settings-credentials';

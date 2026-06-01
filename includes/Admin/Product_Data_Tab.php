@@ -8,6 +8,7 @@
 namespace TrendyolSync\Admin;
 
 use TrendyolSync\API\Market_Context;
+use TrendyolSync\Sync\Barcode_Resolver;
 use TrendyolSync\Sync\Variant_Grouper;
 use TrendyolSync\WooCommerce\Meta_Keys;
 
@@ -34,12 +35,29 @@ class Product_Data_Tab {
 	private $grouper;
 
 	/**
+	 * @var Category_Mapper
+	 */
+	private $category_mapper;
+
+	/**
+	 * @var Barcode_Resolver
+	 */
+	private $barcode_resolver;
+
+	/**
 	 * @param Catalog_Options|null $catalog Opțiuni brand/categorie.
 	 * @param Variant_Grouper|null $grouper  Grupare variații.
 	 */
-	public function __construct( ?Catalog_Options $catalog = null, ?Variant_Grouper $grouper = null ) {
-		$this->catalog = $catalog ?? new Catalog_Options();
-		$this->grouper = $grouper ?? new Variant_Grouper();
+	public function __construct(
+		?Catalog_Options $catalog = null,
+		?Variant_Grouper $grouper = null,
+		?Category_Mapper $category_mapper = null,
+		?Barcode_Resolver $barcode_resolver = null
+	) {
+		$this->catalog          = $catalog ?? new Catalog_Options();
+		$this->grouper          = $grouper ?? new Variant_Grouper();
+		$this->category_mapper  = $category_mapper ?? new Category_Mapper();
+		$this->barcode_resolver = $barcode_resolver ?? new Barcode_Resolver();
 	}
 
 	/**
@@ -95,6 +113,8 @@ class Product_Data_Tab {
 		$category_label = $this->catalog->get_category_label( $category_id );
 		$sync_enabled   = Meta_Keys::is_sync_enabled( $product_id );
 		$main_id        = Meta_Keys::get_string( $product_id, Meta_Keys::PRODUCT_MAIN_ID );
+		$vat_rate       = (int) Meta_Keys::get_string( $product_id, Meta_Keys::VAT_RATE );
+		$dim_weight     = (float) Meta_Keys::get_string( $product_id, Meta_Keys::DIMENSIONAL_WEIGHT );
 
 		wp_nonce_field( 'trendyol_sync_product_meta', 'trendyol_sync_product_nonce' );
 		?>
@@ -177,6 +197,40 @@ class Product_Data_Tab {
 			</p>
 
 			<?php
+			woocommerce_wp_select(
+				array(
+					'id'          => Meta_Keys::VAT_RATE,
+					'label'       => __( 'TVA Trendyol', 'trendyol-sync' ),
+					'value'       => $vat_rate,
+					'options'     => array(
+						''  => __( '— Selectează —', 'trendyol-sync' ),
+						'0' => '0',
+						'1' => '1',
+						'10' => '10',
+						'18' => '18',
+						'20' => '20',
+					),
+					'description' => __( 'Dacă nu este completat, se folosește default-ul din tab-ul Automation.', 'trendyol-sync' ),
+					'desc_tip'    => true,
+				)
+			);
+			woocommerce_wp_text_input(
+				array(
+					'id'                => Meta_Keys::DIMENSIONAL_WEIGHT,
+					'label'             => __( 'Greutate dimensională', 'trendyol-sync' ),
+					'value'             => $dim_weight > 0 ? (string) $dim_weight : '',
+					'type'              => 'number',
+					'custom_attributes' => array(
+						'step' => '0.1',
+						'min'  => '0.1',
+					),
+					'description'       => __( 'Dacă lipsește, pluginul aplică valoarea implicită din Automation.', 'trendyol-sync' ),
+					'desc_tip'          => true,
+				)
+			);
+			?>
+
+			<?php
 			woocommerce_wp_checkbox(
 				array(
 					'id'          => 'trendyol_sync_enabled',
@@ -250,6 +304,42 @@ class Product_Data_Tab {
 		update_post_meta( $post_id, Meta_Keys::BRAND_ID, $brand_id > 0 ? (string) $brand_id : '' );
 		update_post_meta( $post_id, Meta_Keys::CATEGORY_ID, $category_id > 0 ? (string) $category_id : '' );
 
+		$vat_rate = isset( $_POST[ Meta_Keys::VAT_RATE ] )
+			? absint( wp_unslash( $_POST[ Meta_Keys::VAT_RATE ] ) )
+			: 0;
+		$vat_allowed = array( 0, 1, 10, 18, 20 );
+		update_post_meta( $post_id, Meta_Keys::VAT_RATE, in_array( $vat_rate, $vat_allowed, true ) ? (string) $vat_rate : '' );
+
+		$dim_weight = isset( $_POST[ Meta_Keys::DIMENSIONAL_WEIGHT ] )
+			? sanitize_text_field( wp_unslash( (string) $_POST[ Meta_Keys::DIMENSIONAL_WEIGHT ] ) )
+			: '';
+		if ( '' !== $dim_weight && is_numeric( $dim_weight ) && (float) $dim_weight > 0 ) {
+			update_post_meta( $post_id, Meta_Keys::DIMENSIONAL_WEIGHT, (string) (float) $dim_weight );
+		} else {
+			delete_post_meta( $post_id, Meta_Keys::DIMENSIONAL_WEIGHT );
+		}
+
+		$product = wc_get_product( $post_id );
+		if ( $product instanceof \WC_Product ) {
+			if ( $category_id <= 0 ) {
+				$resolved_category = $this->category_mapper->resolve_category_for_product( $product );
+				if ( $resolved_category > 0 ) {
+					update_post_meta( $post_id, Meta_Keys::CATEGORY_ID, (string) $resolved_category );
+				}
+			}
+
+			if ( $brand_id <= 0 ) {
+				$resolved_brand = $this->category_mapper->resolve_brand_for_product( $product );
+				if ( $resolved_brand > 0 ) {
+					update_post_meta( $post_id, Meta_Keys::BRAND_ID, (string) $resolved_brand );
+				}
+			}
+
+			if ( '' === $barcode ) {
+				$this->barcode_resolver->persist_missing_for_product( $product );
+			}
+		}
+
 		$enabled = isset( $_POST['trendyol_sync_enabled'] )
 			&& 'yes' === sanitize_text_field( wp_unslash( (string) $_POST['trendyol_sync_enabled'] ) );
 
@@ -259,9 +349,22 @@ class Product_Data_Tab {
 			$enabled ? Meta_Keys::SYNC_ENABLED : Meta_Keys::SYNC_DISABLED
 		);
 
-		$product = wc_get_product( $post_id );
-
 		if ( $product instanceof \WC_Product ) {
+			$settings = trendyol_sync()->settings()->get_stored_settings();
+			$auto_enable = isset( $settings['auto_enable_sync'] ) && 'yes' === $settings['auto_enable_sync'];
+
+			if ( $auto_enable ) {
+				$has_brand = '' !== Meta_Keys::get_string( $post_id, Meta_Keys::BRAND_ID );
+				$has_category = '' !== Meta_Keys::get_string( $post_id, Meta_Keys::CATEGORY_ID );
+				$has_barcode = '' !== Meta_Keys::get_string( $post_id, Meta_Keys::BARCODE );
+				$has_sku = '' !== trim( (string) $product->get_sku() );
+				$has_price = (float) $product->get_price() > 0;
+				$has_image = $product->get_image_id() > 0;
+				if ( $has_brand && $has_category && $has_barcode && $has_sku && $has_price && $has_image ) {
+					update_post_meta( $post_id, Meta_Keys::SYNC_STATUS, Meta_Keys::SYNC_ENABLED );
+				}
+			}
+
 			$this->grouper->persist_group_main_id( $post_id );
 		}
 	}
