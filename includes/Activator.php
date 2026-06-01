@@ -26,10 +26,10 @@ class Activator {
 			deactivate_plugins( plugin_basename( TRENDYOL_SYNC_FILE ) );
 			wp_die(
 				esc_html__(
-					'Trendyol Sync necesită WooCommerce activ. Activează WooCommerce și încearcă din nou.',
-					'trendyol-sync'
+					'Trendyol Sync for WooCommerce necesită WooCommerce activ. Activează WooCommerce și încearcă din nou.',
+					'trendyol-sync-for-woocommerce'
 				),
-				esc_html__( 'Dependență lipsă', 'trendyol-sync' ),
+				esc_html__( 'Dependență lipsă', 'trendyol-sync-for-woocommerce' ),
 				array( 'back_link' => true )
 			);
 		}

@@ -53,7 +53,7 @@ class Connection_Checker {
 		if ( ! current_user_can( TRENDYOL_SYNC_CAPABILITY ) ) {
 			wp_send_json_error(
 				array(
-					'message' => __( 'Nu ai permisiunea de a efectua acest test.', 'trendyol-sync' ),
+					'message' => __( 'Nu ai permisiunea de a efectua acest test.', 'trendyol-sync-for-woocommerce' ),
 				),
 				403
 			);
@@ -62,7 +62,7 @@ class Connection_Checker {
 		if ( ! $this->settings->has_credentials() ) {
 			wp_send_json_error(
 				array(
-					'message' => __( 'Completează Supplier ID, API Key și API Secret înainte de test.', 'trendyol-sync' ),
+					'message' => __( 'Completează Supplier ID, API Key și API Secret înainte de test.', 'trendyol-sync-for-woocommerce' ),
 				)
 			);
 		}
@@ -70,7 +70,7 @@ class Connection_Checker {
 		if ( ! ( new Auth( $this->settings ) )->can_authenticate() ) {
 			wp_send_json_error(
 				array(
-					'message' => __( 'OpenSSL este necesar pentru decriptarea credențialelor.', 'trendyol-sync' ),
+					'message' => __( 'OpenSSL este necesar pentru decriptarea credențialelor.', 'trendyol-sync-for-woocommerce' ),
 				)
 			);
 		}
@@ -85,7 +85,7 @@ class Connection_Checker {
 		if ( $result['success'] ) {
 			wp_send_json_success(
 				array(
-					'message'     => __( 'Conexiunea cu API Trendyol este funcțională.', 'trendyol-sync' ),
+					'message'     => __( 'Conexiunea cu API Trendyol este funcțională.', 'trendyol-sync-for-woocommerce' ),
 					'environment' => $environment->get_label(),
 					'base_url'    => $environment->get_base_url(),
 				)
@@ -94,7 +94,7 @@ class Connection_Checker {
 
 		wp_send_json_error(
 			array(
-				'message'     => (string) ( $result['error'] ?? __( 'Eroare necunoscută la testarea conexiunii.', 'trendyol-sync' ) ),
+				'message'     => (string) ( $result['error'] ?? __( 'Eroare necunoscută la testarea conexiunii.', 'trendyol-sync-for-woocommerce' ) ),
 				'status_code' => (int) ( $result['status_code'] ?? 0 ),
 				'error_type'  => (string) ( $result['error_type'] ?? 'http' ),
 				'environment' => $environment->get_label(),

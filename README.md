@@ -1,10 +1,10 @@
-# Trendyol Sync
+# Trendyol Sync for WooCommerce
 
 Plugin WordPress pentru integrarea magazinului **WooCommerce** cu API-ul **Trendyol** (piața locală și internațională). Sincronizarea produselor este proiectată să ruleze în fundal, în mod controlat, fără timeout-uri la volume mari.
 
-**Repository:** [github.com/alexandrubala/trendyol-sync](https://github.com/alexandrubala/trendyol-sync)
+**Repository:** [github.com/alexandrubala/trendyol-sync-for-woocommerce](https://github.com/alexandrubala/trendyol-sync-for-woocommerce)
 
-**Versiune curentă:** 1.1.1
+**Versiune curentă:** 1.2.0
 
 ## Cerințe
 
@@ -19,13 +19,22 @@ Plugin WordPress pentru integrarea magazinului **WooCommerce** cu API-ul **Trend
 1. Clonează repository-ul în `wp-content/plugins/`:
 
    ```bash
-   git clone https://github.com/alexandrubala/trendyol-sync.git
+   git clone https://github.com/alexandrubala/trendyol-sync-for-woocommerce.git
    ```
 
-   Sau descarcă ultimul release ZIP din [GitHub Releases](https://github.com/alexandrubala/trendyol-sync/releases) și extrage-l în `wp-content/plugins/trendyol-sync/`.
+   Sau descarcă ultimul release ZIP din [GitHub Releases](https://github.com/alexandrubala/trendyol-sync-for-woocommerce/releases) și extrage-l în `wp-content/plugins/trendyol-sync-for-woocommerce/`.
 
-2. Activează pluginul **Trendyol Sync** din **Plugins** în WordPress.
+2. Activează pluginul **Trendyol Sync for WooCommerce** din **Plugins** în WordPress.
 3. Asigură-te că **WooCommerce** este activ (pluginul nu se activează fără el).
+
+### Migrare de la `trendyol-sync` (≤ 1.1.x)
+
+1. Dezactivează pluginul vechi **Trendyol Sync** (`wp-content/plugins/trendyol-sync/`).
+2. Instalează noul folder `trendyol-sync-for-woocommerce/` (vezi pașii de mai sus).
+3. Activează **Trendyol Sync for WooCommerce** — setările, job-urile și meta-urile produselor rămân (aceleași chei în baza de date).
+4. Șterge folderul vechi `trendyol-sync/` când totul funcționează.
+
+> Redenumește și repository-ul GitHub în `trendyol-sync-for-woocommerce` înainte de release-ul **1.2.0**, ca auto-update-ul să pointeze la noul repo.
 
 ## Configurare
 
@@ -57,7 +66,7 @@ Dacă piața nu poate fi detectată, sincronizarea catalogului este blocată —
 
 ### Actualizări plugin
 
-Update-urile vin din **GitHub Releases**. După update, mergi la **Dashboard → Updates** sau rulează `git pull` dacă ai instalat din git.
+Update-urile vin din **GitHub Releases** (`alexandrubala/trendyol-sync-for-woocommerce`). După update, mergi la **Dashboard → Updates** sau rulează `git pull` dacă ai instalat din git.
 
 Pentru repository privat (opțional), definește în `wp-config.php`:
 
@@ -68,31 +77,40 @@ define( 'TRENDYOL_SYNC_GITHUB_TOKEN', 'ghp_xxxxxxxx' );
 ## Structură proiect
 
 ```
-trendyol-sync/
-├── trendyol-sync.php              # Bootstrap, constante, autoload PSR-4
+trendyol-sync-for-woocommerce/
+├── trendyol-sync-for-woocommerce.php   # Bootstrap, constante, autoload PSR-4
 ├── includes/
-│   ├── Plugin.php                 # Orchestrator (Singleton)
-│   ├── Activator.php              # Tabele DB, capabilities, verificare WC
-│   ├── Deactivator.php            # Curățare Action Scheduler la dezactivare
-│   ├── Admin/                     # Settings, catalog sync, tab produs WC
-│   │   ├── Catalog_Syncer.php     # AJAX sincronizare catalog
-│   │   ├── Catalog_Options.php    # Branduri / categorii din cache
-│   │   ├── Product_Data_Tab.php   # Tab Trendyol Sync pe produs
-│   │   └── Updater.php            # Auto-update din GitHub Releases
+│   ├── Plugin.php                      # Orchestrator (Singleton)
+│   ├── Activator.php                   # Tabele DB, capabilities, verificare WC
+│   ├── Deactivator.php                 # Curățare Action Scheduler la dezactivare
+│   ├── Migration/From_Legacy_Plugin.php
+│   ├── Admin/                          # Settings, catalog sync, tab produs WC
+│   │   ├── Catalog_Syncer.php          # AJAX sincronizare catalog
+│   │   ├── Catalog_Options.php         # Branduri / categorii din cache
+│   │   ├── Product_Data_Tab.php        # Tab Trendyol Sync pe produs
+│   │   └── Updater.php                 # Auto-update din GitHub Releases
 │   ├── API/
-│   │   ├── Client.php             # HTTP client + rate limiting
-│   │   ├── Auth.php               # Basic Auth + storeFrontCode
-│   │   └── Market_Context.php     # Detectare piață din WC / WP locale
-│   ├── Cache/Transient_Cache.php  # Cache categorii, branduri (per piață)
-│   ├── Data/Schema.php            # wp_trendyol_sync_jobs, _batches, _logs
+│   │   ├── Client.php                  # HTTP client + rate limiting
+│   │   ├── Auth.php                    # Basic Auth + storeFrontCode
+│   │   └── Market_Context.php          # Detectare piață din WC / WP locale
+│   ├── Cache/Transient_Cache.php       # Cache categorii, branduri (per piață)
+│   ├── Data/Schema.php                 # wp_trendyol_sync_jobs, _batches, _logs
 │   └── Security/Encryption.php
 ├── assets/
 │   ├── css/
-│   └── js/admin-product-data.js   # Select2 AJAX brand / categorie
-└── languages/trendyol-sync.pot
+│   └── js/admin-product-data.js        # Select2 AJAX brand / categorie
+└── languages/trendyol-sync-for-woocommerce.pot
 ```
 
 ## Changelog
+
+### v1.2.0
+
+- Redenumire plugin: **Trendyol Sync for WooCommerce** (`trendyol-sync-for-woocommerce`)
+- Repository GitHub: `alexandrubala/trendyol-sync-for-woocommerce`
+- Fișier principal nou: `trendyol-sync-for-woocommerce.php`
+- Text domain: `trendyol-sync-for-woocommerce`
+- Migrare automată: dezactivează instalarea veche dacă ambele sunt active; notificare pentru ștergerea folderului `trendyol-sync/`
 
 ### v1.1.1
 
@@ -132,7 +150,7 @@ trendyol-sync/
 ### v1.0.4
 
 - Fix updater GitHub: verificare update-uri funcționează și via WP-Cron
-- Release GitHub cu ZIP WordPress (`trendyol-sync/` root) în loc de zipball GitHub
+- Release GitHub cu ZIP WordPress (`trendyol-sync-for-woocommerce/` root) în loc de zipball GitHub
 
 ### v1.0.3
 
@@ -145,7 +163,7 @@ trendyol-sync/
 - Suport token opțional pentru repository privat (`TRENDYOL_SYNC_GITHUB_TOKEN`)
 - Endpoint stub comenzi `get_shipment_packages($args)`
 - `uninstall.php` cu cleanup complet
-- Bază i18n (`/languages/trendyol-sync.pot`)
+- Bază i18n (`/languages/trendyol-sync-for-woocommerce.pot`)
 
 ### v1.0.0
 
@@ -170,7 +188,7 @@ trendyol-sync/
 ## Dezvoltare
 
 ```bash
-cd wp-content/plugins/trendyol-sync
+cd wp-content/plugins/trendyol-sync-for-woocommerce
 git pull origin main
 ```
 

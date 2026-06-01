@@ -1,21 +1,21 @@
 <?php
 /**
- * Plugin Trendyol Sync – integrare WooCommerce cu API Trendyol.
+ * Plugin Trendyol Sync for WooCommerce – integrare WooCommerce cu API Trendyol.
  *
  * @package TrendyolSync
  *
  * @wordpress-plugin
- * Plugin Name:       Trendyol Sync
- * Plugin URI:        https://github.com/alexandrubala/trendyol-sync
+ * Plugin Name:       Trendyol Sync for WooCommerce
+ * Plugin URI:        https://github.com/alexandrubala/trendyol-sync-for-woocommerce
  * Description:       Sincronizare controlată a produselor WooCommerce cu marketplace-ul Trendyol.
- * Version:           1.1.1
+ * Version:           1.2.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            alexandrubala
  * Author URI:        https://github.com/alexandrubala
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       trendyol-sync
+ * Text Domain:       trendyol-sync-for-woocommerce
  * Domain Path:       /languages
  * WC requires at least: 7.0
  * WC tested up to:   9.0
@@ -26,7 +26,12 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Versiunea curentă a plugin-ului.
  */
-define( 'TRENDYOL_SYNC_VERSION', '1.1.1' );
+define( 'TRENDYOL_SYNC_VERSION', '1.2.0' );
+
+/**
+ * Slug-ul plugin-ului (folder + identificator updater).
+ */
+define( 'TRENDYOL_SYNC_PLUGIN_SLUG', 'trendyol-sync-for-woocommerce' );
 
 /**
  * Calea absolută către directorul plugin-ului (fără slash final).
@@ -49,7 +54,7 @@ define( 'TRENDYOL_SYNC_FILE', __FILE__ );
 define( 'TRENDYOL_SYNC_OPTION_KEY', 'trendyol_sync_settings' );
 
 /**
- * Grupul Action Scheduler pentru acțiunile de sincronizare.
+ * Grupul Action Scheduler pentru acțiunile de sincronizare (păstrat pentru job-uri existente).
  */
 define( 'TRENDYOL_SYNC_AS_GROUP', 'trendyol-sync' );
 
@@ -67,6 +72,11 @@ define( 'TRENDYOL_SYNC_POLL_INTERVAL', 300 );
  * Capability custom pentru administrarea plugin-ului.
  */
 define( 'TRENDYOL_SYNC_CAPABILITY', 'manage_trendyol_sync' );
+
+/**
+ * Basename-ul plugin-ului vechi (înainte de redenumire).
+ */
+define( 'TRENDYOL_SYNC_LEGACY_PLUGIN_BASENAME', 'trendyol-sync/trendyol-sync.php' );
 
 /**
  * Înregistrează autoload PSR-4 pentru namespace-ul TrendyolSync\.

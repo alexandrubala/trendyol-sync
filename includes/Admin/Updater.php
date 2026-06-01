@@ -39,7 +39,7 @@ class Updater {
 	 * GitHub: owner/repo (override prin constante opționale).
 	 */
 	private const DEFAULT_GITHUB_OWNER = 'alexandrubala';
-	private const DEFAULT_GITHUB_REPO  = 'trendyol-sync';
+	private const DEFAULT_GITHUB_REPO  = 'trendyol-sync-for-woocommerce';
 
 	/**
 	 * Hook-urilor WordPress.
@@ -119,7 +119,7 @@ class Updater {
 		}
 
 		$transient->response[ $plugin_file ] = array(
-			'slug'        => 'trendyol-sync',
+			'slug'        => TRENDYOL_SYNC_PLUGIN_SLUG,
 			'new_version' => $new_version,
 			'package'     => $download,
 			'url'         => $html_url,
@@ -142,7 +142,7 @@ class Updater {
 		}
 
 		$slug = is_object( $args ) && isset( $args->slug ) ? (string) $args->slug : '';
-		if ( 'trendyol-sync' !== $slug ) {
+		if ( TRENDYOL_SYNC_PLUGIN_SLUG !== $slug ) {
 			return $def;
 		}
 
@@ -163,17 +163,17 @@ class Updater {
 		$body = wp_kses_post( $body );
 
 		$sections = array(
-			'description' => $body !== '' ? $body : __( 'No description available.', 'trendyol-sync' ),
+			'description' => $body !== '' ? $body : __( 'No description available.', 'trendyol-sync-for-woocommerce' ),
 		);
 
 		// WP afișează „changelog” separat; dacă nu există, reutilizăm body.
-		$sections['changelog'] = $body !== '' ? $body : __( 'No changelog available.', 'trendyol-sync' );
+		$sections['changelog'] = $body !== '' ? $body : __( 'No changelog available.', 'trendyol-sync-for-woocommerce' );
 
 		$response = new \stdClass();
-		$response->name          = sanitize_text_field( __( 'Trendyol Sync', 'trendyol-sync' ) );
-		$response->slug          = 'trendyol-sync';
+		$response->name          = sanitize_text_field( __( 'Trendyol Sync for WooCommerce', 'trendyol-sync-for-woocommerce' ) );
+		$response->slug          = TRENDYOL_SYNC_PLUGIN_SLUG;
 		$response->version       = $new_version;
-		$response->author        = sanitize_text_field( __( 'alexandrubala', 'trendyol-sync' ) );
+		$response->author        = sanitize_text_field( __( 'alexandrubala', 'trendyol-sync-for-woocommerce' ) );
 		$response->homepage      = $homepage;
 		$response->download_link = $download;
 		$response->requires      = '6.0';
@@ -235,7 +235,7 @@ class Updater {
 
 		$headers = array(
 			'Accept'     => 'application/vnd.github+json',
-			'User-Agent' => 'trendyol-sync/' . TRENDYOL_SYNC_VERSION . '; WordPress',
+			'User-Agent' => TRENDYOL_SYNC_PLUGIN_SLUG . '/' . TRENDYOL_SYNC_VERSION . '; WordPress',
 		);
 
 		$token = defined( 'TRENDYOL_SYNC_GITHUB_TOKEN' ) ? trim( (string) TRENDYOL_SYNC_GITHUB_TOKEN ) : '';

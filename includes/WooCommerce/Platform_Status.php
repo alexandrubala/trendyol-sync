@@ -148,31 +148,31 @@ class Platform_Status {
 		if ( Meta_Keys::SYNC_PENDING === $sync_status ) {
 			return array(
 				'state'   => self::STATE_PENDING,
-				'label'   => __( 'În curs de sincronizare', 'trendyol-sync' ),
-				'tooltip' => __( 'Produsul este în curs de sincronizare cu Trendyol.', 'trendyol-sync' ),
+				'label'   => __( 'În curs de sincronizare', 'trendyol-sync-for-woocommerce' ),
+				'tooltip' => __( 'Produsul este în curs de sincronizare cu Trendyol.', 'trendyol-sync-for-woocommerce' ),
 			);
 		}
 
 		if ( Meta_Keys::SYNC_ERROR === $sync_status ) {
 			return array(
 				'state'   => self::STATE_ERROR,
-				'label'   => __( 'Eroare la sincronizare', 'trendyol-sync' ),
+				'label'   => __( 'Eroare la sincronizare', 'trendyol-sync-for-woocommerce' ),
 				'tooltip' => '' !== $error_text
 					? $error_text
-					: __( 'Ultima încercare de sincronizare a eșuat.', 'trendyol-sync' ),
+					: __( 'Ultima încercare de sincronizare a eșuat.', 'trendyol-sync-for-woocommerce' ),
 			);
 		}
 
 		if ( Meta_Keys::is_platform_live( $product_id ) ) {
 			return array(
 				'state'   => self::STATE_LIVE,
-				'label'   => __( 'Pe Trendyol', 'trendyol-sync' ),
+				'label'   => __( 'Pe Trendyol', 'trendyol-sync-for-woocommerce' ),
 				'tooltip' => $this->build_live_tooltip( $product_id ),
 			);
 		}
 
 		$product = wc_get_product( $product_id );
-		$tooltip = __( 'Produsul nu este încă pe platforma Trendyol.', 'trendyol-sync' );
+		$tooltip = __( 'Produsul nu este încă pe platforma Trendyol.', 'trendyol-sync-for-woocommerce' );
 
 		if ( $product instanceof \WC_Product ) {
 			$diagnostic = $this->build_validation_tooltip( $product );
@@ -183,7 +183,7 @@ class Platform_Status {
 
 		return array(
 			'state'   => self::STATE_NOT_LIVE,
-			'label'   => __( 'Nu este pe Trendyol', 'trendyol-sync' ),
+			'label'   => __( 'Nu este pe Trendyol', 'trendyol-sync-for-woocommerce' ),
 			'tooltip' => $tooltip,
 		);
 	}
@@ -225,10 +225,10 @@ class Platform_Status {
 		if ( $pending_count > 0 ) {
 			return array(
 				'state'   => self::STATE_PENDING,
-				'label'   => __( 'În curs de sincronizare', 'trendyol-sync' ),
+				'label'   => __( 'În curs de sincronizare', 'trendyol-sync-for-woocommerce' ),
 				'tooltip' => sprintf(
 					/* translators: 1: pending variations, 2: total variations */
-					__( '%1$d din %2$d variații sunt în curs de sincronizare.', 'trendyol-sync' ),
+					__( '%1$d din %2$d variații sunt în curs de sincronizare.', 'trendyol-sync-for-woocommerce' ),
 					$pending_count,
 					$total
 				),
@@ -238,7 +238,7 @@ class Platform_Status {
 		if ( $error_count > 0 ) {
 			$tooltip = sprintf(
 				/* translators: 1: errored variations, 2: total variations */
-				__( '%1$d din %2$d variații au erori la sincronizare.', 'trendyol-sync' ),
+				__( '%1$d din %2$d variații au erori la sincronizare.', 'trendyol-sync-for-woocommerce' ),
 				$error_count,
 				$total
 			);
@@ -249,7 +249,7 @@ class Platform_Status {
 
 			return array(
 				'state'   => self::STATE_ERROR,
-				'label'   => __( 'Eroare la sincronizare', 'trendyol-sync' ),
+				'label'   => __( 'Eroare la sincronizare', 'trendyol-sync-for-woocommerce' ),
 				'tooltip' => $tooltip,
 			);
 		}
@@ -257,10 +257,10 @@ class Platform_Status {
 		if ( $live_count === $total ) {
 			return array(
 				'state'   => self::STATE_LIVE,
-				'label'   => __( 'Pe Trendyol', 'trendyol-sync' ),
+				'label'   => __( 'Pe Trendyol', 'trendyol-sync-for-woocommerce' ),
 				'tooltip' => sprintf(
 					/* translators: %d: total variations */
-					__( 'Toate cele %d variații sunt pe Trendyol.', 'trendyol-sync' ),
+					__( 'Toate cele %d variații sunt pe Trendyol.', 'trendyol-sync-for-woocommerce' ),
 					$total
 				),
 			);
@@ -269,10 +269,10 @@ class Platform_Status {
 		if ( $live_count > 0 ) {
 			return array(
 				'state'   => self::STATE_PARTIAL,
-				'label'   => __( 'Parțial pe Trendyol', 'trendyol-sync' ),
+				'label'   => __( 'Parțial pe Trendyol', 'trendyol-sync-for-woocommerce' ),
 				'tooltip' => sprintf(
 					/* translators: 1: live variations, 2: total variations */
-					__( '%1$d din %2$d variații sunt pe Trendyol.', 'trendyol-sync' ),
+					__( '%1$d din %2$d variații sunt pe Trendyol.', 'trendyol-sync-for-woocommerce' ),
 					$live_count,
 					$total
 				),
@@ -281,8 +281,8 @@ class Platform_Status {
 
 		return array(
 			'state'   => self::STATE_NOT_LIVE,
-			'label'   => __( 'Nu este pe Trendyol', 'trendyol-sync' ),
-			'tooltip' => __( 'Nicio variație nu este pe Trendyol încă.', 'trendyol-sync' ),
+			'label'   => __( 'Nu este pe Trendyol', 'trendyol-sync-for-woocommerce' ),
+			'tooltip' => __( 'Nicio variație nu este pe Trendyol încă.', 'trendyol-sync-for-woocommerce' ),
 		);
 	}
 
@@ -314,13 +314,13 @@ class Platform_Status {
 		$last_sync_at = Meta_Keys::get_last_sync_at( $product_id );
 
 		if ( '' === $last_sync_at ) {
-			return __( 'Produsul este pe Trendyol.', 'trendyol-sync' );
+			return __( 'Produsul este pe Trendyol.', 'trendyol-sync-for-woocommerce' );
 		}
 
 		$timestamp = strtotime( $last_sync_at . ' UTC' );
 
 		if ( false === $timestamp ) {
-			return __( 'Produsul este pe Trendyol.', 'trendyol-sync' );
+			return __( 'Produsul este pe Trendyol.', 'trendyol-sync-for-woocommerce' );
 		}
 
 		$formatted = wp_date(
@@ -330,7 +330,7 @@ class Platform_Status {
 
 		return sprintf(
 			/* translators: %s: sync datetime */
-			__( 'Produs pe Trendyol (ultimul sync: %s).', 'trendyol-sync' ),
+			__( 'Produs pe Trendyol (ultimul sync: %s).', 'trendyol-sync-for-woocommerce' ),
 			$formatted
 		);
 	}

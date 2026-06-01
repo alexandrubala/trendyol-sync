@@ -18,6 +18,7 @@ use TrendyolSync\Sync\Batch_Poller;
 use TrendyolSync\Sync\Payload_Validator;
 use TrendyolSync\Sync\Product_Mapper;
 use TrendyolSync\Sync\Sync_Runner;
+use TrendyolSync\Migration\From_Legacy_Plugin;
 use TrendyolSync\Sync\Sync_Scheduler;
 
 defined( 'ABSPATH' ) || exit;
@@ -120,6 +121,7 @@ final class Plugin {
 		Sync_Scheduler::register_hooks();
 
 		if ( is_admin() ) {
+			From_Legacy_Plugin::register_hooks();
 			$this->admin = new Admin();
 			$this->admin->register_hooks();
 		}
@@ -132,7 +134,7 @@ final class Plugin {
 	 */
 	public function on_init(): void {
 		load_plugin_textdomain(
-			'trendyol-sync',
+			'trendyol-sync-for-woocommerce',
 			false,
 			dirname( plugin_basename( TRENDYOL_SYNC_FILE ) ) . '/languages'
 		);
@@ -151,8 +153,8 @@ final class Plugin {
 		printf(
 			'<div class="notice notice-error"><p>%s</p></div>',
 			esc_html__(
-				'Trendyol Sync necesită WooCommerce. Activează WooCommerce pentru a folosi acest plugin.',
-				'trendyol-sync'
+				'Trendyol Sync for WooCommerce necesită WooCommerce. Activează WooCommerce pentru a folosi acest plugin.',
+				'trendyol-sync-for-woocommerce'
 			)
 		);
 	}

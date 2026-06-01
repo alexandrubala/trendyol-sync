@@ -94,7 +94,7 @@ class Sync_Runner {
 
 		if ( $job_id <= 0 || empty( $items ) ) {
 			$this->logger->warning(
-				__( 'Chunk invalid ignorat.', 'trendyol-sync' ),
+				__( 'Chunk invalid ignorat.', 'trendyol-sync-for-woocommerce' ),
 				array(
 					'job_id'      => $job_id,
 					'chunk_index' => $chunk_index,
@@ -129,7 +129,7 @@ class Sync_Runner {
 				count( $items ),
 				$product_map,
 				$http_code,
-				(string) ( $response['error'] ?? __( 'Eroare API necunoscută.', 'trendyol-sync' ) ),
+				(string) ( $response['error'] ?? __( 'Eroare API necunoscută.', 'trendyol-sync-for-woocommerce' ) ),
 				$response['data'] ?? null
 			);
 			return;
@@ -145,7 +145,7 @@ class Sync_Runner {
 				count( $items ),
 				$product_map,
 				$http_code,
-				__( 'Răspuns API fără batchRequestId.', 'trendyol-sync' ),
+				__( 'Răspuns API fără batchRequestId.', 'trendyol-sync-for-woocommerce' ),
 				$data
 			);
 			return;
@@ -164,7 +164,7 @@ class Sync_Runner {
 		$this->jobs->increment_processed( $job_id, count( $items ) );
 
 		$this->logger->info(
-			__( 'Chunk trimis cu succes către Trendyol.', 'trendyol-sync' ),
+			__( 'Chunk trimis cu succes către Trendyol.', 'trendyol-sync-for-woocommerce' ),
 			array(
 				'job_id'           => $job_id,
 				'chunk_index'      => $chunk_index,
@@ -253,7 +253,7 @@ class Sync_Runner {
 		$this->jobs->update_status( $job_id, $status );
 
 		$this->logger->info(
-			__( 'Job de sincronizare finalizat (push).', 'trendyol-sync' ),
+			__( 'Job de sincronizare finalizat (push).', 'trendyol-sync-for-woocommerce' ),
 			array(
 				'job_id'    => $job_id,
 				'status'    => $status,

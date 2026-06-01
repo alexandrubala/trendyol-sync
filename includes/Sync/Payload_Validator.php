@@ -55,70 +55,70 @@ class Payload_Validator {
 		$errors = array();
 
 		if ( '' === trim( (string) ( $item['barcode'] ?? '' ) ) ) {
-			$errors[] = __( 'Lipsește codul de bare.', 'trendyol-sync' );
+			$errors[] = __( 'Lipsește codul de bare.', 'trendyol-sync-for-woocommerce' );
 		}
 
 		if ( '' === trim( (string) ( $item['title'] ?? '' ) ) ) {
-			$errors[] = __( 'Lipsește titlul produsului.', 'trendyol-sync' );
+			$errors[] = __( 'Lipsește titlul produsului.', 'trendyol-sync-for-woocommerce' );
 		}
 
 		if ( empty( $item['brandId'] ) ) {
-			$errors[] = __( 'Lipsește brandul Trendyol.', 'trendyol-sync' );
+			$errors[] = __( 'Lipsește brandul Trendyol.', 'trendyol-sync-for-woocommerce' );
 		}
 
 		if ( empty( $item['categoryId'] ) ) {
-			$errors[] = __( 'Lipsește categoria Trendyol.', 'trendyol-sync' );
+			$errors[] = __( 'Lipsește categoria Trendyol.', 'trendyol-sync-for-woocommerce' );
 		}
 
 		if ( ! isset( $item['quantity'] ) || '' === (string) $item['quantity'] ) {
-			$errors[] = __( 'Lipsește cantitatea (stocul).', 'trendyol-sync' );
+			$errors[] = __( 'Lipsește cantitatea (stocul).', 'trendyol-sync-for-woocommerce' );
 		} elseif ( (int) $item['quantity'] < 0 ) {
-			$errors[] = __( 'Cantitatea (stocul) nu poate fi negativă.', 'trendyol-sync' );
+			$errors[] = __( 'Cantitatea (stocul) nu poate fi negativă.', 'trendyol-sync-for-woocommerce' );
 		}
 
 		if ( '' === trim( (string) ( $item['stockCode'] ?? '' ) ) ) {
-			$errors[] = __( 'Lipsește codul de stoc (SKU).', 'trendyol-sync' );
+			$errors[] = __( 'Lipsește codul de stoc (SKU).', 'trendyol-sync-for-woocommerce' );
 		}
 
 		if ( ! isset( $item['dimensionalWeight'] ) || (float) $item['dimensionalWeight'] <= 0 ) {
-			$errors[] = __( 'Lipsește greutatea dimensională.', 'trendyol-sync' );
+			$errors[] = __( 'Lipsește greutatea dimensională.', 'trendyol-sync-for-woocommerce' );
 		}
 
 		if ( '' === trim( (string) ( $item['description'] ?? '' ) ) ) {
-			$errors[] = __( 'Lipsește descrierea produsului.', 'trendyol-sync' );
+			$errors[] = __( 'Lipsește descrierea produsului.', 'trendyol-sync-for-woocommerce' );
 		}
 
 		if ( ! isset( $item['listPrice'] ) || (float) $item['listPrice'] <= 0 ) {
-			$errors[] = __( 'Lipsește prețul de listă.', 'trendyol-sync' );
+			$errors[] = __( 'Lipsește prețul de listă.', 'trendyol-sync-for-woocommerce' );
 		}
 
 		if ( ! isset( $item['salePrice'] ) || (float) $item['salePrice'] <= 0 ) {
-			$errors[] = __( 'Lipsește prețul de vânzare.', 'trendyol-sync' );
+			$errors[] = __( 'Lipsește prețul de vânzare.', 'trendyol-sync-for-woocommerce' );
 		}
 
 		if ( isset( $item['listPrice'], $item['salePrice'] )
 			&& (float) $item['listPrice'] < (float) $item['salePrice'] ) {
-			$errors[] = __( 'Prețul de listă nu poate fi mai mic decât prețul de vânzare.', 'trendyol-sync' );
+			$errors[] = __( 'Prețul de listă nu poate fi mai mic decât prețul de vânzare.', 'trendyol-sync-for-woocommerce' );
 		}
 
 		if ( ! isset( $item['vatRate'] ) || ! in_array( (int) $item['vatRate'], self::ALLOWED_VAT_RATES, true ) ) {
-			$errors[] = __( 'Lipsește sau este invalid cota TVA (vatRate).', 'trendyol-sync' );
+			$errors[] = __( 'Lipsește sau este invalid cota TVA (vatRate).', 'trendyol-sync-for-woocommerce' );
 		}
 
 		if ( '' === trim( (string) ( $item['productMainId'] ?? '' ) ) ) {
-			$errors[] = __( 'Lipsește codul principal al produsului (productMainId).', 'trendyol-sync' );
+			$errors[] = __( 'Lipsește codul principal al produsului (productMainId).', 'trendyol-sync-for-woocommerce' );
 		}
 
 		$images = $item['images'] ?? array();
 
 		if ( ! is_array( $images ) || empty( $images ) ) {
-			$errors[] = __( 'Lipsește cel puțin o imagine validă (HTTPS).', 'trendyol-sync' );
+			$errors[] = __( 'Lipsește cel puțin o imagine validă (HTTPS).', 'trendyol-sync-for-woocommerce' );
 		}
 
 		$attributes = $item['attributes'] ?? array();
 
 		if ( ! is_array( $attributes ) || empty( $attributes ) ) {
-			$errors[] = __( 'Lipsesc atributele obligatorii ale categoriei.', 'trendyol-sync' );
+			$errors[] = __( 'Lipsesc atributele obligatorii ale categoriei.', 'trendyol-sync-for-woocommerce' );
 		} else {
 			$errors = array_merge( $errors, $this->validate_attribute_entries( $attributes ) );
 			$errors = array_merge(
@@ -149,7 +149,7 @@ class Payload_Validator {
 			return array(
 				'valid'       => false,
 				'errors'      => array(),
-				'flat_errors' => array( __( 'Payload-ul nu conține niciun produs.', 'trendyol-sync' ) ),
+				'flat_errors' => array( __( 'Payload-ul nu conține niciun produs.', 'trendyol-sync-for-woocommerce' ) ),
 			);
 		}
 
@@ -192,7 +192,7 @@ class Payload_Validator {
 			if ( ! is_array( $attribute ) ) {
 				$errors[] = sprintf(
 					/* translators: %d: index atribut (1-based) */
-					__( 'Atributul #%d are format invalid.', 'trendyol-sync' ),
+					__( 'Atributul #%d are format invalid.', 'trendyol-sync-for-woocommerce' ),
 					$position + 1
 				);
 				continue;
@@ -203,7 +203,7 @@ class Payload_Validator {
 			if ( $attribute_id <= 0 ) {
 				$errors[] = sprintf(
 					/* translators: %d: index atribut */
-					__( 'Atributul #%d nu are attributeId.', 'trendyol-sync' ),
+					__( 'Atributul #%d nu are attributeId.', 'trendyol-sync-for-woocommerce' ),
 					$position + 1
 				);
 				continue;
@@ -217,7 +217,7 @@ class Payload_Validator {
 			if ( ! $has_value_id && ! $has_value_ids && ! $has_custom ) {
 				$errors[] = sprintf(
 					/* translators: 1: index, 2: attribute id */
-					__( 'Atributul #%1$d (ID %2$d) nu are valoare setată.', 'trendyol-sync' ),
+					__( 'Atributul #%1$d (ID %2$d) nu are valoare setată.', 'trendyol-sync-for-woocommerce' ),
 					$position + 1,
 					$attribute_id
 				);
@@ -263,7 +263,7 @@ class Payload_Validator {
 
 			$errors[] = sprintf(
 				/* translators: %d: Trendyol attribute ID */
-				__( 'Lipsește atributul obligatoriu al categoriei (ID %d).', 'trendyol-sync' ),
+				__( 'Lipsește atributul obligatoriu al categoriei (ID %d).', 'trendyol-sync-for-woocommerce' ),
 				(int) $attribute_id
 			);
 		}

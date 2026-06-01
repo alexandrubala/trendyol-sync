@@ -62,11 +62,11 @@ class Bulk_Actions {
 	 * @return array<string, string>
 	 */
 	public function register_actions( array $actions ): array {
-		$actions['trendyol_enable_sync']     = __( 'Enable Trendyol Sync', 'trendyol-sync' );
-		$actions['trendyol_disable_sync']    = __( 'Disable Trendyol Sync', 'trendyol-sync' );
-		$actions['trendyol_apply_mapping']   = __( 'Aplică mapare Trendyol', 'trendyol-sync' );
-		$actions['trendyol_generate_barcodes'] = __( 'Generează barcode-uri Trendyol', 'trendyol-sync' );
-		$actions['trendyol_prepare_all']     = __( 'Pregătește pentru Trendyol', 'trendyol-sync' );
+		$actions['trendyol_enable_sync']     = __( 'Enable Trendyol Sync', 'trendyol-sync-for-woocommerce' );
+		$actions['trendyol_disable_sync']    = __( 'Disable Trendyol Sync', 'trendyol-sync-for-woocommerce' );
+		$actions['trendyol_apply_mapping']   = __( 'Aplică mapare Trendyol', 'trendyol-sync-for-woocommerce' );
+		$actions['trendyol_generate_barcodes'] = __( 'Generează barcode-uri Trendyol', 'trendyol-sync-for-woocommerce' );
+		$actions['trendyol_prepare_all']     = __( 'Pregătește pentru Trendyol', 'trendyol-sync-for-woocommerce' );
 
 		return $actions;
 	}
@@ -152,7 +152,7 @@ class Bulk_Actions {
 		echo '<div class="notice notice-success is-dismissible"><p>';
 		printf(
 			/* translators: %d number of products */
-			esc_html__( 'Acțiunea Trendyol a fost aplicată pentru %d produse.', 'trendyol-sync' ),
+			esc_html__( 'Acțiunea Trendyol a fost aplicată pentru %d produse.', 'trendyol-sync-for-woocommerce' ),
 			$count
 		);
 		echo '</p></div>';

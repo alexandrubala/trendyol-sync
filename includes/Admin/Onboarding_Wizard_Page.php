@@ -43,25 +43,25 @@ class Onboarding_Wizard_Page {
 	 */
 	public function render(): void {
 		if ( ! current_user_can( TRENDYOL_SYNC_CAPABILITY ) ) {
-			wp_die( esc_html__( 'Nu ai permisiunea de a accesa această pagină.', 'trendyol-sync' ) );
+			wp_die( esc_html__( 'Nu ai permisiunea de a accesa această pagină.', 'trendyol-sync-for-woocommerce' ) );
 		}
 
 		$preview = $this->compute_preview();
 		?>
 		<div class="wrap trendyol-sync-settings-wrap">
-			<h1><?php esc_html_e( 'Wizard pregătire catalog Trendyol', 'trendyol-sync' ); ?></h1>
+			<h1><?php esc_html_e( 'Wizard pregătire catalog Trendyol', 'trendyol-sync-for-woocommerce' ); ?></h1>
 			<ol>
-				<li><?php echo $preview['credentials_ok'] ? '[OK] ' : '[MISSING] '; ?><?php esc_html_e( 'Credențiale API configurate', 'trendyol-sync' ); ?></li>
-				<li><?php echo $preview['catalog_ok'] ? '[OK] ' : '[MISSING] '; ?><?php esc_html_e( 'Catalog sincronizat (branduri/categorii)', 'trendyol-sync' ); ?></li>
-				<li><?php echo $preview['mapping_ok'] ? '[OK] ' : '[MISSING] '; ?><?php esc_html_e( 'Mapare categorii/brand definită', 'trendyol-sync' ); ?></li>
-				<li><?php echo $preview['ready_products'] > 0 ? '[OK] ' : '[MISSING] '; ?><?php esc_html_e( 'Produse gata de sync', 'trendyol-sync' ); ?></li>
+				<li><?php echo $preview['credentials_ok'] ? '[OK] ' : '[MISSING] '; ?><?php esc_html_e( 'Credențiale API configurate', 'trendyol-sync-for-woocommerce' ); ?></li>
+				<li><?php echo $preview['catalog_ok'] ? '[OK] ' : '[MISSING] '; ?><?php esc_html_e( 'Catalog sincronizat (branduri/categorii)', 'trendyol-sync-for-woocommerce' ); ?></li>
+				<li><?php echo $preview['mapping_ok'] ? '[OK] ' : '[MISSING] '; ?><?php esc_html_e( 'Mapare categorii/brand definită', 'trendyol-sync-for-woocommerce' ); ?></li>
+				<li><?php echo $preview['ready_products'] > 0 ? '[OK] ' : '[MISSING] '; ?><?php esc_html_e( 'Produse gata de sync', 'trendyol-sync-for-woocommerce' ); ?></li>
 			</ol>
 
 			<p>
 				<?php
 				printf(
 					/* translators: 1: ready products, 2: total */
-					esc_html__( '%1$d din %2$d produse publicate sunt pregătite pentru sincronizare.', 'trendyol-sync' ),
+					esc_html__( '%1$d din %2$d produse publicate sunt pregătite pentru sincronizare.', 'trendyol-sync-for-woocommerce' ),
 					(int) $preview['ready_products'],
 					(int) $preview['total_products']
 				);
@@ -72,7 +72,7 @@ class Onboarding_Wizard_Page {
 				<input type="hidden" name="action" value="<?php echo esc_attr( self::ACTION_ENABLE_READY ); ?>" />
 				<?php wp_nonce_field( self::ACTION_ENABLE_READY, 'trendyol_sync_wizard_nonce' ); ?>
 				<p>
-					<button type="submit" class="button button-primary"><?php esc_html_e( 'Activează sync pentru produsele gata', 'trendyol-sync' ); ?></button>
+					<button type="submit" class="button button-primary"><?php esc_html_e( 'Activează sync pentru produsele gata', 'trendyol-sync-for-woocommerce' ); ?></button>
 				</p>
 			</form>
 		</div>
@@ -84,7 +84,7 @@ class Onboarding_Wizard_Page {
 	 */
 	public function enable_ready_products(): void {
 		if ( ! current_user_can( TRENDYOL_SYNC_CAPABILITY ) ) {
-			wp_die( esc_html__( 'Nu ai permisiunea de a executa această acțiune.', 'trendyol-sync' ) );
+			wp_die( esc_html__( 'Nu ai permisiunea de a executa această acțiune.', 'trendyol-sync-for-woocommerce' ) );
 		}
 
 		check_admin_referer( self::ACTION_ENABLE_READY, 'trendyol_sync_wizard_nonce' );

@@ -59,7 +59,7 @@ class Sync_Ajax {
 		if ( ! current_user_can( TRENDYOL_SYNC_CAPABILITY ) ) {
 			wp_send_json_error(
 				array(
-					'message' => __( 'Nu ai permisiunea de a porni sincronizarea.', 'trendyol-sync' ),
+					'message' => __( 'Nu ai permisiunea de a porni sincronizarea.', 'trendyol-sync-for-woocommerce' ),
 				),
 				403
 			);
@@ -73,7 +73,7 @@ class Sync_Ajax {
 
 		wp_send_json_error(
 			array(
-				'message' => (string) ( $result['message'] ?? __( 'Nu s-a putut porni sincronizarea.', 'trendyol-sync' ) ),
+				'message' => (string) ( $result['message'] ?? __( 'Nu s-a putut porni sincronizarea.', 'trendyol-sync-for-woocommerce' ) ),
 				'job_id'  => (int) ( $result['job_id'] ?? 0 ),
 			)
 		);
@@ -90,7 +90,7 @@ class Sync_Ajax {
 		if ( ! current_user_can( TRENDYOL_SYNC_CAPABILITY ) ) {
 			wp_send_json_error(
 				array(
-					'message' => __( 'Nu ai permisiunea de a citi statusul sincronizării.', 'trendyol-sync' ),
+					'message' => __( 'Nu ai permisiunea de a citi statusul sincronizării.', 'trendyol-sync-for-woocommerce' ),
 				),
 				403
 			);
@@ -103,7 +103,7 @@ class Sync_Ajax {
 			wp_send_json_success(
 				array(
 					'has_job' => false,
-					'message' => __( 'Nu există niciun job de sincronizare.', 'trendyol-sync' ),
+					'message' => __( 'Nu există niciun job de sincronizare.', 'trendyol-sync-for-woocommerce' ),
 				)
 			);
 		}

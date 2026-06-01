@@ -171,14 +171,14 @@ class Admin {
 					'nonce'        => wp_create_nonce( Sync_Ajax::NONCE_ACTION ),
 				),
 				'i18n'       => array(
-					'checkingConnection' => __( 'Se testează conexiunea…', 'trendyol-sync' ),
-					'connectionButton'   => __( 'Check API Status', 'trendyol-sync' ),
-					'syncingCatalog'     => __( 'Se sincronizează catalogul…', 'trendyol-sync' ),
-					'catalogButton'      => __( 'Sincronizează catalog', 'trendyol-sync' ),
-					'startingSync'       => __( 'Se pornește sincronizarea…', 'trendyol-sync' ),
-					'syncButton'         => __( 'Pornește sincronizarea', 'trendyol-sync' ),
-					'syncDone'           => __( 'Sincronizare finalizată.', 'trendyol-sync' ),
-					'statusIdle'         => __( 'Nu există job activ.', 'trendyol-sync' ),
+					'checkingConnection' => __( 'Se testează conexiunea…', 'trendyol-sync-for-woocommerce' ),
+					'connectionButton'   => __( 'Check API Status', 'trendyol-sync-for-woocommerce' ),
+					'syncingCatalog'     => __( 'Se sincronizează catalogul…', 'trendyol-sync-for-woocommerce' ),
+					'catalogButton'      => __( 'Sincronizează catalog', 'trendyol-sync-for-woocommerce' ),
+					'startingSync'       => __( 'Se pornește sincronizarea…', 'trendyol-sync-for-woocommerce' ),
+					'syncButton'         => __( 'Pornește sincronizarea', 'trendyol-sync-for-woocommerce' ),
+					'syncDone'           => __( 'Sincronizare finalizată.', 'trendyol-sync-for-woocommerce' ),
+					'statusIdle'         => __( 'Nu există job activ.', 'trendyol-sync-for-woocommerce' ),
 				),
 			)
 		);
@@ -212,8 +212,8 @@ class Admin {
 	 */
 	public function register_menu(): void {
 		add_menu_page(
-			__( 'Trendyol Sync', 'trendyol-sync' ),
-			__( 'Trendyol Sync', 'trendyol-sync' ),
+			__( 'Trendyol Sync for WooCommerce', 'trendyol-sync-for-woocommerce' ),
+			__( 'Trendyol Sync', 'trendyol-sync-for-woocommerce' ),
 			TRENDYOL_SYNC_CAPABILITY,
 			self::MENU_SLUG,
 			array( $this->settings_page, 'render' ),
@@ -224,8 +224,8 @@ class Admin {
 		// Același slug ca meniul principal — WordPress ascunde duplicatul din submeniu.
 		add_submenu_page(
 			self::MENU_SLUG,
-			__( 'Trendyol Sync', 'trendyol-sync' ),
-			__( 'Setări', 'trendyol-sync' ),
+			__( 'Trendyol Sync', 'trendyol-sync-for-woocommerce' ),
+			__( 'Setări', 'trendyol-sync-for-woocommerce' ),
 			TRENDYOL_SYNC_CAPABILITY,
 			self::MENU_SLUG,
 			array( $this->settings_page, 'render' )
@@ -233,8 +233,8 @@ class Admin {
 
 		add_submenu_page(
 			self::MENU_SLUG,
-			__( 'Trendyol Mapping', 'trendyol-sync' ),
-			__( 'Mapping', 'trendyol-sync' ),
+			__( 'Trendyol Mapping', 'trendyol-sync-for-woocommerce' ),
+			__( 'Mapping', 'trendyol-sync-for-woocommerce' ),
 			TRENDYOL_SYNC_CAPABILITY,
 			Category_Mapping_Page::PAGE_SLUG,
 			array( $this->category_mapping_page, 'render' )
@@ -242,8 +242,8 @@ class Admin {
 
 		add_submenu_page(
 			self::MENU_SLUG,
-			__( 'Trendyol Sync Queue', 'trendyol-sync' ),
-			__( 'Sync Queue', 'trendyol-sync' ),
+			__( 'Trendyol Sync Queue', 'trendyol-sync-for-woocommerce' ),
+			__( 'Sync Queue', 'trendyol-sync-for-woocommerce' ),
 			TRENDYOL_SYNC_CAPABILITY,
 			Sync_Dashboard_Page::PAGE_SLUG,
 			array( $this->sync_dashboard_page, 'render' )
@@ -251,8 +251,8 @@ class Admin {
 
 		add_submenu_page(
 			self::MENU_SLUG,
-			__( 'Trendyol Onboarding', 'trendyol-sync' ),
-			__( 'Onboarding', 'trendyol-sync' ),
+			__( 'Trendyol Onboarding', 'trendyol-sync-for-woocommerce' ),
+			__( 'Onboarding', 'trendyol-sync-for-woocommerce' ),
 			TRENDYOL_SYNC_CAPABILITY,
 			Onboarding_Wizard_Page::PAGE_SLUG,
 			array( $this->onboarding_wizard_page, 'render' )

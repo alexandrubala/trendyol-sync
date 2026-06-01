@@ -51,7 +51,7 @@ class Batch {
 				'success'     => false,
 				'status_code' => 0,
 				'data'        => null,
-				'error'       => __( 'Supplier ID lipsește din setări.', 'trendyol-sync' ),
+				'error'       => __( 'Supplier ID lipsește din setări.', 'trendyol-sync-for-woocommerce' ),
 				'error_type'  => 'config',
 			);
 		}
@@ -61,7 +61,7 @@ class Batch {
 				'success'     => false,
 				'status_code' => 0,
 				'data'        => null,
-				'error'       => __( 'batchRequestId lipsește.', 'trendyol-sync' ),
+				'error'       => __( 'batchRequestId lipsește.', 'trendyol-sync-for-woocommerce' ),
 				'error_type'  => 'config',
 			);
 		}

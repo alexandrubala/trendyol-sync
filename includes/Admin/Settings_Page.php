@@ -33,7 +33,7 @@ class Settings_Page {
 	 */
 	public function render(): void {
 		if ( ! current_user_can( TRENDYOL_SYNC_CAPABILITY ) ) {
-			wp_die( esc_html__( 'Nu ai permisiunea de a accesa această pagină.', 'trendyol-sync' ) );
+			wp_die( esc_html__( 'Nu ai permisiunea de a accesa această pagină.', 'trendyol-sync-for-woocommerce' ) );
 		}
 
 		$active_tab = $this->settings->get_active_tab();
@@ -49,14 +49,14 @@ class Settings_Page {
 				<?php
 				settings_fields( 'trendyol_sync_settings_group' );
 				do_settings_sections( $page_slug );
-				submit_button( __( 'Salvează setările', 'trendyol-sync' ) );
+				submit_button( __( 'Salvează setările', 'trendyol-sync-for-woocommerce' ) );
 				?>
 
 				<?php if ( Settings::TAB_CREDENTIALS === $active_tab ) : ?>
 					<hr class="trendyol-sync-settings-divider" />
-					<h2><?php esc_html_e( 'Test conexiune API', 'trendyol-sync' ); ?></h2>
+					<h2><?php esc_html_e( 'Test conexiune API', 'trendyol-sync-for-woocommerce' ); ?></h2>
 					<p class="description">
-						<?php esc_html_e( 'Verifică dacă credențialele și mediul selectat permit accesul la API Trendyol.', 'trendyol-sync' ); ?>
+						<?php esc_html_e( 'Verifică dacă credențialele și mediul selectat permit accesul la API Trendyol.', 'trendyol-sync-for-woocommerce' ); ?>
 					</p>
 					<p>
 						<button
@@ -65,13 +65,13 @@ class Settings_Page {
 							class="button button-secondary"
 							<?php echo $this->settings->has_credentials() ? '' : ' disabled'; ?>
 						>
-							<?php esc_html_e( 'Check API Status', 'trendyol-sync' ); ?>
+							<?php esc_html_e( 'Check API Status', 'trendyol-sync-for-woocommerce' ); ?>
 						</button>
 						<span id="trendyol-connection-status" class="trendyol-connection-status" role="status" aria-live="polite"></span>
 					</p>
 
 					<hr class="trendyol-sync-settings-divider" />
-					<h2><?php esc_html_e( 'Catalog Trendyol', 'trendyol-sync' ); ?></h2>
+					<h2><?php esc_html_e( 'Catalog Trendyol', 'trendyol-sync-for-woocommerce' ); ?></h2>
 					<?php
 					$market = \TrendyolSync\API\Market_Context::for_site();
 					if ( $market->is_supported() ) :
@@ -80,7 +80,7 @@ class Settings_Page {
 							<?php
 							printf(
 								/* translators: 1: market label, 2: storefront code, 3: language code */
-								esc_html__( 'Piață detectată: %1$s (%2$s, limba %3$s). Categoriile se descarcă în limba site-ului tău.', 'trendyol-sync' ),
+								esc_html__( 'Piață detectată: %1$s (%2$s, limba %3$s). Categoriile se descarcă în limba site-ului tău.', 'trendyol-sync-for-woocommerce' ),
 								esc_html( $market->get_label() ),
 								esc_html( $market->get_storefront_code() ),
 								esc_html( $market->get_accept_language() )
@@ -89,11 +89,11 @@ class Settings_Page {
 						</p>
 					<?php else : ?>
 						<p class="description trendyol-sync-market-warning">
-							<?php esc_html_e( 'Piața Trendyol nu a putut fi detectată. Setează țara magazinului WooCommerce (ex. România) sau limba site-ului la română înainte de sincronizare.', 'trendyol-sync' ); ?>
+							<?php esc_html_e( 'Piața Trendyol nu a putut fi detectată. Setează țara magazinului WooCommerce (ex. România) sau limba site-ului la română înainte de sincronizare.', 'trendyol-sync-for-woocommerce' ); ?>
 						</p>
 					<?php endif; ?>
 					<p class="description">
-						<?php esc_html_e( 'Descarcă listele de branduri și categorii în cache local. Necesar pentru dropdown-urile de pe pagina de produs.', 'trendyol-sync' ); ?>
+						<?php esc_html_e( 'Descarcă listele de branduri și categorii în cache local. Necesar pentru dropdown-urile de pe pagina de produs.', 'trendyol-sync-for-woocommerce' ); ?>
 					</p>
 					<p>
 						<button
@@ -102,15 +102,15 @@ class Settings_Page {
 							class="button button-secondary"
 							<?php echo $this->settings->has_credentials() ? '' : ' disabled'; ?>
 						>
-							<?php esc_html_e( 'Sincronizează catalog', 'trendyol-sync' ); ?>
+							<?php esc_html_e( 'Sincronizează catalog', 'trendyol-sync-for-woocommerce' ); ?>
 						</button>
 						<span id="trendyol-catalog-status" class="trendyol-connection-status" role="status" aria-live="polite"></span>
 					</p>
 
 					<hr class="trendyol-sync-settings-divider" />
-					<h2><?php esc_html_e( 'Sincronizare produse', 'trendyol-sync' ); ?></h2>
+					<h2><?php esc_html_e( 'Sincronizare produse', 'trendyol-sync-for-woocommerce' ); ?></h2>
 					<p class="description">
-						<?php esc_html_e( 'Pornește sincronizarea produselor în coadă și urmărește progresul job-ului curent.', 'trendyol-sync' ); ?>
+						<?php esc_html_e( 'Pornește sincronizarea produselor în coadă și urmărește progresul job-ului curent.', 'trendyol-sync-for-woocommerce' ); ?>
 					</p>
 					<p>
 						<button
@@ -119,7 +119,7 @@ class Settings_Page {
 							class="button button-primary"
 							<?php echo $this->settings->has_credentials() ? '' : ' disabled'; ?>
 						>
-							<?php esc_html_e( 'Pornește sincronizarea', 'trendyol-sync' ); ?>
+							<?php esc_html_e( 'Pornește sincronizarea', 'trendyol-sync-for-woocommerce' ); ?>
 						</button>
 						<span id="trendyol-sync-status" class="trendyol-connection-status" role="status" aria-live="polite"></span>
 					</p>
@@ -137,12 +137,12 @@ class Settings_Page {
 	 */
 	private function render_tabs( string $active_tab ): void {
 		$tabs = array(
-			Settings::TAB_CREDENTIALS  => __( 'Credentials', 'trendyol-sync' ),
-			Settings::TAB_ENVIRONMENT  => __( 'Environment', 'trendyol-sync' ),
-			Settings::TAB_AUTOMATION   => __( 'Automation', 'trendyol-sync' ),
+			Settings::TAB_CREDENTIALS  => __( 'Credentials', 'trendyol-sync-for-woocommerce' ),
+			Settings::TAB_ENVIRONMENT  => __( 'Environment', 'trendyol-sync-for-woocommerce' ),
+			Settings::TAB_AUTOMATION   => __( 'Automation', 'trendyol-sync-for-woocommerce' ),
 		);
 
-		echo '<nav class="nav-tab-wrapper wp-clearfix" aria-label="' . esc_attr__( 'Setări Trendyol', 'trendyol-sync' ) . '">';
+		echo '<nav class="nav-tab-wrapper wp-clearfix" aria-label="' . esc_attr__( 'Setări Trendyol', 'trendyol-sync-for-woocommerce' ) . '">';
 
 		foreach ( $tabs as $tab_id => $label ) {
 			$url   = $this->settings->get_page_url( $tab_id );

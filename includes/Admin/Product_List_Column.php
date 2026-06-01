@@ -55,12 +55,12 @@ class Product_List_Column {
 			$updated[ $key ] = $label;
 
 			if ( 'is_in_stock' === $key ) {
-				$updated[ self::COLUMN_KEY ] = __( 'Trendyol Sync', 'trendyol-sync' );
+				$updated[ self::COLUMN_KEY ] = __( 'Trendyol Sync', 'trendyol-sync-for-woocommerce' );
 			}
 		}
 
 		if ( ! isset( $updated[ self::COLUMN_KEY ] ) ) {
-			$updated[ self::COLUMN_KEY ] = __( 'Trendyol Sync', 'trendyol-sync' );
+			$updated[ self::COLUMN_KEY ] = __( 'Trendyol Sync', 'trendyol-sync-for-woocommerce' );
 		}
 
 		return $updated;

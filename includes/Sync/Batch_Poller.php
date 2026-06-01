@@ -118,7 +118,7 @@ class Batch_Poller {
 
 		if ( null === $batch ) {
 			$this->logger->warning(
-				__( 'Batch inexistent la polling.', 'trendyol-sync' ),
+				__( 'Batch inexistent la polling.', 'trendyol-sync-for-woocommerce' ),
 				array( 'batch_id' => $batch_id )
 			);
 			return;
@@ -129,7 +129,7 @@ class Batch_Poller {
 
 		if ( '' === $batch_request_id ) {
 			$this->logger->error(
-				__( 'batch_request_id lipsă în DB.', 'trendyol-sync' ),
+				__( 'batch_request_id lipsă în DB.', 'trendyol-sync-for-woocommerce' ),
 				array( 'batch_id' => $batch_id )
 			);
 			return;
@@ -139,7 +139,7 @@ class Batch_Poller {
 			$response = $this->batch_api->get_batch_result( $batch_request_id );
 		} catch ( \Throwable $e ) {
 			$this->logger->error(
-				__( 'Excepție la polling batch.', 'trendyol-sync' ),
+				__( 'Excepție la polling batch.', 'trendyol-sync-for-woocommerce' ),
 				array(
 					'batch_id'         => $batch_id,
 					'batch_request_id' => $batch_request_id,
@@ -154,7 +154,7 @@ class Batch_Poller {
 
 		if ( empty( $response['success'] ) ) {
 			$this->logger->error(
-				(string) ( $response['error'] ?? __( 'Eroare la polling batch.', 'trendyol-sync' ) ),
+				(string) ( $response['error'] ?? __( 'Eroare la polling batch.', 'trendyol-sync-for-woocommerce' ) ),
 				array(
 					'batch_id'         => $batch_id,
 					'batch_request_id' => $batch_request_id,
@@ -172,7 +172,7 @@ class Batch_Poller {
 		if ( Batch_Repository::STATUS_IN_PROGRESS === $status || '' === $status ) {
 			$this->batches->update_poll_result( $batch_id, Batch_Repository::STATUS_IN_PROGRESS, $data, false );
 			$this->logger->debug(
-				__( 'Batch încă în procesare – reprogramare polling.', 'trendyol-sync' ),
+				__( 'Batch încă în procesare – reprogramare polling.', 'trendyol-sync-for-woocommerce' ),
 				array(
 					'batch_id'         => $batch_id,
 					'batch_request_id' => $batch_request_id,
@@ -195,7 +195,7 @@ class Batch_Poller {
 		$this->apply_item_results( $data, $product_map, $batch_id, $job_id );
 
 		$this->logger->info(
-			__( 'Polling batch finalizat.', 'trendyol-sync' ),
+			__( 'Polling batch finalizat.', 'trendyol-sync-for-woocommerce' ),
 			array(
 				'batch_id'         => $batch_id,
 				'batch_request_id' => $batch_request_id,
@@ -249,7 +249,7 @@ class Batch_Poller {
 				Meta_Keys::touch_last_sync_at( $product_id );
 				Meta_Keys::set_last_sync_error( $product_id, '' );
 				$this->logger->info(
-					__( 'Produs sincronizat cu succes pe Trendyol.', 'trendyol-sync' ),
+					__( 'Produs sincronizat cu succes pe Trendyol.', 'trendyol-sync-for-woocommerce' ),
 					array(
 						'product_id' => $product_id,
 						'batch_id'   => $batch_id,
@@ -264,7 +264,7 @@ class Batch_Poller {
 			Meta_Keys::set_last_sync_error( $product_id, $this->format_failure_reasons( $failure_reasons ) );
 
 			$this->logger->error(
-				__( 'Produs respins de Trendyol în batch.', 'trendyol-sync' ),
+				__( 'Produs respins de Trendyol în batch.', 'trendyol-sync-for-woocommerce' ),
 				array(
 					'product_id'      => $product_id,
 					'batch_id'        => $batch_id,
@@ -360,7 +360,7 @@ class Batch_Poller {
 		$this->jobs->update_status( $job_id, $status );
 
 		$this->logger->info(
-			__( 'Job de sincronizare finalizat (după polling batch).', 'trendyol-sync' ),
+			__( 'Job de sincronizare finalizat (după polling batch).', 'trendyol-sync-for-woocommerce' ),
 			array(
 				'job_id' => $job_id,
 				'status' => $status,

@@ -173,7 +173,7 @@ class Settings {
 			add_settings_error(
 				TRENDYOL_SYNC_OPTION_KEY,
 				'invalid_supplier_id',
-				__( 'Supplier ID trebuie să conțină doar cifre.', 'trendyol-sync' ),
+				__( 'Supplier ID trebuie să conțină doar cifre.', 'trendyol-sync-for-woocommerce' ),
 				'error'
 			);
 		}
@@ -182,7 +182,7 @@ class Settings {
 			add_settings_error(
 				TRENDYOL_SYNC_OPTION_KEY,
 				'openssl_missing',
-				__( 'Extensia PHP OpenSSL este necesară pentru salvarea securizată a cheilor API.', 'trendyol-sync' ),
+				__( 'Extensia PHP OpenSSL este necesară pentru salvarea securizată a cheilor API.', 'trendyol-sync-for-woocommerce' ),
 				'error'
 			);
 		}
@@ -333,14 +333,14 @@ class Settings {
 	private function register_sections_and_fields(): void {
 		add_settings_section(
 			'trendyol_sync_credentials',
-			__( 'Credențiale API', 'trendyol-sync' ),
+			__( 'Credențiale API', 'trendyol-sync-for-woocommerce' ),
 			'__return_false',
 			'trendyol-sync-settings-credentials'
 		);
 
 		add_settings_field(
 			'trendyol_sync_supplier_id',
-			__( 'Supplier ID', 'trendyol-sync' ),
+			__( 'Supplier ID', 'trendyol-sync-for-woocommerce' ),
 			array( $this, 'render_supplier_id_field' ),
 			'trendyol-sync-settings-credentials',
 			'trendyol_sync_credentials'
@@ -348,7 +348,7 @@ class Settings {
 
 		add_settings_field(
 			'trendyol_sync_api_key',
-			__( 'API Key', 'trendyol-sync' ),
+			__( 'API Key', 'trendyol-sync-for-woocommerce' ),
 			array( $this, 'render_api_key_field' ),
 			'trendyol-sync-settings-credentials',
 			'trendyol_sync_credentials'
@@ -356,7 +356,7 @@ class Settings {
 
 		add_settings_field(
 			'trendyol_sync_api_secret',
-			__( 'API Secret', 'trendyol-sync' ),
+			__( 'API Secret', 'trendyol-sync-for-woocommerce' ),
 			array( $this, 'render_api_secret_field' ),
 			'trendyol-sync-settings-credentials',
 			'trendyol_sync_credentials'
@@ -364,7 +364,7 @@ class Settings {
 
 		add_settings_field(
 			'trendyol_sync_integrator_name',
-			__( 'Integrator Name', 'trendyol-sync' ),
+			__( 'Integrator Name', 'trendyol-sync-for-woocommerce' ),
 			array( $this, 'render_integrator_name_field' ),
 			'trendyol-sync-settings-credentials',
 			'trendyol_sync_credentials'
@@ -372,14 +372,14 @@ class Settings {
 
 		add_settings_section(
 			'trendyol_sync_environment',
-			__( 'Mediu API', 'trendyol-sync' ),
+			__( 'Mediu API', 'trendyol-sync-for-woocommerce' ),
 			'__return_false',
 			'trendyol-sync-settings-environment'
 		);
 
 		add_settings_field(
 			'trendyol_sync_environment_field',
-			__( 'Environment', 'trendyol-sync' ),
+			__( 'Environment', 'trendyol-sync-for-woocommerce' ),
 			array( $this, 'render_environment_field' ),
 			'trendyol-sync-settings-environment',
 			'trendyol_sync_environment'
@@ -387,14 +387,14 @@ class Settings {
 
 		add_settings_section(
 			'trendyol_sync_automation',
-			__( 'Automatizare', 'trendyol-sync' ),
+			__( 'Automatizare', 'trendyol-sync-for-woocommerce' ),
 			'__return_false',
 			'trendyol-sync-settings-automation'
 		);
 
 		add_settings_field(
 			'trendyol_sync_default_category_id',
-			__( 'Categorie implicită Trendyol', 'trendyol-sync' ),
+			__( 'Categorie implicită Trendyol', 'trendyol-sync-for-woocommerce' ),
 			array( $this, 'render_default_category_id_field' ),
 			'trendyol-sync-settings-automation',
 			'trendyol_sync_automation'
@@ -402,7 +402,7 @@ class Settings {
 
 		add_settings_field(
 			'trendyol_sync_default_brand_id',
-			__( 'Brand implicit Trendyol', 'trendyol-sync' ),
+			__( 'Brand implicit Trendyol', 'trendyol-sync-for-woocommerce' ),
 			array( $this, 'render_default_brand_id_field' ),
 			'trendyol-sync-settings-automation',
 			'trendyol_sync_automation'
@@ -410,7 +410,7 @@ class Settings {
 
 		add_settings_field(
 			'trendyol_sync_default_vat_rate',
-			__( 'TVA implicit Trendyol', 'trendyol-sync' ),
+			__( 'TVA implicit Trendyol', 'trendyol-sync-for-woocommerce' ),
 			array( $this, 'render_default_vat_rate_field' ),
 			'trendyol-sync-settings-automation',
 			'trendyol_sync_automation'
@@ -418,7 +418,7 @@ class Settings {
 
 		add_settings_field(
 			'trendyol_sync_default_dimensional_weight',
-			__( 'Greutate dimensională implicită', 'trendyol-sync' ),
+			__( 'Greutate dimensională implicită', 'trendyol-sync-for-woocommerce' ),
 			array( $this, 'render_default_dimensional_weight_field' ),
 			'trendyol-sync-settings-automation',
 			'trendyol_sync_automation'
@@ -426,7 +426,7 @@ class Settings {
 
 		add_settings_field(
 			'trendyol_sync_barcode_strategy',
-			__( 'Strategie barcode', 'trendyol-sync' ),
+			__( 'Strategie barcode', 'trendyol-sync-for-woocommerce' ),
 			array( $this, 'render_barcode_strategy_field' ),
 			'trendyol-sync-settings-automation',
 			'trendyol_sync_automation'
@@ -434,7 +434,7 @@ class Settings {
 
 		add_settings_field(
 			'trendyol_sync_auto_enable_sync',
-			__( 'Auto enable sync', 'trendyol-sync' ),
+			__( 'Auto enable sync', 'trendyol-sync-for-woocommerce' ),
 			array( $this, 'render_auto_enable_sync_field' ),
 			'trendyol-sync-settings-automation',
 			'trendyol_sync_automation'
@@ -442,7 +442,7 @@ class Settings {
 
 		add_settings_field(
 			'trendyol_sync_scheduled_sync_interval',
-			__( 'Sincronizare programată', 'trendyol-sync' ),
+			__( 'Sincronizare programată', 'trendyol-sync-for-woocommerce' ),
 			array( $this, 'render_scheduled_sync_interval_field' ),
 			'trendyol-sync-settings-automation',
 			'trendyol_sync_automation'
@@ -450,7 +450,7 @@ class Settings {
 
 		add_settings_field(
 			'trendyol_sync_category_attribute_defaults_json',
-			__( 'Atribute implicite per categorie (JSON)', 'trendyol-sync' ),
+			__( 'Atribute implicite per categorie (JSON)', 'trendyol-sync-for-woocommerce' ),
 			array( $this, 'render_category_attribute_defaults_json_field' ),
 			'trendyol-sync-settings-automation',
 			'trendyol_sync_automation'
@@ -458,7 +458,7 @@ class Settings {
 
 		add_settings_field(
 			'trendyol_sync_wc_attribute_map_json',
-			__( 'Mapare WC attributes -> Trendyol (JSON)', 'trendyol-sync' ),
+			__( 'Mapare WC attributes -> Trendyol (JSON)', 'trendyol-sync-for-woocommerce' ),
 			array( $this, 'render_wc_attribute_map_json_field' ),
 			'trendyol-sync-settings-automation',
 			'trendyol_sync_automation'
@@ -466,7 +466,7 @@ class Settings {
 
 		add_settings_field(
 			'trendyol_sync_tax_class_map_json',
-			__( 'Mapare tax class -> TVA Trendyol (JSON)', 'trendyol-sync' ),
+			__( 'Mapare tax class -> TVA Trendyol (JSON)', 'trendyol-sync-for-woocommerce' ),
 			array( $this, 'render_tax_class_map_json_field' ),
 			'trendyol-sync-settings-automation',
 			'trendyol_sync_automation'
@@ -486,7 +486,7 @@ class Settings {
 			esc_attr( $settings['supplier_id'] )
 		);
 		echo '<p class="description">';
-		esc_html_e( 'Supplier ID (Seller ID) din panoul Trendyol → Entegrasyon Bilgileri.', 'trendyol-sync' );
+		esc_html_e( 'Supplier ID (Seller ID) din panoul Trendyol → Entegrasyon Bilgileri.', 'trendyol-sync-for-woocommerce' );
 		echo '</p>';
 	}
 
@@ -517,7 +517,7 @@ class Settings {
 			esc_attr( $settings['integrator_name'] )
 		);
 		echo '<p class="description">';
-		esc_html_e( 'Folosit în header-ul User-Agent (max. 30 caractere alfanumerice). Ex.: SelfIntegration', 'trendyol-sync' );
+		esc_html_e( 'Folosit în header-ul User-Agent (max. 30 caractere alfanumerice). Ex.: SelfIntegration', 'trendyol-sync-for-woocommerce' );
 		echo '</p>';
 	}
 
@@ -528,8 +528,8 @@ class Settings {
 		$settings = $this->get_settings_for_display();
 		$name     = TRENDYOL_SYNC_OPTION_KEY . '[environment]';
 		$options  = array(
-			'stage'      => __( 'Stage (stageapigw.trendyol.com)', 'trendyol-sync' ),
-			'production' => __( 'Production (apigw.trendyol.com)', 'trendyol-sync' ),
+			'stage'      => __( 'Stage (stageapigw.trendyol.com)', 'trendyol-sync-for-woocommerce' ),
+			'production' => __( 'Production (apigw.trendyol.com)', 'trendyol-sync-for-woocommerce' ),
 		);
 
 		echo '<fieldset>';
@@ -544,7 +544,7 @@ class Settings {
 		}
 		echo '</fieldset>';
 		echo '<p class="description">';
-		esc_html_e( 'Credențialele Stage și Production sunt diferite. Folosește perechea corectă pentru mediul selectat.', 'trendyol-sync' );
+		esc_html_e( 'Credențialele Stage și Production sunt diferite. Folosește perechea corectă pentru mediul selectat.', 'trendyol-sync-for-woocommerce' );
 		echo '</p>';
 	}
 
@@ -560,7 +560,7 @@ class Settings {
 			(int) $settings['default_trendyol_category_id']
 		);
 		echo '<p class="description">';
-		esc_html_e( 'Fallback global când produsul nu are categorie explicită și nu se găsește mapare pe product_cat.', 'trendyol-sync' );
+		esc_html_e( 'Fallback global când produsul nu are categorie explicită și nu se găsește mapare pe product_cat.', 'trendyol-sync-for-woocommerce' );
 		echo '</p>';
 	}
 
@@ -617,9 +617,9 @@ class Settings {
 		$prefix_name     = TRENDYOL_SYNC_OPTION_KEY . '[barcode_prefix]';
 		$ean_prefix_name = TRENDYOL_SYNC_OPTION_KEY . '[barcode_ean_prefix]';
 		$options         = array(
-			'internal'       => __( 'internal: ty-{product_id}', 'trendyol-sync' ),
-			'sku_based'      => __( 'sku_based: prefix + SKU', 'trendyol-sync' ),
-			'ean13_internal' => __( 'ean13_internal: prefix 200-299 + check digit', 'trendyol-sync' ),
+			'internal'       => __( 'internal: ty-{product_id}', 'trendyol-sync-for-woocommerce' ),
+			'sku_based'      => __( 'sku_based: prefix + SKU', 'trendyol-sync-for-woocommerce' ),
+			'ean13_internal' => __( 'ean13_internal: prefix 200-299 + check digit', 'trendyol-sync-for-woocommerce' ),
 		);
 
 		echo '<select name="' . esc_attr( $strategy_name ) . '">';
@@ -635,13 +635,13 @@ class Settings {
 		echo '<p class="description">';
 		printf(
 			'<label>%1$s <input type="text" name="%2$s" value="%3$s" class="small-text" /></label> ',
-			esc_html__( 'Prefix SKU:', 'trendyol-sync' ),
+			esc_html__( 'Prefix SKU:', 'trendyol-sync-for-woocommerce' ),
 			esc_attr( $prefix_name ),
 			esc_attr( (string) $settings['barcode_prefix'] )
 		);
 		printf(
 			'<label>%1$s <input type="number" min="200" max="299" step="1" name="%2$s" value="%3$d" class="small-text" /></label>',
-			esc_html__( 'Prefix EAN:', 'trendyol-sync' ),
+			esc_html__( 'Prefix EAN:', 'trendyol-sync-for-woocommerce' ),
 			esc_attr( $ean_prefix_name ),
 			(int) $settings['barcode_ean_prefix']
 		);
@@ -658,7 +658,7 @@ class Settings {
 			'<label><input type="checkbox" name="%1$s" value="yes" %2$s /> %3$s</label>',
 			esc_attr( $name ),
 			checked( (string) $settings['auto_enable_sync'], 'yes', false ),
-			esc_html__( 'Activează automat sync când produsul are câmpurile minime completate.', 'trendyol-sync' )
+			esc_html__( 'Activează automat sync când produsul are câmpurile minime completate.', 'trendyol-sync-for-woocommerce' )
 		);
 	}
 
@@ -670,10 +670,10 @@ class Settings {
 		$interval_name = TRENDYOL_SYNC_OPTION_KEY . '[scheduled_sync_interval]';
 		$modified_name = TRENDYOL_SYNC_OPTION_KEY . '[sync_only_modified]';
 		$intervals     = array(
-			'none'       => __( 'Dezactivat', 'trendyol-sync' ),
-			'hourly'     => __( 'Din oră în oră', 'trendyol-sync' ),
-			'twicedaily' => __( 'De două ori pe zi', 'trendyol-sync' ),
-			'daily'      => __( 'Zilnic', 'trendyol-sync' ),
+			'none'       => __( 'Dezactivat', 'trendyol-sync-for-woocommerce' ),
+			'hourly'     => __( 'Din oră în oră', 'trendyol-sync-for-woocommerce' ),
+			'twicedaily' => __( 'De două ori pe zi', 'trendyol-sync-for-woocommerce' ),
+			'daily'      => __( 'Zilnic', 'trendyol-sync-for-woocommerce' ),
 		);
 
 		echo '<select name="' . esc_attr( $interval_name ) . '">';
@@ -691,7 +691,7 @@ class Settings {
 			'<label><input type="checkbox" name="%1$s" value="yes" %2$s /> %3$s</label>',
 			esc_attr( $modified_name ),
 			checked( (string) $settings['sync_only_modified'], 'yes', false ),
-			esc_html__( 'Trimite doar produsele modificate de la ultimul sync.', 'trendyol-sync' )
+			esc_html__( 'Trimite doar produsele modificate de la ultimul sync.', 'trendyol-sync-for-woocommerce' )
 		);
 		echo '</p>';
 	}
@@ -708,7 +708,7 @@ class Settings {
 			esc_textarea( (string) $settings['category_attribute_defaults_json'] )
 		);
 		echo '<p class="description">';
-		esc_html_e( 'Format: { "123": { "338": 456, "339": "Custom" } } (categoryId -> attributeId -> value/valueId).', 'trendyol-sync' );
+		esc_html_e( 'Format: { "123": { "338": 456, "339": "Custom" } } (categoryId -> attributeId -> value/valueId).', 'trendyol-sync-for-woocommerce' );
 		echo '</p>';
 	}
 
@@ -724,7 +724,7 @@ class Settings {
 			esc_textarea( (string) $settings['wc_attribute_map_json'] )
 		);
 		echo '<p class="description">';
-		esc_html_e( 'Format: { "pa_color": { "attribute_id": 47, "values": { "red": 12 }, "allow_custom": true } }.', 'trendyol-sync' );
+		esc_html_e( 'Format: { "pa_color": { "attribute_id": 47, "values": { "red": 12 }, "allow_custom": true } }.', 'trendyol-sync-for-woocommerce' );
 		echo '</p>';
 	}
 
@@ -740,7 +740,7 @@ class Settings {
 			esc_textarea( (string) $settings['tax_class_map_json'] )
 		);
 		echo '<p class="description">';
-		esc_html_e( 'Format: { "standard":20, "reduced-rate":10, "zero-rate":0 }.', 'trendyol-sync' );
+		esc_html_e( 'Format: { "standard":20, "reduced-rate":10, "zero-rate":0 }.', 'trendyol-sync-for-woocommerce' );
 		echo '</p>';
 	}
 
@@ -761,14 +761,14 @@ class Settings {
 			'<input type="password" name="%1$s" id="%2$s" value="" class="regular-text" autocomplete="new-password" placeholder="%3$s" />',
 			esc_attr( $name ),
 			esc_attr( $input_id ),
-			esc_attr__( 'Lasă gol pentru a păstra valoarea existentă', 'trendyol-sync' )
+			esc_attr__( 'Lasă gol pentru a păstra valoarea existentă', 'trendyol-sync-for-woocommerce' )
 		);
 
 		if ( $has ) {
 			echo '<p class="description">';
 			printf(
 				/* translators: %s: masked placeholder */
-				esc_html__( 'Salvat: %s — completează doar dacă dorești să schimbi cheia.', 'trendyol-sync' ),
+				esc_html__( 'Salvat: %s — completează doar dacă dorești să schimbi cheia.', 'trendyol-sync-for-woocommerce' ),
 				esc_html( '••••••' )
 			);
 			echo '</p>';

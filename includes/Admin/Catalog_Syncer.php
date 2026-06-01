@@ -64,7 +64,7 @@ class Catalog_Syncer {
 		if ( ! current_user_can( TRENDYOL_SYNC_CAPABILITY ) ) {
 			wp_send_json_error(
 				array(
-					'message' => __( 'Nu ai permisiunea de a sincroniza catalogul.', 'trendyol-sync' ),
+					'message' => __( 'Nu ai permisiunea de a sincroniza catalogul.', 'trendyol-sync-for-woocommerce' ),
 				),
 				403
 			);
@@ -73,7 +73,7 @@ class Catalog_Syncer {
 		if ( ! $this->settings->has_credentials() ) {
 			wp_send_json_error(
 				array(
-					'message' => __( 'Completează Supplier ID, API Key și API Secret înainte de sincronizare.', 'trendyol-sync' ),
+					'message' => __( 'Completează Supplier ID, API Key și API Secret înainte de sincronizare.', 'trendyol-sync-for-woocommerce' ),
 				)
 			);
 		}
@@ -81,7 +81,7 @@ class Catalog_Syncer {
 		if ( ! ( new Auth( $this->settings ) )->can_authenticate() ) {
 			wp_send_json_error(
 				array(
-					'message' => __( 'OpenSSL este necesar pentru decriptarea credențialelor.', 'trendyol-sync' ),
+					'message' => __( 'OpenSSL este necesar pentru decriptarea credențialelor.', 'trendyol-sync-for-woocommerce' ),
 				)
 			);
 		}
@@ -94,7 +94,7 @@ class Catalog_Syncer {
 
 		wp_send_json_error(
 			array(
-				'message'     => (string) ( $result['message'] ?? __( 'Sincronizarea catalogului a eșuat.', 'trendyol-sync' ) ),
+				'message'     => (string) ( $result['message'] ?? __( 'Sincronizarea catalogului a eșuat.', 'trendyol-sync-for-woocommerce' ) ),
 				'status_code' => (int) ( $result['status_code'] ?? 0 ),
 				'error_type'  => (string) ( $result['error_type'] ?? 'http' ),
 			)
@@ -135,7 +135,7 @@ class Catalog_Syncer {
 			if ( ! $response['success'] ) {
 				return array(
 					'success'     => false,
-					'message'     => (string) ( $response['error'] ?? __( 'Eroare la descărcarea brandurilor.', 'trendyol-sync' ) ),
+					'message'     => (string) ( $response['error'] ?? __( 'Eroare la descărcarea brandurilor.', 'trendyol-sync-for-woocommerce' ) ),
 					'status_code' => (int) ( $response['status_code'] ?? 0 ),
 					'error_type'  => (string) ( $response['error_type'] ?? 'http' ),
 				);
@@ -160,7 +160,7 @@ class Catalog_Syncer {
 		if ( ! $cat_result['success'] ) {
 			return array(
 				'success'     => false,
-				'message'     => (string) ( $cat_result['error'] ?? __( 'Eroare la descărcarea categoriilor.', 'trendyol-sync' ) ),
+				'message'     => (string) ( $cat_result['error'] ?? __( 'Eroare la descărcarea categoriilor.', 'trendyol-sync-for-woocommerce' ) ),
 				'status_code' => (int) ( $cat_result['status_code'] ?? 0 ),
 				'error_type'  => (string) ( $cat_result['error_type'] ?? 'http' ),
 			);
@@ -172,7 +172,7 @@ class Catalog_Syncer {
 			'success'        => true,
 			'message'        => sprintf(
 				/* translators: 1: market label, 2: brand count, 3: category count */
-				__( 'Catalog sincronizat pentru %1$s: %2$d branduri, %3$d categorii.', 'trendyol-sync' ),
+				__( 'Catalog sincronizat pentru %1$s: %2$d branduri, %3$d categorii.', 'trendyol-sync-for-woocommerce' ),
 				$market->get_label(),
 				$counts['brand_count'],
 				$counts['category_count']

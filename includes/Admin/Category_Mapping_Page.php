@@ -48,7 +48,7 @@ class Category_Mapping_Page {
 	 */
 	public function render(): void {
 		if ( ! current_user_can( TRENDYOL_SYNC_CAPABILITY ) ) {
-			wp_die( esc_html__( 'Nu ai permisiunea de a accesa această pagină.', 'trendyol-sync' ) );
+			wp_die( esc_html__( 'Nu ai permisiunea de a accesa această pagină.', 'trendyol-sync-for-woocommerce' ) );
 		}
 
 		$terms = get_terms(
@@ -64,7 +64,7 @@ class Category_Mapping_Page {
 		$brand_map    = $this->mapper->get_brand_map();
 		?>
 		<div class="wrap trendyol-sync-settings-wrap">
-			<h1><?php esc_html_e( 'Mapare categorii WooCommerce -> Trendyol', 'trendyol-sync' ); ?></h1>
+			<h1><?php esc_html_e( 'Mapare categorii WooCommerce -> Trendyol', 'trendyol-sync-for-woocommerce' ); ?></h1>
 			<?php if ( isset( $_GET['mapping_updated'] ) ) : ?>
 				<div class="notice notice-success is-dismissible">
 					<p>
@@ -72,18 +72,18 @@ class Category_Mapping_Page {
 						if ( isset( $_GET['applied_products'] ) ) {
 							printf(
 								/* translators: %d number of products */
-								esc_html__( 'Mapările au fost salvate și aplicate pe %d produse.', 'trendyol-sync' ),
+								esc_html__( 'Mapările au fost salvate și aplicate pe %d produse.', 'trendyol-sync-for-woocommerce' ),
 								absint( wp_unslash( $_GET['applied_products'] ) )
 							);
 						} else {
-							esc_html_e( 'Mapările au fost salvate.', 'trendyol-sync' );
+							esc_html_e( 'Mapările au fost salvate.', 'trendyol-sync-for-woocommerce' );
 						}
 						?>
 					</p>
 				</div>
 			<?php endif; ?>
 			<p class="description">
-				<?php esc_html_e( 'Setează o mapare globală pentru categorii și branduri. Produsele noi pot prelua automat aceste valori la sync.', 'trendyol-sync' ); ?>
+				<?php esc_html_e( 'Setează o mapare globală pentru categorii și branduri. Produsele noi pot prelua automat aceste valori la sync.', 'trendyol-sync-for-woocommerce' ); ?>
 			</p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="<?php echo esc_attr( self::POST_ACTION ); ?>" />
@@ -91,9 +91,9 @@ class Category_Mapping_Page {
 				<table class="widefat striped">
 					<thead>
 						<tr>
-							<th><?php esc_html_e( 'Categorie WooCommerce', 'trendyol-sync' ); ?></th>
-							<th><?php esc_html_e( 'Categorie Trendyol', 'trendyol-sync' ); ?></th>
-							<th><?php esc_html_e( 'Brand Trendyol', 'trendyol-sync' ); ?></th>
+							<th><?php esc_html_e( 'Categorie WooCommerce', 'trendyol-sync-for-woocommerce' ); ?></th>
+							<th><?php esc_html_e( 'Categorie Trendyol', 'trendyol-sync-for-woocommerce' ); ?></th>
+							<th><?php esc_html_e( 'Brand Trendyol', 'trendyol-sync-for-woocommerce' ); ?></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -115,9 +115,9 @@ class Category_Mapping_Page {
 											name="category_map[<?php echo esc_attr( (string) $term_id ); ?>]"
 											class="trendyol-sync-mapping-select"
 											data-type="category"
-											data-placeholder="<?php esc_attr_e( 'Caută categoria…', 'trendyol-sync' ); ?>"
+											data-placeholder="<?php esc_attr_e( 'Caută categoria…', 'trendyol-sync-for-woocommerce' ); ?>"
 										>
-											<option value=""><?php esc_html_e( '— Fără mapare —', 'trendyol-sync' ); ?></option>
+											<option value=""><?php esc_html_e( '— Fără mapare —', 'trendyol-sync-for-woocommerce' ); ?></option>
 											<?php if ( $mapped_category > 0 && '' !== $category_label ) : ?>
 												<option value="<?php echo esc_attr( (string) $mapped_category ); ?>" selected="selected"><?php echo esc_html( $category_label ); ?></option>
 											<?php endif; ?>
@@ -128,9 +128,9 @@ class Category_Mapping_Page {
 											name="brand_map[<?php echo esc_attr( (string) $term_id ); ?>]"
 											class="trendyol-sync-mapping-select"
 											data-type="brand"
-											data-placeholder="<?php esc_attr_e( 'Caută brandul…', 'trendyol-sync' ); ?>"
+											data-placeholder="<?php esc_attr_e( 'Caută brandul…', 'trendyol-sync-for-woocommerce' ); ?>"
 										>
-											<option value=""><?php esc_html_e( '— Fără mapare —', 'trendyol-sync' ); ?></option>
+											<option value=""><?php esc_html_e( '— Fără mapare —', 'trendyol-sync-for-woocommerce' ); ?></option>
 											<?php if ( $mapped_brand > 0 && '' !== $brand_label ) : ?>
 												<option value="<?php echo esc_attr( (string) $mapped_brand ); ?>" selected="selected"><?php echo esc_html( $brand_label ); ?></option>
 											<?php endif; ?>
@@ -140,14 +140,14 @@ class Category_Mapping_Page {
 							<?php endforeach; ?>
 						<?php else : ?>
 							<tr>
-								<td colspan="3"><?php esc_html_e( 'Nu există categorii WooCommerce.', 'trendyol-sync' ); ?></td>
+								<td colspan="3"><?php esc_html_e( 'Nu există categorii WooCommerce.', 'trendyol-sync-for-woocommerce' ); ?></td>
 							</tr>
 						<?php endif; ?>
 					</tbody>
 				</table>
 				<p>
-					<button type="submit" name="submit_mode" value="save" class="button button-primary"><?php esc_html_e( 'Salvează mapările', 'trendyol-sync' ); ?></button>
-					<button type="submit" name="submit_mode" value="save_apply" class="button button-secondary"><?php esc_html_e( 'Salvează și aplică pe produse existente', 'trendyol-sync' ); ?></button>
+					<button type="submit" name="submit_mode" value="save" class="button button-primary"><?php esc_html_e( 'Salvează mapările', 'trendyol-sync-for-woocommerce' ); ?></button>
+					<button type="submit" name="submit_mode" value="save_apply" class="button button-secondary"><?php esc_html_e( 'Salvează și aplică pe produse existente', 'trendyol-sync-for-woocommerce' ); ?></button>
 				</p>
 			</form>
 		</div>
@@ -159,7 +159,7 @@ class Category_Mapping_Page {
 	 */
 	public function handle_submit(): void {
 		if ( ! current_user_can( TRENDYOL_SYNC_CAPABILITY ) ) {
-			wp_die( esc_html__( 'Nu ai permisiunea de a salva mapările.', 'trendyol-sync' ) );
+			wp_die( esc_html__( 'Nu ai permisiunea de a salva mapările.', 'trendyol-sync-for-woocommerce' ) );
 		}
 
 		check_admin_referer( self::POST_ACTION, 'trendyol_sync_mapping_nonce' );

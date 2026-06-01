@@ -81,7 +81,7 @@ class Product_Data_Tab {
 	 */
 	public function add_product_tab( array $tabs ): array {
 		$tabs[ self::TAB_ID ] = array(
-			'label'    => __( 'Trendyol Sync', 'trendyol-sync' ),
+			'label'    => __( 'Trendyol Sync', 'trendyol-sync-for-woocommerce' ),
 			'target'   => 'trendyol_sync_product_data',
 			'class'    => array( 'show_if_simple', 'show_if_variable' ),
 			'priority' => 80,
@@ -121,7 +121,7 @@ class Product_Data_Tab {
 		<div id="trendyol_sync_product_data" class="panel woocommerce_options_panel hidden">
 			<?php if ( ! $market->is_supported() ) : ?>
 				<p class="trendyol-sync-cache-notice">
-					<?php esc_html_e( 'Piața Trendyol nu corespunde setărilor site-ului. Setează țara magazinului WooCommerce (ex. România) sau limba site-ului la română.', 'trendyol-sync' ); ?>
+					<?php esc_html_e( 'Piața Trendyol nu corespunde setărilor site-ului. Setează țara magazinului WooCommerce (ex. România) sau limba site-ului la română.', 'trendyol-sync-for-woocommerce' ); ?>
 				</p>
 			<?php elseif ( $cache_empty ) : ?>
 				<p class="trendyol-sync-cache-notice">
@@ -129,7 +129,7 @@ class Product_Data_Tab {
 					echo wp_kses(
 						sprintf(
 							/* translators: %s: settings page URL */
-							__( 'Listele de branduri și categorii nu sunt în cache. Rulează o sincronizare din <a href="%s">setările Trendyol Sync</a>.', 'trendyol-sync' ),
+							__( 'Listele de branduri și categorii nu sunt în cache. Rulează o sincronizare din <a href="%s">setările Trendyol Sync</a>.', 'trendyol-sync-for-woocommerce' ),
 							esc_url( trendyol_sync()->settings()->get_page_url() )
 						),
 						array(
@@ -145,10 +145,10 @@ class Product_Data_Tab {
 			woocommerce_wp_text_input(
 				array(
 					'id'          => Meta_Keys::BARCODE,
-					'label'       => __( 'Barcode', 'trendyol-sync' ),
+					'label'       => __( 'Barcode', 'trendyol-sync-for-woocommerce' ),
 					'value'       => $barcode,
 					'desc_tip'    => true,
-					'description' => __( 'Cod de bare unic pentru Trendyol (max. 40 caractere).', 'trendyol-sync' ),
+					'description' => __( 'Cod de bare unic pentru Trendyol (max. 40 caractere).', 'trendyol-sync-for-woocommerce' ),
 					'custom_attributes' => array(
 						'maxlength' => '40',
 					),
@@ -158,16 +158,16 @@ class Product_Data_Tab {
 
 			<p class="form-field <?php echo esc_attr( Meta_Keys::BRAND_ID ); ?>_field">
 				<label for="<?php echo esc_attr( Meta_Keys::BRAND_ID ); ?>">
-					<?php esc_html_e( 'Brand Trendyol', 'trendyol-sync' ); ?>
+					<?php esc_html_e( 'Brand Trendyol', 'trendyol-sync-for-woocommerce' ); ?>
 				</label>
 				<select
 					id="<?php echo esc_attr( Meta_Keys::BRAND_ID ); ?>"
 					name="<?php echo esc_attr( Meta_Keys::BRAND_ID ); ?>"
 					class="trendyol-sync-select"
-					data-placeholder="<?php esc_attr_e( 'Caută brandul…', 'trendyol-sync' ); ?>"
+					data-placeholder="<?php esc_attr_e( 'Caută brandul…', 'trendyol-sync-for-woocommerce' ); ?>"
 					<?php echo $cache_empty ? ' disabled' : ''; ?>
 				>
-					<option value=""><?php esc_html_e( '— Selectează —', 'trendyol-sync' ); ?></option>
+					<option value=""><?php esc_html_e( '— Selectează —', 'trendyol-sync-for-woocommerce' ); ?></option>
 					<?php if ( $brand_id > 0 && '' !== $brand_label ) : ?>
 						<option value="<?php echo esc_attr( (string) $brand_id ); ?>" selected="selected">
 							<?php echo esc_html( $brand_label ); ?>
@@ -178,16 +178,16 @@ class Product_Data_Tab {
 
 			<p class="form-field <?php echo esc_attr( Meta_Keys::CATEGORY_ID ); ?>_field">
 				<label for="<?php echo esc_attr( Meta_Keys::CATEGORY_ID ); ?>">
-					<?php esc_html_e( 'Categorie Trendyol', 'trendyol-sync' ); ?>
+					<?php esc_html_e( 'Categorie Trendyol', 'trendyol-sync-for-woocommerce' ); ?>
 				</label>
 				<select
 					id="<?php echo esc_attr( Meta_Keys::CATEGORY_ID ); ?>"
 					name="<?php echo esc_attr( Meta_Keys::CATEGORY_ID ); ?>"
 					class="trendyol-sync-select"
-					data-placeholder="<?php esc_attr_e( 'Caută categoria…', 'trendyol-sync' ); ?>"
+					data-placeholder="<?php esc_attr_e( 'Caută categoria…', 'trendyol-sync-for-woocommerce' ); ?>"
 					<?php echo $cache_empty ? ' disabled' : ''; ?>
 				>
-					<option value=""><?php esc_html_e( '— Selectează —', 'trendyol-sync' ); ?></option>
+					<option value=""><?php esc_html_e( '— Selectează —', 'trendyol-sync-for-woocommerce' ); ?></option>
 					<?php if ( $category_id > 0 && '' !== $category_label ) : ?>
 						<option value="<?php echo esc_attr( (string) $category_id ); ?>" selected="selected">
 							<?php echo esc_html( $category_label ); ?>
@@ -200,31 +200,31 @@ class Product_Data_Tab {
 			woocommerce_wp_select(
 				array(
 					'id'          => Meta_Keys::VAT_RATE,
-					'label'       => __( 'TVA Trendyol', 'trendyol-sync' ),
+					'label'       => __( 'TVA Trendyol', 'trendyol-sync-for-woocommerce' ),
 					'value'       => $vat_rate,
 					'options'     => array(
-						''  => __( '— Selectează —', 'trendyol-sync' ),
+						''  => __( '— Selectează —', 'trendyol-sync-for-woocommerce' ),
 						'0' => '0',
 						'1' => '1',
 						'10' => '10',
 						'18' => '18',
 						'20' => '20',
 					),
-					'description' => __( 'Dacă nu este completat, se folosește default-ul din tab-ul Automation.', 'trendyol-sync' ),
+					'description' => __( 'Dacă nu este completat, se folosește default-ul din tab-ul Automation.', 'trendyol-sync-for-woocommerce' ),
 					'desc_tip'    => true,
 				)
 			);
 			woocommerce_wp_text_input(
 				array(
 					'id'                => Meta_Keys::DIMENSIONAL_WEIGHT,
-					'label'             => __( 'Greutate dimensională', 'trendyol-sync' ),
+					'label'             => __( 'Greutate dimensională', 'trendyol-sync-for-woocommerce' ),
 					'value'             => $dim_weight > 0 ? (string) $dim_weight : '',
 					'type'              => 'number',
 					'custom_attributes' => array(
 						'step' => '0.1',
 						'min'  => '0.1',
 					),
-					'description'       => __( 'Dacă lipsește, pluginul aplică valoarea implicită din Automation.', 'trendyol-sync' ),
+					'description'       => __( 'Dacă lipsește, pluginul aplică valoarea implicită din Automation.', 'trendyol-sync-for-woocommerce' ),
 					'desc_tip'          => true,
 				)
 			);
@@ -234,16 +234,16 @@ class Product_Data_Tab {
 			woocommerce_wp_checkbox(
 				array(
 					'id'          => 'trendyol_sync_enabled',
-					'label'       => __( 'Enable Trendyol Sync', 'trendyol-sync' ),
+					'label'       => __( 'Enable Trendyol Sync', 'trendyol-sync-for-woocommerce' ),
 					'value'       => $sync_enabled ? 'yes' : 'no',
-					'description' => __( 'Include acest produs (și variațiile) la următoarea sincronizare în coadă.', 'trendyol-sync' ),
+					'description' => __( 'Include acest produs (și variațiile) la următoarea sincronizare în coadă.', 'trendyol-sync-for-woocommerce' ),
 				)
 			);
 			?>
 
 			<?php if ( '' !== $main_id ) : ?>
 				<p class="form-field trendyol-sync-readonly">
-					<label><?php esc_html_e( 'Product Main ID', 'trendyol-sync' ); ?></label>
+					<label><?php esc_html_e( 'Product Main ID', 'trendyol-sync-for-woocommerce' ); ?></label>
 					<span class="description"><code><?php echo esc_html( $main_id ); ?></code></span>
 				</p>
 			<?php endif; ?>
@@ -426,7 +426,7 @@ class Product_Data_Tab {
 		if ( ! current_user_can( 'edit_products' ) ) {
 			wp_send_json_error(
 				array(
-					'message' => __( 'Nu ai permisiunea de a căuta în catalog.', 'trendyol-sync' ),
+					'message' => __( 'Nu ai permisiunea de a căuta în catalog.', 'trendyol-sync-for-woocommerce' ),
 				),
 				403
 			);
@@ -453,7 +453,7 @@ class Product_Data_Tab {
 		} else {
 			wp_send_json_error(
 				array(
-					'message' => __( 'Tip de căutare invalid.', 'trendyol-sync' ),
+					'message' => __( 'Tip de căutare invalid.', 'trendyol-sync-for-woocommerce' ),
 				),
 				400
 			);

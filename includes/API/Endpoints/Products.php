@@ -50,7 +50,7 @@ class Products {
 				'success'     => false,
 				'status_code' => 0,
 				'data'        => null,
-				'error'       => __( 'Supplier ID lipsește din setări.', 'trendyol-sync' ),
+				'error'       => __( 'Supplier ID lipsește din setări.', 'trendyol-sync-for-woocommerce' ),
 				'error_type'  => 'config',
 			);
 		}

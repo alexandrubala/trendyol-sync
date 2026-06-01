@@ -80,7 +80,7 @@ class Client {
 
 		if ( null === $headers ) {
 			return $this->error_response(
-				__( 'Credențialele API nu sunt configurate sau nu pot fi decriptate.', 'trendyol-sync' ),
+				__( 'Credențialele API nu sunt configurate sau nu pot fi decriptate.', 'trendyol-sync-for-woocommerce' ),
 				0,
 				'config'
 			);
@@ -88,7 +88,7 @@ class Client {
 
 		if ( ! $this->acquire_rate_limit_slot() ) {
 			return $this->error_response(
-				__( 'Limita de 50 cereri / 10 secunde a fost atinsă. Încearcă din nou peste câteva secunde.', 'trendyol-sync' ),
+				__( 'Limita de 50 cereri / 10 secunde a fost atinsă. Încearcă din nou peste câteva secunde.', 'trendyol-sync-for-woocommerce' ),
 				429,
 				'rate_limit'
 			);
@@ -226,14 +226,14 @@ class Client {
 
 		switch ( $status_code ) {
 			case 401:
-				return __( 'Autentificare eșuată (401). Verifică API Key, API Secret și mediul selectat.', 'trendyol-sync' );
+				return __( 'Autentificare eșuată (401). Verifică API Key, API Secret și mediul selectat.', 'trendyol-sync-for-woocommerce' );
 			case 403:
-				return __( 'Acces refuzat (403). Verifică header-ul User-Agent și permisiunile contului.', 'trendyol-sync' );
+				return __( 'Acces refuzat (403). Verifică header-ul User-Agent și permisiunile contului.', 'trendyol-sync-for-woocommerce' );
 			case 429:
-				return __( 'Prea multe cereri (429). Așteaptă câteva secunde înainte de a reîncerca.', 'trendyol-sync' );
+				return __( 'Prea multe cereri (429). Așteaptă câteva secunde înainte de a reîncerca.', 'trendyol-sync-for-woocommerce' );
 			default:
 				/* translators: %d: HTTP status code */
-				return sprintf( __( 'Eroare API HTTP %d.', 'trendyol-sync' ), $status_code );
+				return sprintf( __( 'Eroare API HTTP %d.', 'trendyol-sync-for-woocommerce' ), $status_code );
 		}
 	}
 
@@ -252,7 +252,7 @@ class Client {
 
 		$encoded = wp_json_encode( $value );
 
-		return is_string( $encoded ) ? $encoded : __( 'Eroare API necunoscută.', 'trendyol-sync' );
+		return is_string( $encoded ) ? $encoded : __( 'Eroare API necunoscută.', 'trendyol-sync-for-woocommerce' );
 	}
 
 	/**

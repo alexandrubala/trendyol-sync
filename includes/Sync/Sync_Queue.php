@@ -81,7 +81,7 @@ class Sync_Queue {
 		if ( ! trendyol_sync()->settings()->has_credentials() ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Completează credențialele API înainte de sincronizare.', 'trendyol-sync' ),
+				'message' => __( 'Completează credențialele API înainte de sincronizare.', 'trendyol-sync-for-woocommerce' ),
 			);
 		}
 
@@ -90,7 +90,7 @@ class Sync_Queue {
 		if ( empty( $products ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Nu există produse cu sincronizarea activată.', 'trendyol-sync' ),
+				'message' => __( 'Nu există produse cu sincronizarea activată.', 'trendyol-sync-for-woocommerce' ),
 			);
 		}
 
@@ -99,7 +99,7 @@ class Sync_Queue {
 		if ( $job_id <= 0 ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Nu s-a putut crea job-ul de sincronizare.', 'trendyol-sync' ),
+				'message' => __( 'Nu s-a putut crea job-ul de sincronizare.', 'trendyol-sync-for-woocommerce' ),
 			);
 		}
 
@@ -108,7 +108,7 @@ class Sync_Queue {
 		} catch ( \Throwable $e ) {
 			$this->jobs->update_status( $job_id, Sync_Job_Repository::STATUS_FAILED );
 			$this->logger->error(
-				__( 'Eroare la pregătirea payload-ului de sincronizare.', 'trendyol-sync' ),
+				__( 'Eroare la pregătirea payload-ului de sincronizare.', 'trendyol-sync-for-woocommerce' ),
 				array(
 					'job_id'  => $job_id,
 					'message' => $e->getMessage(),
@@ -133,7 +133,7 @@ class Sync_Queue {
 			return array(
 				'success'            => false,
 				'job_id'             => $job_id,
-				'message'            => __( 'Niciun produs nu a trecut validarea pre-flight.', 'trendyol-sync' ),
+				'message'            => __( 'Niciun produs nu a trecut validarea pre-flight.', 'trendyol-sync-for-woocommerce' ),
 				'validation_failed'  => $failed_count,
 			);
 		}
@@ -162,12 +162,12 @@ class Sync_Queue {
 			return array(
 				'success' => false,
 				'job_id'  => $job_id,
-				'message' => __( 'Nu s-au putut programa acțiunile de sincronizare.', 'trendyol-sync' ),
+				'message' => __( 'Nu s-au putut programa acțiunile de sincronizare.', 'trendyol-sync-for-woocommerce' ),
 			);
 		}
 
 		$this->logger->info(
-			__( 'Sincronizare pornită.', 'trendyol-sync' ),
+			__( 'Sincronizare pornită.', 'trendyol-sync-for-woocommerce' ),
 			array(
 				'job_id'  => $job_id,
 				'total'   => count( $valid_items ),
@@ -182,7 +182,7 @@ class Sync_Queue {
 			'total'             => count( $valid_items ),
 			'chunks'            => $scheduled,
 			'validation_failed' => $failed_count,
-			'message'           => __( 'Sincronizarea a fost programată în fundal.', 'trendyol-sync' ),
+			'message'           => __( 'Sincronizarea a fost programată în fundal.', 'trendyol-sync-for-woocommerce' ),
 		);
 	}
 
@@ -261,7 +261,7 @@ class Sync_Queue {
 			throw new \RuntimeException(
 				sprintf(
 					/* translators: %s list of duplicate barcodes */
-					__( 'Există barcode-uri duplicate: %s', 'trendyol-sync' ),
+					__( 'Există barcode-uri duplicate: %s', 'trendyol-sync-for-woocommerce' ),
 					implode( ', ', $barcode_index_result['duplicates'] )
 				)
 			);
@@ -276,7 +276,7 @@ class Sync_Queue {
 				$product_id = $barcode_to_product[ $barcode ] ?? 0;
 
 				$this->logger->warning(
-					__( 'Produs respins la validare pre-flight.', 'trendyol-sync' ),
+					__( 'Produs respins la validare pre-flight.', 'trendyol-sync-for-woocommerce' ),
 					array(
 						'product_id' => $product_id,
 						'barcode'    => $barcode,

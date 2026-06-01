@@ -50,43 +50,43 @@ class Sync_Dashboard_Page {
 	 */
 	public function render(): void {
 		if ( ! current_user_can( TRENDYOL_SYNC_CAPABILITY ) ) {
-			wp_die( esc_html__( 'Nu ai permisiunea de a accesa această pagină.', 'trendyol-sync' ) );
+			wp_die( esc_html__( 'Nu ai permisiunea de a accesa această pagină.', 'trendyol-sync-for-woocommerce' ) );
 		}
 
 		$latest_job = $this->jobs->find_latest();
 		$logs       = $this->get_recent_logs();
 		?>
 		<div class="wrap trendyol-sync-settings-wrap">
-			<h1><?php esc_html_e( 'Trendyol Sync Queue', 'trendyol-sync' ); ?></h1>
-			<p class="description"><?php esc_html_e( 'Pornește sincronizarea produselor și urmărește starea job-ului curent.', 'trendyol-sync' ); ?></p>
+			<h1><?php esc_html_e( 'Trendyol Sync Queue', 'trendyol-sync-for-woocommerce' ); ?></h1>
+			<p class="description"><?php esc_html_e( 'Pornește sincronizarea produselor și urmărește starea job-ului curent.', 'trendyol-sync-for-woocommerce' ); ?></p>
 			<p>
-				<button id="trendyol-start-sync" class="button button-primary"><?php esc_html_e( 'Pornește sincronizarea', 'trendyol-sync' ); ?></button>
+				<button id="trendyol-start-sync" class="button button-primary"><?php esc_html_e( 'Pornește sincronizarea', 'trendyol-sync-for-woocommerce' ); ?></button>
 				<span id="trendyol-sync-status" class="trendyol-connection-status" role="status" aria-live="polite"></span>
 			</p>
 
-			<h2><?php esc_html_e( 'Ultimul job', 'trendyol-sync' ); ?></h2>
+			<h2><?php esc_html_e( 'Ultimul job', 'trendyol-sync-for-woocommerce' ); ?></h2>
 			<?php if ( is_array( $latest_job ) ) : ?>
 				<table class="widefat striped">
 					<tbody>
-						<tr><th><?php esc_html_e( 'ID', 'trendyol-sync' ); ?></th><td><?php echo esc_html( (string) $latest_job['id'] ); ?></td></tr>
-						<tr><th><?php esc_html_e( 'Status', 'trendyol-sync' ); ?></th><td><?php echo esc_html( (string) $latest_job['status'] ); ?></td></tr>
-						<tr><th><?php esc_html_e( 'Total', 'trendyol-sync' ); ?></th><td><?php echo esc_html( (string) $latest_job['total'] ); ?></td></tr>
-						<tr><th><?php esc_html_e( 'Procesate', 'trendyol-sync' ); ?></th><td><?php echo esc_html( (string) $latest_job['processed'] ); ?></td></tr>
-						<tr><th><?php esc_html_e( 'Eșuate', 'trendyol-sync' ); ?></th><td><?php echo esc_html( (string) $latest_job['failed'] ); ?></td></tr>
-						<tr><th><?php esc_html_e( 'Actualizat', 'trendyol-sync' ); ?></th><td><?php echo esc_html( (string) $latest_job['updated_at'] ); ?></td></tr>
+						<tr><th><?php esc_html_e( 'ID', 'trendyol-sync-for-woocommerce' ); ?></th><td><?php echo esc_html( (string) $latest_job['id'] ); ?></td></tr>
+						<tr><th><?php esc_html_e( 'Status', 'trendyol-sync-for-woocommerce' ); ?></th><td><?php echo esc_html( (string) $latest_job['status'] ); ?></td></tr>
+						<tr><th><?php esc_html_e( 'Total', 'trendyol-sync-for-woocommerce' ); ?></th><td><?php echo esc_html( (string) $latest_job['total'] ); ?></td></tr>
+						<tr><th><?php esc_html_e( 'Procesate', 'trendyol-sync-for-woocommerce' ); ?></th><td><?php echo esc_html( (string) $latest_job['processed'] ); ?></td></tr>
+						<tr><th><?php esc_html_e( 'Eșuate', 'trendyol-sync-for-woocommerce' ); ?></th><td><?php echo esc_html( (string) $latest_job['failed'] ); ?></td></tr>
+						<tr><th><?php esc_html_e( 'Actualizat', 'trendyol-sync-for-woocommerce' ); ?></th><td><?php echo esc_html( (string) $latest_job['updated_at'] ); ?></td></tr>
 					</tbody>
 				</table>
 			<?php else : ?>
-				<p><?php esc_html_e( 'Nu există job-uri încă.', 'trendyol-sync' ); ?></p>
+				<p><?php esc_html_e( 'Nu există job-uri încă.', 'trendyol-sync-for-woocommerce' ); ?></p>
 			<?php endif; ?>
 
-			<h2><?php esc_html_e( 'Loguri recente', 'trendyol-sync' ); ?></h2>
+			<h2><?php esc_html_e( 'Loguri recente', 'trendyol-sync-for-woocommerce' ); ?></h2>
 			<table class="widefat striped">
 				<thead>
 					<tr>
-						<th><?php esc_html_e( 'Data', 'trendyol-sync' ); ?></th>
-						<th><?php esc_html_e( 'Level', 'trendyol-sync' ); ?></th>
-						<th><?php esc_html_e( 'Mesaj', 'trendyol-sync' ); ?></th>
+						<th><?php esc_html_e( 'Data', 'trendyol-sync-for-woocommerce' ); ?></th>
+						<th><?php esc_html_e( 'Level', 'trendyol-sync-for-woocommerce' ); ?></th>
+						<th><?php esc_html_e( 'Mesaj', 'trendyol-sync-for-woocommerce' ); ?></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -99,7 +99,7 @@ class Sync_Dashboard_Page {
 							</tr>
 						<?php endforeach; ?>
 					<?php else : ?>
-						<tr><td colspan="3"><?php esc_html_e( 'Nu există loguri.', 'trendyol-sync' ); ?></td></tr>
+						<tr><td colspan="3"><?php esc_html_e( 'Nu există loguri.', 'trendyol-sync-for-woocommerce' ); ?></td></tr>
 					<?php endif; ?>
 				</tbody>
 			</table>

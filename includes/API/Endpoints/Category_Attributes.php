@@ -49,7 +49,7 @@ class Category_Attributes {
 				'success'     => false,
 				'status_code' => 400,
 				'data'        => null,
-				'error'       => __( 'ID categorie invalid.', 'trendyol-sync' ),
+				'error'       => __( 'ID categorie invalid.', 'trendyol-sync-for-woocommerce' ),
 				'error_type'  => 'validation',
 			);
 		}

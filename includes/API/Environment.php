@@ -78,7 +78,7 @@ class Environment {
 	 */
 	public function get_label(): string {
 		return self::ENV_PRODUCTION === $this->get_environment()
-			? __( 'Production', 'trendyol-sync' )
-			: __( 'Stage', 'trendyol-sync' );
+			? __( 'Production', 'trendyol-sync-for-woocommerce' )
+			: __( 'Stage', 'trendyol-sync-for-woocommerce' );
 	}
 }
