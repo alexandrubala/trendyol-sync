@@ -15,6 +15,11 @@ defined( 'ABSPATH' ) || exit;
 class Admin {
 
 	/**
+	 * Slug meniu principal (top-level) în admin.
+	 */
+	public const MENU_SLUG = 'trendyol-sync-settings';
+
+	/**
 	 * Pagina de setări.
 	 *
 	 * @var Settings_Page
@@ -128,14 +133,8 @@ class Admin {
 	 * @return void
 	 */
 	public function enqueue_assets( string $hook_suffix ): void {
-		if ( 'woocommerce_page_trendyol-sync-settings' !== $hook_suffix ) {
-			$is_mapping_page = 'woocommerce_page_' . Category_Mapping_Page::PAGE_SLUG === $hook_suffix;
-			$is_sync_page    = 'woocommerce_page_' . Sync_Dashboard_Page::PAGE_SLUG === $hook_suffix;
-			$is_wizard_page  = 'woocommerce_page_' . Onboarding_Wizard_Page::PAGE_SLUG === $hook_suffix;
-
-			if ( ! $is_mapping_page && ! $is_sync_page && ! $is_wizard_page ) {
-				return;
-			}
+		if ( ! $this->is_plugin_admin_screen( $hook_suffix ) ) {
+			return;
 		}
 
 		wp_enqueue_style(
@@ -184,7 +183,7 @@ class Admin {
 			)
 		);
 
-		if ( 'woocommerce_page_' . Category_Mapping_Page::PAGE_SLUG === $hook_suffix ) {
+		if ( self::MENU_SLUG . '_page_' . Category_Mapping_Page::PAGE_SLUG === $hook_suffix ) {
 			wp_enqueue_script( 'selectWoo' );
 			wp_enqueue_style( 'select2' );
 			wp_enqueue_script(
@@ -207,45 +206,80 @@ class Admin {
 	}
 
 	/**
-	 * Adaugă submeniul sub WooCommerce.
+	 * Meniu dedicat Trendyol Sync (în afara WooCommerce).
 	 *
 	 * @return void
 	 */
 	public function register_menu(): void {
-		add_submenu_page(
-			'woocommerce',
+		add_menu_page(
 			__( 'Trendyol Sync', 'trendyol-sync' ),
 			__( 'Trendyol Sync', 'trendyol-sync' ),
 			TRENDYOL_SYNC_CAPABILITY,
-			'trendyol-sync-settings',
+			self::MENU_SLUG,
+			array( $this->settings_page, 'render' ),
+			'dashicons-update',
+			58
+		);
+
+		// Același slug ca meniul principal — WordPress ascunde duplicatul din submeniu.
+		add_submenu_page(
+			self::MENU_SLUG,
+			__( 'Trendyol Sync', 'trendyol-sync' ),
+			__( 'Setări', 'trendyol-sync' ),
+			TRENDYOL_SYNC_CAPABILITY,
+			self::MENU_SLUG,
 			array( $this->settings_page, 'render' )
 		);
 
 		add_submenu_page(
-			'woocommerce',
+			self::MENU_SLUG,
 			__( 'Trendyol Mapping', 'trendyol-sync' ),
-			__( 'Trendyol Mapping', 'trendyol-sync' ),
+			__( 'Mapping', 'trendyol-sync' ),
 			TRENDYOL_SYNC_CAPABILITY,
 			Category_Mapping_Page::PAGE_SLUG,
 			array( $this->category_mapping_page, 'render' )
 		);
 
 		add_submenu_page(
-			'woocommerce',
+			self::MENU_SLUG,
 			__( 'Trendyol Sync Queue', 'trendyol-sync' ),
-			__( 'Trendyol Sync Queue', 'trendyol-sync' ),
+			__( 'Sync Queue', 'trendyol-sync' ),
 			TRENDYOL_SYNC_CAPABILITY,
 			Sync_Dashboard_Page::PAGE_SLUG,
 			array( $this->sync_dashboard_page, 'render' )
 		);
 
 		add_submenu_page(
-			'woocommerce',
+			self::MENU_SLUG,
 			__( 'Trendyol Onboarding', 'trendyol-sync' ),
-			__( 'Trendyol Onboarding', 'trendyol-sync' ),
+			__( 'Onboarding', 'trendyol-sync' ),
 			TRENDYOL_SYNC_CAPABILITY,
 			Onboarding_Wizard_Page::PAGE_SLUG,
 			array( $this->onboarding_wizard_page, 'render' )
+		);
+	}
+
+	/**
+	 * Verifică dacă ecranul curent aparține pluginului.
+	 *
+	 * @param string $hook_suffix Hook-ul paginii admin.
+	 * @return bool
+	 */
+	private function is_plugin_admin_screen( string $hook_suffix ): bool {
+		if ( 'toplevel_page_' . self::MENU_SLUG === $hook_suffix ) {
+			return true;
+		}
+
+		$submenu_prefix = self::MENU_SLUG . '_page_';
+
+		return in_array(
+			$hook_suffix,
+			array(
+				$submenu_prefix . Category_Mapping_Page::PAGE_SLUG,
+				$submenu_prefix . Sync_Dashboard_Page::PAGE_SLUG,
+				$submenu_prefix . Onboarding_Wizard_Page::PAGE_SLUG,
+			),
+			true
 		);
 	}
 }

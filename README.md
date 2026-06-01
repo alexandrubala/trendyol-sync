@@ -4,7 +4,7 @@ Plugin WordPress pentru integrarea magazinului **WooCommerce** cu API-ul **Trend
 
 **Repository:** [github.com/alexandrubala/trendyol-sync](https://github.com/alexandrubala/trendyol-sync)
 
-**Versiune curentă:** 1.1.0
+**Versiune curentă:** 1.1.1
 
 ## Cerințe
 
@@ -29,7 +29,7 @@ Plugin WordPress pentru integrarea magazinului **WooCommerce** cu API-ul **Trend
 
 ## Configurare
 
-1. Mergi la **WooCommerce → Trendyol Sync**.
+1. Mergi la **Trendyol Sync** în meniul din stânga al WordPress.
 2. Tab **Credentials**:
    - **Supplier ID** — din panoul Trendyol (*Entegrasyon Bilgileri*)
    - **API Key** / **API Secret** — salvate criptat în baza de date
@@ -93,6 +93,10 @@ trendyol-sync/
 ```
 
 ## Changelog
+
+### v1.1.1
+
+- Meniu admin dedicat **Trendyol Sync** în sidebar (în afara WooCommerce), cu submeniuri Mapping, Sync Queue și Onboarding
 
 ### v1.1.0
 

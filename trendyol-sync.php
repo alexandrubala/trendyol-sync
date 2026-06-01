@@ -8,7 +8,7 @@
  * Plugin Name:       Trendyol Sync
  * Plugin URI:        https://github.com/alexandrubala/trendyol-sync
  * Description:       Sincronizare controlată a produselor WooCommerce cu marketplace-ul Trendyol.
- * Version:           1.1.0
+ * Version:           1.1.1
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            alexandrubala
@@ -26,7 +26,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Versiunea curentă a plugin-ului.
  */
-define( 'TRENDYOL_SYNC_VERSION', '1.1.0' );
+define( 'TRENDYOL_SYNC_VERSION', '1.1.1' );
 
 /**
  * Calea absolută către directorul plugin-ului (fără slash final).
