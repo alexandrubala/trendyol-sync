@@ -4,7 +4,7 @@ Plugin WordPress pentru integrarea magazinului **WooCommerce** cu API-ul **Trend
 
 **Repository:** [github.com/alexandrubala/trendyol-sync](https://github.com/alexandrubala/trendyol-sync)
 
-**Versiune curentă:** 1.0.6
+**Versiune curentă:** 1.0.7
 
 ## Cerințe
 
@@ -93,6 +93,12 @@ trendyol-sync/
 ```
 
 ## Changelog
+
+### v1.0.7
+
+- Coloană nouă **Trendyol Sync** în lista de produse WooCommerce (X roșu / bifa verde / pending / eroare / parțial).
+- Status separat pentru prezența pe platformă (`_trendyol_platform_live`) + tooltip-uri cu detalii de eroare/sincronizare.
+- Agregare pentru produse variabile (status părinte calculat din variații).
 
 ### v1.0.6
 

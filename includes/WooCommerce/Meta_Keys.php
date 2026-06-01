@@ -22,6 +22,9 @@ final class Meta_Keys {
 	public const DIMENSIONAL_WEIGHT  = '_trendyol_dimensional_weight';
 	public const ATTRIBUTES          = '_trendyol_attributes';
 	public const SYNC_STATUS         = '_trendyol_sync_status';
+	public const PLATFORM_LIVE       = '_trendyol_platform_live';
+	public const LAST_SYNC_AT        = '_trendyol_last_sync_at';
+	public const LAST_SYNC_ERROR     = '_trendyol_last_sync_error';
 
 	/** Valori permise pentru {@see self::SYNC_STATUS}. */
 	public const SYNC_ENABLED  = 'enabled';
@@ -44,6 +47,9 @@ final class Meta_Keys {
 			self::DIMENSIONAL_WEIGHT,
 			self::ATTRIBUTES,
 			self::SYNC_STATUS,
+			self::PLATFORM_LIVE,
+			self::LAST_SYNC_AT,
+			self::LAST_SYNC_ERROR,
 		);
 	}
 
@@ -101,5 +107,75 @@ final class Meta_Keys {
 	 */
 	public static function is_sync_enabled( int $product_id ): bool {
 		return self::SYNC_ENABLED === self::get_string( $product_id, self::SYNC_STATUS );
+	}
+
+	/**
+	 * Verifică dacă produsul a fost acceptat pe platforma Trendyol.
+	 *
+	 * @param int $product_id ID produs.
+	 * @return bool
+	 */
+	public static function is_platform_live( int $product_id ): bool {
+		return 'yes' === self::get_string( $product_id, self::PLATFORM_LIVE );
+	}
+
+	/**
+	 * Marchează produsul ca live / nelive pe Trendyol.
+	 *
+	 * @param int  $product_id ID produs.
+	 * @param bool $is_live    Stare live.
+	 * @return void
+	 */
+	public static function set_platform_live( int $product_id, bool $is_live ): void {
+		if ( $is_live ) {
+			update_post_meta( $product_id, self::PLATFORM_LIVE, 'yes' );
+			return;
+		}
+
+		delete_post_meta( $product_id, self::PLATFORM_LIVE );
+	}
+
+	/**
+	 * Salvează timestamp UTC pentru ultima sincronizare reușită.
+	 *
+	 * @param int $product_id ID produs.
+	 * @return void
+	 */
+	public static function touch_last_sync_at( int $product_id ): void {
+		update_post_meta( $product_id, self::LAST_SYNC_AT, gmdate( 'Y-m-d H:i:s' ) );
+	}
+
+	/**
+	 * @param int $product_id ID produs.
+	 * @return string
+	 */
+	public static function get_last_sync_at( int $product_id ): string {
+		return self::get_string( $product_id, self::LAST_SYNC_AT );
+	}
+
+	/**
+	 * Persistă ultimul mesaj de eroare de la sincronizare.
+	 *
+	 * @param int    $product_id ID produs.
+	 * @param string $message    Mesaj eroare.
+	 * @return void
+	 */
+	public static function set_last_sync_error( int $product_id, string $message ): void {
+		$message = trim( $message );
+
+		if ( '' === $message ) {
+			delete_post_meta( $product_id, self::LAST_SYNC_ERROR );
+			return;
+		}
+
+		update_post_meta( $product_id, self::LAST_SYNC_ERROR, $message );
+	}
+
+	/**
+	 * @param int $product_id ID produs.
+	 * @return string
+	 */
+	public static function get_last_sync_error( int $product_id ): string {
+		return self::get_string( $product_id, self::LAST_SYNC_ERROR );
 	}
 }

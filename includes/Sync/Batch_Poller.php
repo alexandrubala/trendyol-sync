@@ -245,6 +245,9 @@ class Batch_Poller {
 
 			if ( 'SUCCESS' === $item_status ) {
 				update_post_meta( $product_id, Meta_Keys::SYNC_STATUS, Meta_Keys::SYNC_ENABLED );
+				Meta_Keys::set_platform_live( $product_id, true );
+				Meta_Keys::touch_last_sync_at( $product_id );
+				Meta_Keys::set_last_sync_error( $product_id, '' );
 				$this->logger->info(
 					__( 'Produs sincronizat cu succes pe Trendyol.', 'trendyol-sync' ),
 					array(
@@ -258,6 +261,7 @@ class Batch_Poller {
 			}
 
 			update_post_meta( $product_id, Meta_Keys::SYNC_STATUS, Meta_Keys::SYNC_ERROR );
+			Meta_Keys::set_last_sync_error( $product_id, $this->format_failure_reasons( $failure_reasons ) );
 
 			$this->logger->error(
 				__( 'Produs respins de Trendyol în batch.', 'trendyol-sync' ),
@@ -271,6 +275,41 @@ class Batch_Poller {
 				)
 			);
 		}
+	}
+
+	/**
+	 * @param array<int, mixed> $failure_reasons Motive brute din API.
+	 * @return string
+	 */
+	private function format_failure_reasons( array $failure_reasons ): string {
+		$messages = array();
+
+		foreach ( $failure_reasons as $reason ) {
+			if ( is_array( $reason ) ) {
+				$message = isset( $reason['message'] ) ? trim( (string) $reason['message'] ) : '';
+
+				if ( '' === $message && isset( $reason['failureReason'] ) ) {
+					$message = trim( (string) $reason['failureReason'] );
+				}
+
+				if ( '' !== $message ) {
+					$messages[] = $message;
+				}
+				continue;
+			}
+
+			$message = trim( (string) $reason );
+
+			if ( '' !== $message ) {
+				$messages[] = $message;
+			}
+		}
+
+		if ( empty( $messages ) ) {
+			return '';
+		}
+
+		return implode( '; ', array_values( array_unique( $messages ) ) );
 	}
 
 	/**

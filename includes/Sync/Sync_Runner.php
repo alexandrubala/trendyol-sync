@@ -205,6 +205,7 @@ class Sync_Runner {
 
 		foreach ( $product_map as $product_id ) {
 			update_post_meta( (int) $product_id, Meta_Keys::SYNC_STATUS, Meta_Keys::SYNC_ERROR );
+			Meta_Keys::set_last_sync_error( (int) $product_id, $message );
 		}
 
 		$this->logger->error(

@@ -57,6 +57,13 @@ class Admin {
 	private $product_data_tab;
 
 	/**
+	 * Coloană status Trendyol în lista de produse.
+	 *
+	 * @var Product_List_Column
+	 */
+	private $product_list_column;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -66,6 +73,7 @@ class Admin {
 		$this->catalog_syncer     = new Catalog_Syncer( $this->settings );
 		$this->sync_ajax          = new Sync_Ajax();
 		$this->product_data_tab   = new Product_Data_Tab();
+		$this->product_list_column = new Product_List_Column();
 	}
 
 	/**
@@ -81,6 +89,7 @@ class Admin {
 		$this->catalog_syncer->register_hooks();
 		$this->sync_ajax->register_hooks();
 		$this->product_data_tab->register_hooks();
+		$this->product_list_column->register_hooks();
 		( new Updater() )->register_hooks();
 	}
 

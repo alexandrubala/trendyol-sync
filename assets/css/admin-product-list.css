@@ -1,0 +1,49 @@
+.column-trendyol_sync {
+	width: 56px;
+	text-align: center;
+}
+
+.column-trendyol_sync .trendyol-sync-col {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+}
+
+.column-trendyol_sync .trendyol-sync-col .dashicons {
+	font-size: 18px;
+	width: 18px;
+	height: 18px;
+}
+
+.column-trendyol_sync .trendyol-sync-col--live {
+	color: #00a32a;
+}
+
+.column-trendyol_sync .trendyol-sync-col--pending {
+	color: #dba617;
+}
+
+.column-trendyol_sync .trendyol-sync-col--pending .dashicons {
+	animation: trendyol-sync-spin 1.6s linear infinite;
+}
+
+.column-trendyol_sync .trendyol-sync-col--error,
+.column-trendyol_sync .trendyol-sync-col--not_live {
+	color: #d63638;
+}
+
+.column-trendyol_sync .trendyol-sync-col--partial {
+	color: #d97706;
+}
+
+@keyframes trendyol-sync-spin {
+	from {
+		transform: rotate(0deg);
+	}
+
+	to {
+		transform: rotate(360deg);
+	}
+}

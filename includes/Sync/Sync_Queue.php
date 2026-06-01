@@ -238,6 +238,7 @@ class Sync_Queue {
 
 				if ( $product_id > 0 ) {
 					update_post_meta( $product_id, Meta_Keys::SYNC_STATUS, Meta_Keys::SYNC_ERROR );
+					Meta_Keys::set_last_sync_error( $product_id, implode( '; ', $validation['errors'] ) );
 				}
 
 				continue;
@@ -249,6 +250,7 @@ class Sync_Queue {
 			if ( $product_id > 0 ) {
 				$product_map[ $barcode ] = $product_id;
 				update_post_meta( $product_id, Meta_Keys::SYNC_STATUS, Meta_Keys::SYNC_PENDING );
+				Meta_Keys::set_last_sync_error( $product_id, '' );
 			}
 
 			$valid_items[] = $item;
