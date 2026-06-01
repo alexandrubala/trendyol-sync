@@ -7,15 +7,14 @@
 
 namespace TrendyolSync\Sync;
 
+use TrendyolSync\API\Vat_Rates;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Class Payload_Validator
  */
 class Payload_Validator {
-
-	/** Cote TVA acceptate de Trendyol (RO / TR marketplace). */
-	private const ALLOWED_VAT_RATES = array( 0, 1, 10, 18, 20 );
 
 	/**
 	 * Definiții atribute obligatorii per categorie (attributeId => allowCustom).
@@ -101,7 +100,8 @@ class Payload_Validator {
 			$errors[] = __( 'Prețul de listă nu poate fi mai mic decât prețul de vânzare.', 'trendyol-sync-for-woocommerce' );
 		}
 
-		if ( ! isset( $item['vatRate'] ) || ! in_array( (int) $item['vatRate'], self::ALLOWED_VAT_RATES, true ) ) {
+		$vat_rates = Vat_Rates::for_site();
+		if ( ! isset( $item['vatRate'] ) || ! $vat_rates->is_valid( (int) $item['vatRate'] ) ) {
 			$errors[] = __( 'Lipsește sau este invalid cota TVA (vatRate).', 'trendyol-sync-for-woocommerce' );
 		}
 

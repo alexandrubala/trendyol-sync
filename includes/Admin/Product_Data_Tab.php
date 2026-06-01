@@ -8,6 +8,7 @@
 namespace TrendyolSync\Admin;
 
 use TrendyolSync\API\Market_Context;
+use TrendyolSync\API\Vat_Rates;
 use TrendyolSync\Sync\Barcode_Resolver;
 use TrendyolSync\Sync\Variant_Grouper;
 use TrendyolSync\WooCommerce\Meta_Keys;
@@ -200,15 +201,8 @@ class Product_Data_Tab {
 				array(
 					'id'          => Meta_Keys::VAT_RATE,
 					'label'       => __( 'TVA Trendyol', 'trendyol-sync-for-woocommerce' ),
-					'value'       => $vat_rate,
-					'options'     => array(
-						''  => __( '— Selectează —', 'trendyol-sync-for-woocommerce' ),
-						'0' => '0',
-						'1' => '1',
-						'10' => '10',
-						'18' => '18',
-						'20' => '20',
-					),
+					'value'       => Vat_Rates::for_site()->is_valid( $vat_rate ) ? (string) $vat_rate : '',
+					'options'     => Vat_Rates::for_site()->get_select_options(),
 					'description' => __( 'Dacă nu este completat, se folosește default-ul din tab-ul Automation.', 'trendyol-sync-for-woocommerce' ),
 					'desc_tip'    => true,
 				)
@@ -303,11 +297,16 @@ class Product_Data_Tab {
 		update_post_meta( $post_id, Meta_Keys::BRAND_ID, $brand_id > 0 ? (string) $brand_id : '' );
 		update_post_meta( $post_id, Meta_Keys::CATEGORY_ID, $category_id > 0 ? (string) $category_id : '' );
 
-		$vat_rate = isset( $_POST[ Meta_Keys::VAT_RATE ] )
-			? absint( wp_unslash( $_POST[ Meta_Keys::VAT_RATE ] ) )
-			: 0;
-		$vat_allowed = array( 0, 1, 10, 18, 20 );
-		update_post_meta( $post_id, Meta_Keys::VAT_RATE, in_array( $vat_rate, $vat_allowed, true ) ? (string) $vat_rate : '' );
+		$vat_rates = Vat_Rates::for_site();
+		$vat_raw   = isset( $_POST[ Meta_Keys::VAT_RATE ] )
+			? wp_unslash( (string) $_POST[ Meta_Keys::VAT_RATE ] )
+			: '';
+		if ( '' === $vat_raw ) {
+			update_post_meta( $post_id, Meta_Keys::VAT_RATE, '' );
+		} else {
+			$vat_rate = $vat_rates->sanitize( absint( $vat_raw ) );
+			update_post_meta( $post_id, Meta_Keys::VAT_RATE, (string) $vat_rate );
+		}
 
 		$dim_weight = isset( $_POST[ Meta_Keys::DIMENSIONAL_WEIGHT ] )
 			? sanitize_text_field( wp_unslash( (string) $_POST[ Meta_Keys::DIMENSIONAL_WEIGHT ] ) )

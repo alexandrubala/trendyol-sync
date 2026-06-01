@@ -7,6 +7,8 @@
 
 namespace TrendyolSync\WooCommerce;
 
+use TrendyolSync\API\Vat_Rates;
+
 use TrendyolSync\Admin\Category_Mapper;
 use TrendyolSync\Sync\Barcode_Resolver;
 
@@ -268,14 +270,15 @@ class Product_Adapter {
 	 * @return int
 	 */
 	private function get_vat_rate( int $product_id, int $meta_source_id ): int {
-		$rate = Meta_Keys::get_string( $product_id, Meta_Keys::VAT_RATE );
+		$vat_rates = Vat_Rates::for_site();
+		$rate      = Meta_Keys::get_string( $product_id, Meta_Keys::VAT_RATE );
 
 		if ( '' === $rate ) {
 			$rate = Meta_Keys::get_string( $meta_source_id, Meta_Keys::VAT_RATE );
 		}
 
 		if ( '' !== $rate ) {
-			return (int) $rate;
+			return $vat_rates->sanitize( (int) $rate );
 		}
 
 		$product = wc_get_product( $product_id );
@@ -283,16 +286,17 @@ class Product_Adapter {
 			$tax_class = (string) $product->get_tax_class();
 			$tax_map   = get_option( 'trendyol_sync_tax_class_map', array() );
 			if ( is_array( $tax_map ) && isset( $tax_map[ $tax_class ] ) && is_numeric( $tax_map[ $tax_class ] ) ) {
-				return (int) $tax_map[ $tax_class ];
+				return $vat_rates->sanitize( (int) $tax_map[ $tax_class ] );
 			}
 			if ( is_array( $tax_map ) && '' === $tax_class && isset( $tax_map['standard'] ) && is_numeric( $tax_map['standard'] ) ) {
-				return (int) $tax_map['standard'];
+				return $vat_rates->sanitize( (int) $tax_map['standard'] );
 			}
 		}
 
 		$settings = trendyol_sync()->settings()->get_stored_settings();
+		$stored   = isset( $settings['default_vat_rate'] ) ? (int) $settings['default_vat_rate'] : $vat_rates->get_default_rate();
 
-		return isset( $settings['default_vat_rate'] ) ? (int) $settings['default_vat_rate'] : 20;
+		return $vat_rates->sanitize( $stored );
 	}
 
 	/**

@@ -7,6 +7,7 @@
 
 namespace TrendyolSync\Admin;
 
+use TrendyolSync\API\Vat_Rates;
 use TrendyolSync\Security\Encryption;
 
 defined( 'ABSPATH' ) || exit;
@@ -96,11 +97,11 @@ class Settings {
 			? absint( wp_unslash( $input['default_trendyol_brand_id'] ) )
 			: absint( $existing['default_trendyol_brand_id'] ?? 0 );
 
-		$vat_allowed = array( 0, 1, 10, 18, 20 );
-		$vat_rate    = isset( $input['default_vat_rate'] )
+		$vat_rates = Vat_Rates::for_site();
+		$vat_rate  = isset( $input['default_vat_rate'] )
 			? absint( wp_unslash( $input['default_vat_rate'] ) )
-			: absint( $existing['default_vat_rate'] ?? 20 );
-		$output['default_vat_rate'] = in_array( $vat_rate, $vat_allowed, true ) ? $vat_rate : 20;
+			: absint( $existing['default_vat_rate'] ?? $vat_rates->get_default_rate() );
+		$output['default_vat_rate'] = $vat_rates->sanitize( $vat_rate );
 
 		$default_weight = isset( $input['default_dimensional_weight'] )
 			? sanitize_text_field( wp_unslash( (string) $input['default_dimensional_weight'] ) )
@@ -158,15 +159,16 @@ class Settings {
 			$output['wc_attribute_map_json'] = '{}';
 		}
 
-		$tax_class_map_json = isset( $input['tax_class_map_json'] )
+		$default_tax_map_json = Vat_Rates::for_site()->get_default_tax_class_map_json();
+		$tax_class_map_json   = isset( $input['tax_class_map_json'] )
 			? trim( (string) wp_unslash( $input['tax_class_map_json'] ) )
-			: (string) ( $existing['tax_class_map_json'] ?? '{"standard":20,"reduced-rate":10,"zero-rate":0}' );
+			: (string) ( $existing['tax_class_map_json'] ?? $default_tax_map_json );
 		$decoded_tax_map = json_decode( $tax_class_map_json, true );
 		if ( is_array( $decoded_tax_map ) ) {
 			update_option( 'trendyol_sync_tax_class_map', $decoded_tax_map );
 			$output['tax_class_map_json'] = wp_json_encode( $decoded_tax_map, JSON_PRETTY_PRINT );
 		} else {
-			$output['tax_class_map_json'] = '{"standard":20,"reduced-rate":10,"zero-rate":0}';
+			$output['tax_class_map_json'] = $default_tax_map_json;
 		}
 
 		if ( '' !== $output['supplier_id'] && ! ctype_digit( $output['supplier_id'] ) ) {
@@ -196,6 +198,8 @@ class Settings {
 	 * @return array<string, mixed>
 	 */
 	public function get_defaults(): array {
+		$vat_rates = Vat_Rates::for_site();
+
 		return array(
 			'supplier_id'                   => '',
 			'api_key'                       => '',
@@ -204,7 +208,7 @@ class Settings {
 			'integrator_name'               => 'SelfIntegration',
 			'default_trendyol_category_id'  => 0,
 			'default_trendyol_brand_id'     => 0,
-			'default_vat_rate'              => 20,
+			'default_vat_rate'              => $vat_rates->get_default_rate(),
 			'default_dimensional_weight'    => '1',
 			'barcode_strategy'              => 'internal',
 			'barcode_prefix'                => 'TY-',
@@ -214,7 +218,7 @@ class Settings {
 			'sync_only_modified'            => 'no',
 			'category_attribute_defaults_json' => '{}',
 			'wc_attribute_map_json'         => '{}',
-			'tax_class_map_json'            => '{"standard":20,"reduced-rate":10,"zero-rate":0}',
+			'tax_class_map_json'            => $vat_rates->get_default_tax_class_map_json(),
 		);
 	}
 
@@ -239,7 +243,8 @@ class Settings {
 	 * @return array<string, mixed>
 	 */
 	public function get_settings_for_display(): array {
-		$stored = $this->get_stored_settings();
+		$stored    = $this->get_stored_settings();
+		$vat_rates = Vat_Rates::for_site();
 
 		return array(
 			'supplier_id'     => $stored['supplier_id'],
@@ -249,7 +254,9 @@ class Settings {
 			'has_api_secret'  => '' !== ( $stored['api_secret'] ?? '' ),
 			'default_trendyol_category_id' => absint( $stored['default_trendyol_category_id'] ?? 0 ),
 			'default_trendyol_brand_id'    => absint( $stored['default_trendyol_brand_id'] ?? 0 ),
-			'default_vat_rate'             => absint( $stored['default_vat_rate'] ?? 20 ),
+			'default_vat_rate'             => $vat_rates->sanitize(
+				absint( $stored['default_vat_rate'] ?? $vat_rates->get_default_rate() )
+			),
 			'default_dimensional_weight'   => (string) ( $stored['default_dimensional_weight'] ?? '1' ),
 			'barcode_strategy'             => (string) ( $stored['barcode_strategy'] ?? 'internal' ),
 			'barcode_prefix'               => (string) ( $stored['barcode_prefix'] ?? 'TY-' ),
@@ -259,7 +266,7 @@ class Settings {
 			'sync_only_modified'           => (string) ( $stored['sync_only_modified'] ?? 'no' ),
 			'category_attribute_defaults_json' => (string) ( $stored['category_attribute_defaults_json'] ?? '{}' ),
 			'wc_attribute_map_json'        => (string) ( $stored['wc_attribute_map_json'] ?? '{}' ),
-			'tax_class_map_json'           => (string) ( $stored['tax_class_map_json'] ?? '{"standard":20,"reduced-rate":10,"zero-rate":0}' ),
+			'tax_class_map_json'           => (string) ( $stored['tax_class_map_json'] ?? $vat_rates->get_default_tax_class_map_json() ),
 		);
 	}
 
@@ -583,7 +590,7 @@ class Settings {
 	public function render_default_vat_rate_field(): void {
 		$settings = $this->get_settings_for_display();
 		$name     = TRENDYOL_SYNC_OPTION_KEY . '[default_vat_rate]';
-		$options  = array( 0, 1, 10, 18, 20 );
+		$options  = Vat_Rates::for_site()->get_allowed_rates();
 		echo '<select name="' . esc_attr( $name ) . '">';
 		foreach ( $options as $value ) {
 			printf(
