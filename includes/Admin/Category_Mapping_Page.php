@@ -141,7 +141,7 @@ class Category_Mapping_Page {
 											data-type="category"
 											data-placeholder="<?php esc_attr_e( 'Caută categoria…', 'trendyol-sync-for-woocommerce' ); ?>"
 										>
-											<option value=""><?php esc_html_e( '— Fără mapare —', 'trendyol-sync-for-woocommerce' ); ?></option>
+											<option value=""></option>
 											<?php if ( $mapped_category > 0 && '' !== $category_label ) : ?>
 												<option value="<?php echo esc_attr( (string) $mapped_category ); ?>" selected="selected"><?php echo esc_html( $category_label ); ?></option>
 											<?php endif; ?>
@@ -154,7 +154,7 @@ class Category_Mapping_Page {
 											data-type="brand"
 											data-placeholder="<?php esc_attr_e( 'Caută brandul…', 'trendyol-sync-for-woocommerce' ); ?>"
 										>
-											<option value=""><?php esc_html_e( '— Fără mapare —', 'trendyol-sync-for-woocommerce' ); ?></option>
+											<option value=""></option>
 											<?php if ( $mapped_brand > 0 && '' !== $brand_label ) : ?>
 												<option value="<?php echo esc_attr( (string) $mapped_brand ); ?>" selected="selected"><?php echo esc_html( $brand_label ); ?></option>
 											<?php endif; ?>

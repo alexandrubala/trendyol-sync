@@ -4,7 +4,7 @@ Plugin WordPress pentru integrarea magazinului **WooCommerce** cu API-ul **Trend
 
 **Repository:** [github.com/alexandrubala/trendyol-sync-for-woocommerce](https://github.com/alexandrubala/trendyol-sync-for-woocommerce)
 
-**Versiune curentă:** 1.2.0
+**Versiune curentă:** 1.2.1
 
 ## Cerințe
 
@@ -103,6 +103,12 @@ trendyol-sync-for-woocommerce/
 ```
 
 ## Changelog
+
+### v1.2.1
+
+- Pagina **Mapping**: încărcare corectă selectWoo pe ecrane admin custom; dropdown-uri AJAX pentru categorii/branduri Trendyol
+- Sincronizare catalog: așteptare automată la limita de 50 cereri / 10 secunde; timeout extins pentru descărcare completă
+- Căutare catalog: permisiune `manage_trendyol_sync`; detectare cache îmbunătățită
 
 ### v1.2.0
 

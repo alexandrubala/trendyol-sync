@@ -107,6 +107,10 @@ class Catalog_Syncer {
 	 * @return array<string, mixed>
 	 */
 	public function sync(): array {
+		if ( function_exists( 'set_time_limit' ) ) {
+			set_time_limit( 300 );
+		}
+
 		$market = Market_Context::for_site();
 
 		if ( ! $market->is_supported() ) {
@@ -122,15 +126,15 @@ class Catalog_Syncer {
 		$plugin = trendyol_sync();
 		$cache  = $plugin->cache();
 
+		$brands = new Brands( $plugin->api_client(), $cache );
+
 		$cache->delete_all_brands();
 		$cache->delete_category_tree();
-
-		$brands = new Brands( $plugin->api_client(), $cache );
 
 		$brand_pages = 0;
 
 		for ( $page = 0; $page < self::MAX_BRAND_PAGES; ++$page ) {
-			$response = $brands->get_brands( $page, self::BRAND_PAGE_SIZE, false );
+			$response = $brands->get_brands( $page, self::BRAND_PAGE_SIZE, false, true );
 
 			if ( ! $response['success'] ) {
 				return array(
@@ -154,8 +158,12 @@ class Catalog_Syncer {
 			}
 		}
 
+		for ( $page = $brand_pages; $page < self::MAX_BRAND_PAGES; ++$page ) {
+			$cache->delete_brands( $page, self::BRAND_PAGE_SIZE );
+		}
+
 		$categories = new Categories( $plugin->api_client(), $cache );
-		$cat_result = $categories->get_category_tree( false );
+		$cat_result = $categories->get_category_tree( false, true );
 
 		if ( ! $cat_result['success'] ) {
 			return array(

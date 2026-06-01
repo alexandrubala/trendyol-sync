@@ -196,10 +196,20 @@ class Admin {
 				'trendyol-sync-category-mapping',
 				'trendyolSyncMappingData',
 				array(
-					'ajaxUrl'      => admin_url( 'admin-ajax.php' ),
-					'searchAction' => Product_Data_Tab::AJAX_SEARCH_ACTION,
-					'nonce'        => wp_create_nonce( Product_Data_Tab::SEARCH_NONCE_ACTION ),
+					'ajaxUrl'           => admin_url( 'admin-ajax.php' ),
+					'searchAction'      => Product_Data_Tab::AJAX_SEARCH_ACTION,
+					'nonce'             => wp_create_nonce( Product_Data_Tab::SEARCH_NONCE_ACTION ),
+					'emptyLabel'        => __( '— Fără mapare —', 'trendyol-sync-for-woocommerce' ),
+					'noResults'         => __( 'Niciun rezultat găsit. Sincronizează catalogul din Setări.', 'trendyol-sync-for-woocommerce' ),
+					'searching'         => __( 'Se caută…', 'trendyol-sync-for-woocommerce' ),
+					'selectWooMissing'  => __( 'Componenta de căutare nu s-a încărcat. Verifică că WooCommerce este activ și reîncarcă pagina.', 'trendyol-sync-for-woocommerce' ),
 				)
+			);
+			wp_enqueue_style(
+				'trendyol-sync-product-data',
+				TRENDYOL_SYNC_URL . 'assets/css/admin-product-data.css',
+				array( 'select2' ),
+				TRENDYOL_SYNC_VERSION
 			);
 		}
 	}

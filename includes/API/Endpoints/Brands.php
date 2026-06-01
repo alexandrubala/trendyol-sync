@@ -43,10 +43,11 @@ class Brands {
 	 *
 	 * @param int  $page      Număr pagină (0-based conform API).
 	 * @param int  $size      Număr maxim branduri per pagină.
-	 * @param bool $use_cache Folosește cache transient (implicit true).
+	 * @param bool $use_cache             Folosește cache transient (implicit true).
+	 * @param bool $wait_for_rate_limit   Așteaptă eliberarea slotului de rate limit (sync catalog).
 	 * @return array<string, mixed> Răspuns normalizat de la Client.
 	 */
-	public function get_brands( int $page = 0, int $size = 1000, bool $use_cache = true ): array {
+	public function get_brands( int $page = 0, int $size = 1000, bool $use_cache = true, bool $wait_for_rate_limit = false ): array {
 		$page = max( 0, $page );
 		$size = max( 1, min( 1000, $size ) );
 
@@ -70,7 +71,8 @@ class Brands {
 			array(
 				'page' => $page,
 				'size' => $size,
-			)
+			),
+			$wait_for_rate_limit
 		);
 
 		if ( $response['success'] && ! empty( $response['data'] ) ) {

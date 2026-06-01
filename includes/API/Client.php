@@ -45,8 +45,8 @@ class Client {
 	 * @param array<string, mixed> $query Parametri query string.
 	 * @return array<string, mixed> Răspuns normalizat.
 	 */
-	public function get( string $path, array $query = array() ): array {
-		return $this->request( 'GET', $path, $query );
+	public function get( string $path, array $query = array(), bool $wait_for_rate_limit = false ): array {
+		return $this->request( 'GET', $path, $query, null, $wait_for_rate_limit );
 	}
 
 	/**
@@ -75,7 +75,7 @@ class Client {
 	 *     @type string|null $error_type auth|forbidden|rate_limit|http|network|config
 	 * }
 	 */
-	public function request( string $method, string $path, array $query = array(), ?array $body = null ): array {
+	public function request( string $method, string $path, array $query = array(), ?array $body = null, bool $wait_for_rate_limit = false ): array {
 		$headers = $this->auth->get_request_headers();
 
 		if ( null === $headers ) {
@@ -86,7 +86,7 @@ class Client {
 			);
 		}
 
-		if ( ! $this->acquire_rate_limit_slot() ) {
+		if ( ! $this->acquire_rate_limit_slot( $wait_for_rate_limit ) ) {
 			return $this->error_response(
 				__( 'Limita de 50 cereri / 10 secunde a fost atinsă. Încearcă din nou peste câteva secunde.', 'trendyol-sync-for-woocommerce' ),
 				429,
@@ -118,39 +118,55 @@ class Client {
 	/**
 	 * Sliding window: înregistrează cererea și refuză dacă s-a depășit plafonul.
 	 *
+	 * @param bool $wait Dacă true, așteaptă eliberarea unui slot (pentru sync catalog lung).
 	 * @return bool True dacă slotul a fost rezervat.
 	 */
-	private function acquire_rate_limit_slot(): bool {
-		$now      = microtime( true );
-		$cutoff   = $now - (float) self::RATE_LIMIT_WINDOW;
-		$requests = get_transient( self::RATE_LIMIT_TRANSIENT );
+	private function acquire_rate_limit_slot( bool $wait = false ): bool {
+		$deadline = $wait ? microtime( true ) + (float) self::RATE_LIMIT_WINDOW + 2.0 : 0.0;
 
-		if ( ! is_array( $requests ) ) {
-			$requests = array();
-		}
+		do {
+			$now      = microtime( true );
+			$cutoff   = $now - (float) self::RATE_LIMIT_WINDOW;
+			$requests = get_transient( self::RATE_LIMIT_TRANSIENT );
 
-		$requests = array_values(
-			array_filter(
-				$requests,
-				static function ( $timestamp ) use ( $cutoff ) {
-					return is_numeric( $timestamp ) && (float) $timestamp > $cutoff;
-				}
-			)
-		);
+			if ( ! is_array( $requests ) ) {
+				$requests = array();
+			}
 
-		if ( count( $requests ) >= self::RATE_LIMIT_MAX ) {
-			return false;
-		}
+			$requests = array_values(
+				array_filter(
+					$requests,
+					static function ( $timestamp ) use ( $cutoff ) {
+						return is_numeric( $timestamp ) && (float) $timestamp > $cutoff;
+					}
+				)
+			);
 
-		$requests[] = $now;
+			if ( count( $requests ) < self::RATE_LIMIT_MAX ) {
+				$requests[] = $now;
 
-		set_transient(
-			self::RATE_LIMIT_TRANSIENT,
-			$requests,
-			self::RATE_LIMIT_WINDOW + 1
-		);
+				set_transient(
+					self::RATE_LIMIT_TRANSIENT,
+					$requests,
+					self::RATE_LIMIT_WINDOW + 1
+				);
 
-		return true;
+				return true;
+			}
+
+			if ( ! $wait || $now >= $deadline ) {
+				return false;
+			}
+
+			$oldest = min( array_map( 'floatval', $requests ) );
+			$sleep  = ( $oldest + (float) self::RATE_LIMIT_WINDOW ) - $now + 0.05;
+
+			if ( $sleep > 0 && $sleep <= (float) self::RATE_LIMIT_WINDOW + 2.0 ) {
+				usleep( (int) round( $sleep * 1000000 ) );
+			} else {
+				usleep( 250000 );
+			}
+		} while ( true );
 	}
 
 	/**

@@ -41,10 +41,11 @@ class Categories {
 	/**
 	 * Preia arborele de categorii Trendyol (getCategoryTree).
 	 *
-	 * @param bool $use_cache Folosește cache-ul transient (implicit true).
+	 * @param bool $use_cache             Folosește cache-ul transient (implicit true).
+	 * @param bool $wait_for_rate_limit   Așteaptă eliberarea slotului de rate limit (sync catalog).
 	 * @return array<string, mixed> Răspuns normalizat de la Client.
 	 */
-	public function get_category_tree( bool $use_cache = true ): array {
+	public function get_category_tree( bool $use_cache = true, bool $wait_for_rate_limit = false ): array {
 		if ( $use_cache ) {
 			$cached = $this->cache->get_category_tree();
 
@@ -60,7 +61,7 @@ class Categories {
 			}
 		}
 
-		$response = $this->client->get( self::PATH );
+		$response = $this->client->get( self::PATH, array(), $wait_for_rate_limit );
 
 		if ( $response['success'] && ! empty( $response['data'] ) ) {
 			$this->cache->set_category_tree( $response['data'] );
