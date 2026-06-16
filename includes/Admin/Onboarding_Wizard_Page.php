@@ -51,10 +51,10 @@ class Onboarding_Wizard_Page {
 		<div class="wrap trendyol-sync-settings-wrap">
 			<h1><?php esc_html_e( 'Wizard pregătire catalog Trendyol', 'trendyol-sync-for-woocommerce' ); ?></h1>
 			<ol>
-				<li><?php echo $preview['credentials_ok'] ? '[OK] ' : '[MISSING] '; ?><?php esc_html_e( 'Credențiale API configurate', 'trendyol-sync-for-woocommerce' ); ?></li>
-				<li><?php echo $preview['catalog_ok'] ? '[OK] ' : '[MISSING] '; ?><?php esc_html_e( 'Catalog sincronizat (branduri/categorii)', 'trendyol-sync-for-woocommerce' ); ?></li>
-				<li><?php echo $preview['mapping_ok'] ? '[OK] ' : '[MISSING] '; ?><?php esc_html_e( 'Mapare categorii/brand definită', 'trendyol-sync-for-woocommerce' ); ?></li>
-				<li><?php echo $preview['ready_products'] > 0 ? '[OK] ' : '[MISSING] '; ?><?php esc_html_e( 'Produse gata de sync', 'trendyol-sync-for-woocommerce' ); ?></li>
+				<li><?php echo esc_html( ( $preview['credentials_ok'] ? '[OK] ' : '[MISSING] ' ) ); ?><?php esc_html_e( 'Credențiale API configurate', 'trendyol-sync-for-woocommerce' ); ?></li>
+				<li><?php echo esc_html( ( $preview['catalog_ok'] ? '[OK] ' : '[MISSING] ' ) ); ?><?php esc_html_e( 'Catalog sincronizat (branduri/categorii)', 'trendyol-sync-for-woocommerce' ); ?></li>
+				<li><?php echo esc_html( ( $preview['mapping_ok'] ? '[OK] ' : '[MISSING] ' ) ); ?><?php esc_html_e( 'Mapare categorii/brand definită', 'trendyol-sync-for-woocommerce' ); ?></li>
+				<li><?php echo esc_html( ( $preview['ready_products'] > 0 ? '[OK] ' : '[MISSING] ' ) ); ?><?php esc_html_e( 'Produse gata de sync', 'trendyol-sync-for-woocommerce' ); ?></li>
 			</ol>
 
 			<p>

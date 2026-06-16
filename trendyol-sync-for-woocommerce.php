@@ -1,17 +1,17 @@
 <?php
 /**
- * Plugin Trendyol Sync for WooCommerce – integrare WooCommerce cu API Trendyol.
+ * Trendyol Sync for WooCommerce – WooCommerce integration with the Trendyol API.
  *
  * @package TrendyolSync
  *
  * @wordpress-plugin
  * Plugin Name:       Trendyol Sync for WooCommerce
  * Plugin URI:        https://github.com/alexandrubala/trendyol-sync-for-woocommerce
- * Description:       Sincronizare controlată a produselor WooCommerce cu marketplace-ul Trendyol.
+ * Description:       Controlled background synchronization of WooCommerce products with the Trendyol marketplace API.
  * Version:           1.2.2
  * Requires at least: 6.0
  * Requires PHP:      7.4
- * Author:            alexandrubala
+ * Author:            Alexandru Bala
  * Author URI:        https://github.com/alexandrubala
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -77,6 +77,11 @@ define( 'TRENDYOL_SYNC_CAPABILITY', 'manage_trendyol_sync' );
  * Basename-ul plugin-ului vechi (înainte de redenumire).
  */
 define( 'TRENDYOL_SYNC_LEGACY_PLUGIN_BASENAME', 'trendyol-sync/trendyol-sync.php' );
+
+/**
+ * Opt-in GitHub Releases updater (disabled by default for WordPress.org compatibility).
+ * Add to wp-config.php: define( 'TRENDYOL_SYNC_GITHUB_UPDATES', true );
+ */
 
 /**
  * Înregistrează autoload PSR-4 pentru namespace-ul TrendyolSync\.

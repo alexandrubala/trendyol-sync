@@ -42,11 +42,35 @@ class Updater {
 	private const DEFAULT_GITHUB_REPO  = 'trendyol-sync-for-woocommerce';
 
 	/**
+	 * GitHub updater is opt-in so WordPress.org installs use the official update channel.
+	 *
+	 * Enable in wp-config.php: define( 'TRENDYOL_SYNC_GITHUB_UPDATES', true );
+	 *
+	 * @return bool
+	 */
+	public static function is_enabled(): bool {
+		if ( defined( 'TRENDYOL_SYNC_GITHUB_UPDATES' ) ) {
+			return (bool) TRENDYOL_SYNC_GITHUB_UPDATES;
+		}
+
+		/**
+		 * Filter whether the GitHub Releases updater is active.
+		 *
+		 * @param bool $enabled Default false.
+		 */
+		return (bool) apply_filters( 'trendyol_sync_enable_github_updater', false );
+	}
+
+	/**
 	 * Hook-urilor WordPress.
 	 *
 	 * @return void
 	 */
 	public function register_hooks(): void {
+		if ( ! self::is_enabled() ) {
+			return;
+		}
+
 		add_filter(
 			'site_transient_update_plugins',
 			array( $this, 'filter_site_transient_update_plugins' )
@@ -67,6 +91,10 @@ class Updater {
 	 * @return object
 	 */
 	public function filter_site_transient_update_plugins( $transient ) {
+		if ( ! self::is_enabled() ) {
+			return $transient;
+		}
+
 		if ( ! is_object( $transient ) ) {
 			return $transient;
 		}
@@ -137,6 +165,10 @@ class Updater {
 	 * @return false|object
 	 */
 	public function filter_plugins_api( $def, $action, $args ) {
+		if ( ! self::is_enabled() ) {
+			return $def;
+		}
+
 		if ( 'plugin_information' !== $action ) {
 			return $def;
 		}
@@ -173,7 +205,7 @@ class Updater {
 		$response->name          = sanitize_text_field( __( 'Trendyol Sync for WooCommerce', 'trendyol-sync-for-woocommerce' ) );
 		$response->slug          = TRENDYOL_SYNC_PLUGIN_SLUG;
 		$response->version       = $new_version;
-		$response->author        = sanitize_text_field( __( 'alexandrubala', 'trendyol-sync-for-woocommerce' ) );
+		$response->author        = sanitize_text_field( 'Alexandru Bala' );
 		$response->homepage      = $homepage;
 		$response->download_link = $download;
 		$response->requires      = '6.0';

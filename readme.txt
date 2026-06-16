@@ -1,6 +1,6 @@
 === Trendyol Sync for WooCommerce ===
-Contributors: alexandrubala
-Tags: woocommerce, trendyol, marketplace, sync, inventory, ecommerce, api
+Contributors: webgems
+Tags: woocommerce, trendyol, marketplace, sync, inventory
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
@@ -25,7 +25,6 @@ Trendyol Sync for WooCommerce connects your WooCommerce store to Trendyol's sell
 * Category and brand mapping (global defaults, per WooCommerce category, per-product overrides)
 * Background sync queue with batch polling and admin dashboard
 * Rate limiting aligned with Trendyol (50 requests / 10 seconds)
-* GitHub Releases auto-updater
 
 **Supported storefronts**
 
@@ -33,10 +32,10 @@ RO, GR, DE, BG, HU, CZ, SK, AZ, SA, AE (detected from store settings).
 
 == Installation ==
 
-1. Upload the plugin folder to `/wp-content/plugins/trendyol-sync-for-woocommerce/` or install the release ZIP from GitHub.
+1. Upload the plugin folder to `/wp-content/plugins/trendyol-sync-for-woocommerce/` or install the ZIP from the WordPress.org plugin directory.
 2. Activate **Trendyol Sync for WooCommerce** through the **Plugins** menu.
 3. Ensure **WooCommerce** is active (required).
-4. Go to **Trendyol Sync → Settings**, enter your Supplier ID, API Key, and API Secret from the Trendyol seller panel.
+4. Go to **Trendyol Sync - Settings**, enter your Supplier ID, API Key, and API Secret from the Trendyol seller panel.
 5. Choose **Stage** or **Production**, then click **Sync catalog** to download brands and categories.
 6. Map WooCommerce categories and enable sync on products you want to push to Trendyol.
 
@@ -52,7 +51,7 @@ Yes. API Key and API Secret are encrypted in the database using OpenSSL (AES-256
 
 = What happens when I uninstall the plugin? =
 
-By default, plugin settings and transients are removed. Custom database tables (sync jobs, batches, logs) are only dropped if you enable **Remove all plugin data on uninstall** in **Settings → Environment** before uninstalling. Product meta (barcodes, sync status) is never deleted automatically.
+By default, plugin settings and transients are removed. Custom database tables (sync jobs, batches, logs) are only dropped if you enable **Remove all plugin data on uninstall** in **Settings - Environment** before uninstalling. Product meta (barcodes, sync status) is never deleted automatically.
 
 = How do I migrate from the old `trendyol-sync` plugin? =
 
@@ -72,6 +71,8 @@ Deactivate the old plugin, install this one, and activate it. Settings, jobs, an
 * Mapping page: Trendyol categories loaded inline (no AJAX on page open); brand AJAX search fixed
 * Improved API category tree parsing (v2/v3 formats)
 * Removed `minimumResultsForSearch: 0` that caused empty dropdowns
+* WordPress.org readiness: readme.txt, LICENSE, English plugin header, optional GitHub updater
+* Security: logger redacts secrets; duplicate sync jobs blocked; safer uninstall with opt-in table purge
 
 = 1.2.1 =
 * Mapping page: correct selectWoo on custom admin screens; AJAX dropdowns for categories/brands
@@ -91,4 +92,4 @@ Deactivate the old plugin, install this one, and activate it. Settings, jobs, an
 == Upgrade Notice ==
 
 = 1.2.2 =
-Mapping page UX fixes and improved category tree parsing.
+WordPress.org readiness, security hardening, and mapping page UX fixes.

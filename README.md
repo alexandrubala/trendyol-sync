@@ -14,9 +14,19 @@ WordPress plugin that integrates your **WooCommerce** store with the **Trendyol*
 | PHP         | 7.4+ (OpenSSL) |
 | WooCommerce | 7.0+    |
 
+## Features
+
+- Encrypted API credential storage (AES-256-CBC)
+- Automatic Trendyol market detection from WooCommerce store country and WordPress locale
+- Local cache for Trendyol brands and categories
+- Per-product admin tab (category, brand, barcode, VAT, sync toggle)
+- Category and brand mapping with global defaults and per-product overrides
+- Background sync queue with batch polling and admin dashboard
+- API rate limiting (50 requests per 10 seconds)
+
 ## Screenshots
 
-| Settings — Credentials | Settings — Environment |
+| Settings - Credentials | Settings - Environment |
 |------------------------|------------------------|
 | ![API credentials and catalog sync](docs/screenshots/settings-credentials.png) | ![Stage / Production environment](docs/screenshots/settings-environment.png) |
 
@@ -28,7 +38,7 @@ WordPress plugin that integrates your **WooCommerce** store with the **Trendyol*
 |------------|
 | ![Sync queue dashboard](docs/screenshots/sync-queue.png) |
 
-> Add PNG screenshots under `docs/screenshots/` using the filenames above before publishing to WordPress.org.
+Add PNG screenshots under `docs/screenshots/` using the filenames above before publishing to WordPress.org.
 
 ## Installation
 
@@ -41,48 +51,52 @@ WordPress plugin that integrates your **WooCommerce** store with the **Trendyol*
    Or download the latest release ZIP from [GitHub Releases](https://github.com/alexandrubala/trendyol-sync-for-woocommerce/releases) and extract it to `wp-content/plugins/trendyol-sync-for-woocommerce/`.
 
 2. Activate **Trendyol Sync for WooCommerce** under **Plugins**.
-3. Ensure **WooCommerce** is active (the plugin cannot be activated without it).
+3. Ensure **WooCommerce** is active (required at activation).
 
-### Migrating from `trendyol-sync` (≤ 1.1.x)
+### Migrating from `trendyol-sync` (1.1.x and older)
 
 1. Deactivate the old **Trendyol Sync** plugin (`wp-content/plugins/trendyol-sync/`).
 2. Install the new `trendyol-sync-for-woocommerce/` folder.
-3. Activate **Trendyol Sync for WooCommerce** — settings, jobs, and product meta are preserved (same database keys).
+3. Activate **Trendyol Sync for WooCommerce**. Settings, jobs, and product meta are preserved.
 4. Remove the old `trendyol-sync/` folder once everything works.
 
 ## Configuration
 
 1. Open **Trendyol Sync** in the WordPress admin sidebar.
 2. **Credentials** tab:
-   - **Supplier ID** — from the Trendyol seller panel (*Entegrasyon Bilgileri*)
-   - **API Key** / **API Secret** — stored encrypted in the database
-   - **Integrator Name** — used in the `User-Agent` header (e.g. `SelfIntegration`)
+   - **Supplier ID** from the Trendyol seller panel
+   - **API Key** and **API Secret** (stored encrypted)
+   - **Integrator Name** for the `User-Agent` header (e.g. `SelfIntegration`)
 3. **Environment** tab:
-   - **Stage** — `https://stageapigw.trendyol.com` (testing; may require IP whitelist)
-   - **Production** — `https://apigw.trendyol.com`
+   - **Stage** - `https://stageapigw.trendyol.com` (testing; may require IP whitelist)
+   - **Production** - `https://apigw.trendyol.com`
 
-> Stage and Production credentials are different. Never commit real API keys to a public repository.
+Stage and Production credentials are different. Never commit real API keys to a public repository.
 
-### Catalog (brands & categories)
+### Catalog (brands and categories)
 
-On the **Credentials** tab, click **Sync catalog** to download Trendyol brands and categories into a local cache. Product-page and Mapping dropdowns depend on this step.
+On the **Credentials** tab, click **Sync catalog** to download Trendyol brands and categories into a local cache.
 
 The plugin detects the Trendyol market from:
 
-- **WooCommerce store country** (Settings → General → Store location)
-- **WordPress site language** (Settings → General → Site language)
+- WooCommerce store country (Settings - General - Store location)
+- WordPress site language (Settings - General - Site language)
 
-Example: store in **Romania** + language **Romanian** → sends `storeFrontCode: RO` and `Accept-Language: ro`, so categories appear in Romanian.
+Example: store in **Romania** with language **Romanian** sends `storeFrontCode: RO` and `Accept-Language: ro`.
 
 Supported markets: RO, GR, DE, BG, HU, CZ, SK, AZ, SA, AE.
 
-If the market cannot be detected, catalog sync is blocked to avoid importing irrelevant categories.
-
 ### Plugin updates
 
-Updates come from **GitHub Releases** (`alexandrubala/trendyol-sync-for-woocommerce`). After updating, visit **Dashboard → Updates** or run `git pull` for git installs.
+**WordPress.org installs** receive updates through the official WordPress plugin directory.
 
-For a private repository (optional), add to `wp-config.php`:
+**GitHub installs** can opt in to GitHub Releases updates by adding to `wp-config.php`:
+
+```php
+define( 'TRENDYOL_SYNC_GITHUB_UPDATES', true );
+```
+
+For a private GitHub repository, also define:
 
 ```php
 define( 'TRENDYOL_SYNC_GITHUB_TOKEN', 'ghp_xxxxxxxx' );
@@ -92,19 +106,20 @@ define( 'TRENDYOL_SYNC_GITHUB_TOKEN', 'ghp_xxxxxxxx' );
 
 ```
 trendyol-sync-for-woocommerce/
-├── trendyol-sync-for-woocommerce.php   # Bootstrap, constants, PSR-4 autoload
+├── trendyol-sync-for-woocommerce.php
 ├── includes/
-│   ├── Plugin.php                      # Orchestrator (Singleton)
-│   ├── Activator.php                   # DB tables, capabilities, WC check
-│   ├── Deactivator.php                 # Action Scheduler cleanup on deactivate
-│   ├── Migration/From_Legacy_Plugin.php
-│   ├── Admin/                          # Settings, catalog sync, WC product tab
-│   ├── API/                            # HTTP client, auth, rate limiting
-│   ├── Cache/Transient_Cache.php
-│   ├── Data/Schema.php
-│   └── Security/Encryption.php
+│   ├── Plugin.php
+│   ├── Activator.php
+│   ├── Deactivator.php
+│   ├── Admin/
+│   ├── API/
+│   ├── Cache/
+│   ├── Data/
+│   └── Security/
 ├── assets/
 ├── languages/trendyol-sync-for-woocommerce.pot
+├── readme.txt
+├── LICENSE
 └── uninstall.php
 ```
 
@@ -112,52 +127,40 @@ trendyol-sync-for-woocommerce/
 
 ### v1.2.2
 
-- **Mapping** page: Trendyol categories loaded inline (no AJAX on open); brand AJAX search fixed
+- Mapping page: Trendyol categories loaded inline; brand AJAX search fixed
 - Improved API category tree parsing (v2/v3 formats)
-- Removed `minimumResultsForSearch: 0` that caused empty dropdowns
-- Added `LICENSE`, `readme.txt`, English README, optional full data purge on uninstall
-- Logger redacts sensitive fields; duplicate sync jobs blocked while one is running
+- WordPress.org readiness: `readme.txt`, `LICENSE`, English plugin header
+- GitHub updater disabled by default (opt-in via `TRENDYOL_SYNC_GITHUB_UPDATES`)
+- Logger redacts sensitive fields; duplicate sync jobs blocked
+- Safer uninstall with opt-in table purge
 
 ### v1.2.1
 
-- **Mapping** page: correct selectWoo on custom admin screens; AJAX dropdowns for categories/brands
-- Catalog sync: automatic wait on 50 req/10s rate limit; extended timeout for full download
-- Catalog search: `manage_trendyol_sync` capability; improved cache detection
+- Mapping page selectWoo fixes; AJAX dropdowns for categories and brands
+- Catalog sync rate-limit wait; extended download timeout
 
 ### v1.2.0
 
-- Renamed plugin: **Trendyol Sync for WooCommerce** (`trendyol-sync-for-woocommerce`)
-- GitHub repository: `alexandrubala/trendyol-sync-for-woocommerce`
-- New main file: `trendyol-sync-for-woocommerce.php`
-- Text domain: `trendyol-sync-for-woocommerce`
-- Automatic migration: deactivates legacy install when both are active
-
-### v1.1.0
-
-- Full automation: WooCommerce `product_cat` → Trendyol category/brand mapping, barcode strategies, scheduled sync, bulk actions, onboarding wizard, sync dashboard
-
-### v1.0.5
-
-- Automatic Trendyol market detection; per-market catalog cache; AJAX catalog search
+- Renamed to **Trendyol Sync for WooCommerce** (`trendyol-sync-for-woocommerce`)
+- New text domain and automatic legacy plugin deactivation
 
 See [readme.txt](readme.txt) for the full WordPress.org changelog.
 
 ## Roadmap
 
-Tracked as [GitHub Issues](https://github.com/alexandrubala/trendyol-sync-for-woocommerce/issues):
-
-- Attribute mapping UI (no manual JSON)
-- CSV import/export for mappings
-- Order sync support
-- Webhook / email error notifications
-- WordPress.org compliance review
+- [Attribute mapping UI](https://github.com/alexandrubala/trendyol-sync-for-woocommerce/issues/1)
+- [CSV import/export for mappings](https://github.com/alexandrubala/trendyol-sync-for-woocommerce/issues/2)
+- [Order sync support](https://github.com/alexandrubala/trendyol-sync-for-woocommerce/issues/3)
+- [Webhook/email error notifications](https://github.com/alexandrubala/trendyol-sync-for-woocommerce/issues/4)
+- [WordPress.org compliance review](https://github.com/alexandrubala/trendyol-sync-for-woocommerce/issues/5)
 
 ## Security
 
-- API keys are stored encrypted in the `trendyol_sync_settings` option.
-- Never log or commit real credentials to Git.
-- Trendyol requires a `User-Agent` header and enforces **50 requests / 10 seconds** per endpoint.
-- AJAX endpoints use nonces and capability checks; forms use `sanitize_*` and `esc_*` helpers.
+- API keys are stored encrypted in the database.
+- Secrets are redacted from logs (API keys, tokens, Authorization headers).
+- AJAX endpoints use nonces and capability checks.
+- Forms sanitize input and escape output with WordPress helpers.
+- Trendyol enforces **50 requests per 10 seconds** per endpoint; the plugin respects this limit.
 
 ## Development
 
@@ -168,8 +171,8 @@ git pull origin main
 
 ## License
 
-GPL-2.0-or-later — see [LICENSE](LICENSE).
+GPL-2.0-or-later. See [LICENSE](LICENSE).
 
 ## Author
 
-[alexandrubala](https://github.com/alexandrubala)
+[Alexandru Bala](https://github.com/alexandrubala)

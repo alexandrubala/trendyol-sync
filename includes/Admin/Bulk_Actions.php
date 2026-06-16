@@ -78,6 +78,22 @@ class Bulk_Actions {
 	 * @return string
 	 */
 	public function handle_actions( string $redirect_to, string $doaction, array $post_ids ): string {
+		if ( ! current_user_can( 'edit_products' ) ) {
+			return $redirect_to;
+		}
+
+		$allowed_actions = array(
+			'trendyol_enable_sync',
+			'trendyol_disable_sync',
+			'trendyol_apply_mapping',
+			'trendyol_generate_barcodes',
+			'trendyol_prepare_all',
+		);
+
+		if ( ! in_array( $doaction, $allowed_actions, true ) ) {
+			return $redirect_to;
+		}
+
 		if ( empty( $post_ids ) ) {
 			return $redirect_to;
 		}
@@ -139,6 +155,10 @@ class Bulk_Actions {
 	 * @return void
 	 */
 	public function render_notice(): void {
+		if ( ! current_user_can( 'edit_products' ) ) {
+			return;
+		}
+
 		if ( ! isset( $_GET['trendyol_bulk_action'], $_GET['trendyol_bulk_done'] ) ) {
 			return;
 		}

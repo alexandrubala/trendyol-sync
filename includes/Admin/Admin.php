@@ -130,7 +130,11 @@ class Admin {
 		$this->sync_dashboard_page->register_hooks();
 		$this->onboarding_wizard_page->register_hooks();
 		$this->catalog_search->register_hooks();
-		( new Updater() )->register_hooks();
+
+		if ( Updater::is_enabled() ) {
+			( new Updater() )->register_hooks();
+		}
+
 		add_action( 'admin_init', array( Select_Woo_Assets::class, 'register' ) );
 	}
 
