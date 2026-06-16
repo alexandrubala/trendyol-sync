@@ -104,6 +104,26 @@ class Sync_Job_Repository {
 	}
 
 	/**
+	 * Job în curs (pending sau running) — folosit pentru a evita sync-uri paralele.
+	 *
+	 * @return array<string, mixed>|null
+	 */
+	public function find_active(): ?array {
+		global $wpdb;
+
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$this->table} WHERE status IN (%s, %s) ORDER BY id DESC LIMIT 1",
+				self::STATUS_PENDING,
+				self::STATUS_RUNNING
+			),
+			ARRAY_A
+		);
+
+		return is_array( $row ) ? $row : null;
+	}
+
+	/**
 	 * @param int    $job_id ID job.
 	 * @param string $status Status nou.
 	 * @return bool

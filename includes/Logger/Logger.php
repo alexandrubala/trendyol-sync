@@ -82,28 +82,85 @@ class Logger {
 	 * @param array<string, mixed> $context Context brut.
 	 * @return array<string, mixed>
 	 */
+	/**
+	 * Chei de context care nu trebuie scrise niciodată în log.
+	 *
+	 * @var string[]
+	 */
+	private const REDACTED_KEYS = array(
+		'api_key',
+		'api_secret',
+		'authorization',
+		'password',
+		'secret',
+		'token',
+		'github_token',
+	);
+
 	private function sanitize_context( array $context ): array {
 		$clean = array();
 
 		foreach ( $context as $key => $value ) {
 			$key = (string) $key;
 
+			if ( $this->is_redacted_key( $key ) ) {
+				$clean[ $key ] = '[REDACTED]';
+				continue;
+			}
+
 			if ( is_scalar( $value ) || null === $value ) {
-				$clean[ $key ] = $value;
+				$clean[ $key ] = $this->redact_scalar_value( $key, $value );
 				continue;
 			}
 
 			if ( is_array( $value ) ) {
-				$encoded = wp_json_encode( $value );
+				$encoded = wp_json_encode( $this->sanitize_context( $value ) );
 				$clean[ $key ] = is_string( $encoded ) ? $encoded : '';
 				continue;
 			}
 
 			if ( is_object( $value ) && method_exists( $value, '__toString' ) ) {
-				$clean[ $key ] = (string) $value;
+				$clean[ $key ] = $this->redact_scalar_value( $key, (string) $value );
 			}
 		}
 
 		return $clean;
+	}
+
+	/**
+	 * @param string $key Cheie context.
+	 * @return bool
+	 */
+	private function is_redacted_key( string $key ): bool {
+		$normalized = strtolower( $key );
+
+		foreach ( self::REDACTED_KEYS as $redacted ) {
+			if ( $normalized === $redacted || false !== strpos( $normalized, $redacted ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * @param string       $key   Cheie context.
+	 * @param scalar|null  $value Valoare.
+	 * @return scalar|null
+	 */
+	private function redact_scalar_value( string $key, $value ) {
+		if ( ! is_string( $value ) || '' === $value ) {
+			return $value;
+		}
+
+		if ( preg_match( '/^ghp_[A-Za-z0-9]+$/', $value ) ) {
+			return '[REDACTED]';
+		}
+
+		if ( 'authorization' === strtolower( $key ) || 0 === stripos( $value, 'basic ' ) || 0 === stripos( $value, 'bearer ' ) ) {
+			return '[REDACTED]';
+		}
+
+		return $value;
 	}
 }

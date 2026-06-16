@@ -85,6 +85,16 @@ class Sync_Queue {
 			);
 		}
 
+		$active_job = $this->jobs->find_active();
+
+		if ( null !== $active_job ) {
+			return array(
+				'success' => false,
+				'job_id'  => (int) $active_job['id'],
+				'message' => __( 'Există deja o sincronizare în curs. Așteaptă finalizarea înainte de a porni una nouă.', 'trendyol-sync-for-woocommerce' ),
+			);
+		}
+
 		$products = $this->get_sync_enabled_products();
 
 		if ( empty( $products ) ) {

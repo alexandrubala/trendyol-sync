@@ -1,213 +1,175 @@
 # Trendyol Sync for WooCommerce
 
-Plugin WordPress pentru integrarea magazinului **WooCommerce** cu API-ul **Trendyol** (piața locală și internațională). Sincronizarea produselor este proiectată să ruleze în fundal, în mod controlat, fără timeout-uri la volume mari.
+WordPress plugin that integrates your **WooCommerce** store with the **Trendyol** seller API (local and international storefronts). Product synchronization runs in the background in a controlled way, without PHP timeouts on large catalogs.
 
 **Repository:** [github.com/alexandrubala/trendyol-sync-for-woocommerce](https://github.com/alexandrubala/trendyol-sync-for-woocommerce)
 
-**Versiune curentă:** 1.2.2
+**Current version:** 1.2.2
 
-## Cerințe
+## Requirements
 
-| Componentă | Versiune minimă |
-|------------|-----------------|
-| WordPress  | 6.0+            |
-| PHP        | 7.4+ (OpenSSL)  |
-| WooCommerce| 7.0+            |
+| Component   | Minimum |
+|-------------|---------|
+| WordPress   | 6.0+    |
+| PHP         | 7.4+ (OpenSSL) |
+| WooCommerce | 7.0+    |
 
-## Instalare
+## Screenshots
 
-1. Clonează repository-ul în `wp-content/plugins/`:
+| Settings — Credentials | Settings — Environment |
+|------------------------|------------------------|
+| ![API credentials and catalog sync](docs/screenshots/settings-credentials.png) | ![Stage / Production environment](docs/screenshots/settings-environment.png) |
+
+| Product tab | Category mapping |
+|-------------|------------------|
+| ![Trendyol Sync product tab](docs/screenshots/product-tab.png) | ![Category and brand mapping](docs/screenshots/mapping-page.png) |
+
+| Sync queue |
+|------------|
+| ![Sync queue dashboard](docs/screenshots/sync-queue.png) |
+
+> Add PNG screenshots under `docs/screenshots/` using the filenames above before publishing to WordPress.org.
+
+## Installation
+
+1. Clone into `wp-content/plugins/`:
 
    ```bash
    git clone https://github.com/alexandrubala/trendyol-sync-for-woocommerce.git
    ```
 
-   Sau descarcă ultimul release ZIP din [GitHub Releases](https://github.com/alexandrubala/trendyol-sync-for-woocommerce/releases) și extrage-l în `wp-content/plugins/trendyol-sync-for-woocommerce/`.
+   Or download the latest release ZIP from [GitHub Releases](https://github.com/alexandrubala/trendyol-sync-for-woocommerce/releases) and extract it to `wp-content/plugins/trendyol-sync-for-woocommerce/`.
 
-2. Activează pluginul **Trendyol Sync for WooCommerce** din **Plugins** în WordPress.
-3. Asigură-te că **WooCommerce** este activ (pluginul nu se activează fără el).
+2. Activate **Trendyol Sync for WooCommerce** under **Plugins**.
+3. Ensure **WooCommerce** is active (the plugin cannot be activated without it).
 
-### Migrare de la `trendyol-sync` (≤ 1.1.x)
+### Migrating from `trendyol-sync` (≤ 1.1.x)
 
-1. Dezactivează pluginul vechi **Trendyol Sync** (`wp-content/plugins/trendyol-sync/`).
-2. Instalează noul folder `trendyol-sync-for-woocommerce/` (vezi pașii de mai sus).
-3. Activează **Trendyol Sync for WooCommerce** — setările, job-urile și meta-urile produselor rămân (aceleași chei în baza de date).
-4. Șterge folderul vechi `trendyol-sync/` când totul funcționează.
+1. Deactivate the old **Trendyol Sync** plugin (`wp-content/plugins/trendyol-sync/`).
+2. Install the new `trendyol-sync-for-woocommerce/` folder.
+3. Activate **Trendyol Sync for WooCommerce** — settings, jobs, and product meta are preserved (same database keys).
+4. Remove the old `trendyol-sync/` folder once everything works.
 
-> Redenumește și repository-ul GitHub în `trendyol-sync-for-woocommerce` înainte de release-ul **1.2.0**, ca auto-update-ul să pointeze la noul repo.
+## Configuration
 
-## Configurare
-
-1. Mergi la **Trendyol Sync** în meniul din stânga al WordPress.
-2. Tab **Credentials**:
-   - **Supplier ID** — din panoul Trendyol (*Entegrasyon Bilgileri*)
-   - **API Key** / **API Secret** — salvate criptat în baza de date
-   - **Integrator Name** — folosit în header-ul `User-Agent` (ex. `SelfIntegration`)
-3. Tab **Environment**:
-   - **Stage** — `https://stageapigw.trendyol.com` (test; poate necesita IP whitelist)
+1. Open **Trendyol Sync** in the WordPress admin sidebar.
+2. **Credentials** tab:
+   - **Supplier ID** — from the Trendyol seller panel (*Entegrasyon Bilgileri*)
+   - **API Key** / **API Secret** — stored encrypted in the database
+   - **Integrator Name** — used in the `User-Agent` header (e.g. `SelfIntegration`)
+3. **Environment** tab:
+   - **Stage** — `https://stageapigw.trendyol.com` (testing; may require IP whitelist)
    - **Production** — `https://apigw.trendyol.com`
 
-> Credențialele Stage și Production sunt diferite. Nu partaja cheile API în repository-uri publice.
+> Stage and Production credentials are different. Never commit real API keys to a public repository.
 
-### Catalog (branduri & categorii)
+### Catalog (brands & categories)
 
-Pe tab-ul **Credentials**, apasă **Sincronizează catalog** pentru a descărca brandurile și categoriile Trendyol în cache local. Dropdown-urile de pe pagina de produs și de pe pagina Mapping depind de acest pas.
+On the **Credentials** tab, click **Sync catalog** to download Trendyol brands and categories into a local cache. Product-page and Mapping dropdowns depend on this step.
 
-Pluginul detectează automat piața Trendyol din:
+The plugin detects the Trendyol market from:
 
-- **Țara magazinului** WooCommerce (Setări → General → Locație magazin)
-- **Limba site-ului** WordPress (Setări → General → Limba site-ului)
+- **WooCommerce store country** (Settings → General → Store location)
+- **WordPress site language** (Settings → General → Site language)
 
-Exemplu: magazin în **România** + limbă **română** → trimite `storeFrontCode: RO` și `Accept-Language: ro` la API, iar categoriile apar în română (nu în turcă).
+Example: store in **Romania** + language **Romanian** → sends `storeFrontCode: RO` and `Accept-Language: ro`, so categories appear in Romanian.
 
-Piețe suportate: RO, GR, DE, BG, HU, CZ, SK, AZ, SA, AE.
+Supported markets: RO, GR, DE, BG, HU, CZ, SK, AZ, SA, AE.
 
-Dacă piața nu poate fi detectată, sincronizarea catalogului este blocată — nu se importă categorii irelevante.
+If the market cannot be detected, catalog sync is blocked to avoid importing irrelevant categories.
 
-### Actualizări plugin
+### Plugin updates
 
-Update-urile vin din **GitHub Releases** (`alexandrubala/trendyol-sync-for-woocommerce`). După update, mergi la **Dashboard → Updates** sau rulează `git pull` dacă ai instalat din git.
+Updates come from **GitHub Releases** (`alexandrubala/trendyol-sync-for-woocommerce`). After updating, visit **Dashboard → Updates** or run `git pull` for git installs.
 
-Pentru repository privat (opțional), definește în `wp-config.php`:
+For a private repository (optional), add to `wp-config.php`:
 
 ```php
 define( 'TRENDYOL_SYNC_GITHUB_TOKEN', 'ghp_xxxxxxxx' );
 ```
 
-## Structură proiect
+## Project structure
 
 ```
 trendyol-sync-for-woocommerce/
-├── trendyol-sync-for-woocommerce.php   # Bootstrap, constante, autoload PSR-4
+├── trendyol-sync-for-woocommerce.php   # Bootstrap, constants, PSR-4 autoload
 ├── includes/
 │   ├── Plugin.php                      # Orchestrator (Singleton)
-│   ├── Activator.php                   # Tabele DB, capabilities, verificare WC
-│   ├── Deactivator.php                 # Curățare Action Scheduler la dezactivare
+│   ├── Activator.php                   # DB tables, capabilities, WC check
+│   ├── Deactivator.php                 # Action Scheduler cleanup on deactivate
 │   ├── Migration/From_Legacy_Plugin.php
-│   ├── Admin/                          # Settings, catalog sync, tab produs WC
-│   │   ├── Catalog_Syncer.php          # AJAX sincronizare catalog
-│   │   ├── Catalog_Options.php         # Branduri / categorii din cache
-│   │   ├── Product_Data_Tab.php        # Tab Trendyol Sync pe produs
-│   │   └── Updater.php                 # Auto-update din GitHub Releases
-│   ├── API/
-│   │   ├── Client.php                  # HTTP client + rate limiting
-│   │   ├── Auth.php                    # Basic Auth + storeFrontCode
-│   │   └── Market_Context.php          # Detectare piață din WC / WP locale
-│   ├── Cache/Transient_Cache.php       # Cache categorii, branduri (per piață)
-│   ├── Data/Schema.php                 # wp_trendyol_sync_jobs, _batches, _logs
+│   ├── Admin/                          # Settings, catalog sync, WC product tab
+│   ├── API/                            # HTTP client, auth, rate limiting
+│   ├── Cache/Transient_Cache.php
+│   ├── Data/Schema.php
 │   └── Security/Encryption.php
 ├── assets/
-│   ├── css/
-│   └── js/admin-product-data.js        # Select2 AJAX brand / categorie
-└── languages/trendyol-sync-for-woocommerce.pot
+├── languages/trendyol-sync-for-woocommerce.pot
+└── uninstall.php
 ```
 
 ## Changelog
 
 ### v1.2.2
 
-- Pagina **Mapping**: categorii Trendyol încărcate direct în pagină (fără AJAX la deschidere); branduri cu AJAX reparat
-- Parsare îmbunătățită a arborelui de categorii API (formate v2/v3)
-- Eliminat `minimumResultsForSearch: 0` care afișa dropdown gol
+- **Mapping** page: Trendyol categories loaded inline (no AJAX on open); brand AJAX search fixed
+- Improved API category tree parsing (v2/v3 formats)
+- Removed `minimumResultsForSearch: 0` that caused empty dropdowns
+- Added `LICENSE`, `readme.txt`, English README, optional full data purge on uninstall
+- Logger redacts sensitive fields; duplicate sync jobs blocked while one is running
 
 ### v1.2.1
 
-- Pagina **Mapping**: încărcare corectă selectWoo pe ecrane admin custom; dropdown-uri AJAX pentru categorii/branduri Trendyol
-- Sincronizare catalog: așteptare automată la limita de 50 cereri / 10 secunde; timeout extins pentru descărcare completă
-- Căutare catalog: permisiune `manage_trendyol_sync`; detectare cache îmbunătățită
+- **Mapping** page: correct selectWoo on custom admin screens; AJAX dropdowns for categories/brands
+- Catalog sync: automatic wait on 50 req/10s rate limit; extended timeout for full download
+- Catalog search: `manage_trendyol_sync` capability; improved cache detection
 
 ### v1.2.0
 
-- Redenumire plugin: **Trendyol Sync for WooCommerce** (`trendyol-sync-for-woocommerce`)
-- Repository GitHub: `alexandrubala/trendyol-sync-for-woocommerce`
-- Fișier principal nou: `trendyol-sync-for-woocommerce.php`
+- Renamed plugin: **Trendyol Sync for WooCommerce** (`trendyol-sync-for-woocommerce`)
+- GitHub repository: `alexandrubala/trendyol-sync-for-woocommerce`
+- New main file: `trendyol-sync-for-woocommerce.php`
 - Text domain: `trendyol-sync-for-woocommerce`
-- Migrare automată: dezactivează instalarea veche dacă ambele sunt active; notificare pentru ștergerea folderului `trendyol-sync/`
-
-### v1.1.1
-
-- Meniu admin dedicat **Trendyol Sync** în sidebar (în afara WooCommerce), cu submeniuri Mapping, Sync Queue și Onboarding
+- Automatic migration: deactivates legacy install when both are active
 
 ### v1.1.0
 
-- Automatizare completă mapare WooCommerce `product_cat` -> categorie/brand Trendyol (global + per categorie + fallback pe produs).
-- Generare automată barcode (internal / sku_based / ean13_internal), persistență automată și validare duplicate înainte de sync.
-- Tab nou **Automation** în setări (defaults categorie/brand/TVA/greutate, strategie barcode, sync incremental, sync programat).
-- Câmpuri noi pe produs pentru TVA și greutate dimensională + fallback automat din tax class și dimensiuni/greutate WooCommerce.
-- Bulk actions noi în lista produse: enable/disable sync, aplică mapare, generează barcode, pregătește pentru Trendyol.
-- UI sincronizare produse în admin (start sync + polling status), pagini noi pentru mapping, queue dashboard și onboarding wizard.
-- Suport schema atribute categorie Trendyol (`Category Attributes`) cu cache și mapări JSON pentru default-uri pe categorie / mapare atribute WC.
-- Coloană produse îmbunătățită cu diagnostic pre-flight (afișează motive concrete pentru care produsul nu este gata de sync).
-
-### v1.0.7
-
-- Coloană nouă **Trendyol Sync** în lista de produse WooCommerce (X roșu / bifa verde / pending / eroare / parțial).
-- Status separat pentru prezența pe platformă (`_trendyol_platform_live`) + tooltip-uri cu detalii de eroare/sincronizare.
-- Agregare pentru produse variabile (status părinte calculat din variații).
-
-### v1.0.6
-
-- Dropdown brand/categorie: paginare AJAX (50/pagină) și scroll corect în admin WooCommerce
-- Dropdown atașat la `body` — nu mai e tăiat de panoul produsului
+- Full automation: WooCommerce `product_cat` → Trendyol category/brand mapping, barcode strategies, scheduled sync, bulk actions, onboarding wizard, sync dashboard
 
 ### v1.0.5
 
-- Detectare automată piață Trendyol (`Market_Context`) din țara WooCommerce + limba WordPress
-- Header-e API `storeFrontCode` și `Accept-Language` — categorii în română pe site-uri RO
-- Blocare sincronizare catalog dacă piața nu e recunoscută (evită categorii turcești/irelevante)
-- Cache catalog separat per piață și limbă (ex. `RO_ro`)
-- Căutare AJAX rapidă brand/categorie (Select2) — nu mai încarcă mii de `<option>` în pagină
-- Opțiuni brand/categorie pre-procesate în cache după sincronizare
+- Automatic Trendyol market detection; per-market catalog cache; AJAX catalog search
 
-### v1.0.4
-
-- Fix updater GitHub: verificare update-uri funcționează și via WP-Cron
-- Release GitHub cu ZIP WordPress (`trendyol-sync-for-woocommerce/` root) în loc de zipball GitHub
-
-### v1.0.3
-
-- Buton **Sincronizează catalog** în setări (branduri + categorii Trendyol în cache)
-- Avertisment pe tab-ul produs când cache-ul catalog lipsește
-
-### v1.0.2
-
-- Auto-update nativ din GitHub Releases
-- Suport token opțional pentru repository privat (`TRENDYOL_SYNC_GITHUB_TOKEN`)
-- Endpoint stub comenzi `get_shipment_packages($args)`
-- `uninstall.php` cu cleanup complet
-- Bază i18n (`/languages/trendyol-sync-for-woocommerce.pot`)
-
-### v1.0.0
-
-- Scaffolding OOP cu autoload PSR-4 nativ
-- Tabele custom la activare, capability `manage_trendyol_sync`
-- Pagină setări Credentials / Environment
-- Criptare AES-256-CBC pentru chei API
+See [readme.txt](readme.txt) for the full WordPress.org changelog.
 
 ## Roadmap
 
-- [ ] UI avansat pentru mapare atribute categorie (fără JSON manual)
-- [ ] Import/export CSV pentru mapări categorii/brand și reguli atribut
-- [ ] Notificări automate (email/webhook) pentru eșecuri masive de sync
-- [ ] Comenzi (`getShipmentPackages`) + procesare shipment flow
+Tracked as [GitHub Issues](https://github.com/alexandrubala/trendyol-sync-for-woocommerce/issues):
 
-## Securitate
+- Attribute mapping UI (no manual JSON)
+- CSV import/export for mappings
+- Order sync support
+- Webhook / email error notifications
+- WordPress.org compliance review
 
-- Cheile API sunt stocate criptat în opțiunea `trendyol_sync_settings`.
-- Nu loga și nu comite niciodată credențiale reale în Git.
-- Trendyol impune header `User-Agent` și rate limit **50 cereri / 10 secunde** per endpoint.
+## Security
 
-## Dezvoltare
+- API keys are stored encrypted in the `trendyol_sync_settings` option.
+- Never log or commit real credentials to Git.
+- Trendyol requires a `User-Agent` header and enforces **50 requests / 10 seconds** per endpoint.
+- AJAX endpoints use nonces and capability checks; forms use `sanitize_*` and `esc_*` helpers.
+
+## Development
 
 ```bash
 cd wp-content/plugins/trendyol-sync-for-woocommerce
 git pull origin main
 ```
 
-## Licență
+## License
 
-GPL-2.0-or-later — vezi [LICENSE](https://www.gnu.org/licenses/gpl-2.0.html).
+GPL-2.0-or-later — see [LICENSE](LICENSE).
 
-## Autor
+## Author
 
 [alexandrubala](https://github.com/alexandrubala)

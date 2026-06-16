@@ -118,7 +118,7 @@ class Catalog_Syncer {
 				'success' => false,
 				'message' => __(
 					'Piața Trendyol nu a putut fi detectată din setările site-ului. Setează țara magazinului WooCommerce (ex. România) sau limba site-ului (ex. română) înainte de sincronizare.',
-					'trendyol-sync'
+					'trendyol-sync-for-woocommerce'
 				),
 			);
 		}

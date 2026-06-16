@@ -28,6 +28,10 @@ class Sync_Scheduler {
 	 * @return void
 	 */
 	public static function run_scheduled_sync(): void {
+		if ( ! trendyol_sync()->settings()->has_credentials() ) {
+			return;
+		}
+
 		$queue = new Sync_Queue();
 		$queue->start();
 	}

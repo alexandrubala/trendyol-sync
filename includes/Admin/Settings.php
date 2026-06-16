@@ -75,8 +75,12 @@ class Settings {
 			$output['environment'] = in_array( $environment, self::ENVIRONMENTS, true )
 				? $environment
 				: (string) ( $existing['environment'] ?? 'stage' );
+			$output['purge_data_on_uninstall'] = isset( $input['purge_data_on_uninstall'] ) && 'yes' === sanitize_text_field( wp_unslash( (string) $input['purge_data_on_uninstall'] ) )
+				? 'yes'
+				: 'no';
 		} else {
 			$output['environment'] = (string) ( $existing['environment'] ?? 'stage' );
+			$output['purge_data_on_uninstall'] = (string) ( $existing['purge_data_on_uninstall'] ?? 'no' ) === 'yes' ? 'yes' : 'no';
 		}
 
 		$output['api_key']    = $this->sanitize_secret_field(
@@ -205,6 +209,7 @@ class Settings {
 			'api_key'                       => '',
 			'api_secret'                    => '',
 			'environment'                   => 'stage',
+			'purge_data_on_uninstall'       => 'no',
 			'integrator_name'               => 'SelfIntegration',
 			'default_trendyol_category_id'  => 0,
 			'default_trendyol_brand_id'     => 0,
@@ -249,6 +254,7 @@ class Settings {
 		return array(
 			'supplier_id'     => $stored['supplier_id'],
 			'environment'     => $stored['environment'],
+			'purge_data_on_uninstall' => (string) ( $stored['purge_data_on_uninstall'] ?? 'no' ),
 			'integrator_name' => $stored['integrator_name'],
 			'has_api_key'     => '' !== ( $stored['api_key'] ?? '' ),
 			'has_api_secret'  => '' !== ( $stored['api_secret'] ?? '' ),
@@ -388,6 +394,14 @@ class Settings {
 			'trendyol_sync_environment_field',
 			__( 'Environment', 'trendyol-sync-for-woocommerce' ),
 			array( $this, 'render_environment_field' ),
+			'trendyol-sync-settings-environment',
+			'trendyol_sync_environment'
+		);
+
+		add_settings_field(
+			'trendyol_sync_purge_on_uninstall',
+			__( 'Uninstall cleanup', 'trendyol-sync-for-woocommerce' ),
+			array( $this, 'render_purge_on_uninstall_field' ),
 			'trendyol-sync-settings-environment',
 			'trendyol_sync_environment'
 		);
@@ -552,6 +566,25 @@ class Settings {
 		echo '</fieldset>';
 		echo '<p class="description">';
 		esc_html_e( 'Credențialele Stage și Production sunt diferite. Folosește perechea corectă pentru mediul selectat.', 'trendyol-sync-for-woocommerce' );
+		echo '</p>';
+	}
+
+	/**
+	 * @return void
+	 */
+	public function render_purge_on_uninstall_field(): void {
+		$settings = $this->get_settings_for_display();
+		$name     = TRENDYOL_SYNC_OPTION_KEY . '[purge_data_on_uninstall]';
+		$checked  = 'yes' === ( $settings['purge_data_on_uninstall'] ?? 'no' );
+
+		printf(
+			'<label><input type="checkbox" name="%1$s" value="yes" %2$s /> %3$s</label>',
+			esc_attr( $name ),
+			checked( $checked, true, false ),
+			esc_html__( 'Remove all plugin data on uninstall (sync jobs, batches, logs tables)', 'trendyol-sync-for-woocommerce' )
+		);
+		echo '<p class="description">';
+		esc_html_e( 'When disabled, only settings and cache are removed. WooCommerce product meta (barcodes, sync status) is never deleted.', 'trendyol-sync-for-woocommerce' );
 		echo '</p>';
 	}
 
